@@ -25,7 +25,7 @@ format:
     code-tools: true
     # number-sections: false
     # bibliography: ./bib/ref.bib
-    fontsize: "12"
+    fontsize: "10"
     mainfont: "Helvetica"
     monofont: "Fira Code"
     # fontcolor: ""
@@ -68,6 +68,9 @@ The `groundhog` package ensures that the library versions you use are the same a
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
 # First, clean the environment:
 rm(list = ls())
 
@@ -88,6 +91,8 @@ We wrote a function to calculate effect sizes both with plugin estimators and wi
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 # COMMENT OUT FOR RENDERING AND DELETE PRIOR TO PUBLICATION:
 # setwd("tutorial")
@@ -107,6 +112,9 @@ Or with a vector of raw data:
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
 eff_size(x1 = c(14.5, 13, 15.8), 
          x2 = c(7.9, 21, 18.4), 
          sd1 = c(1.3, 2, 1.9), 
@@ -123,6 +131,9 @@ For a full list of options that eff_size can calculate, please see information b
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
 eff_size()
 
 ```
@@ -133,6 +144,9 @@ We simulated the bias of SAFE calculations versus normal plugin calculations for
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
 scenarios <- readRDS("data/scenarios.Rds")
 
 # Subset scenarios:
@@ -155,6 +169,9 @@ To speed things up we will do this in parallel. The function `prepare_cluster()`
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
 set.seed(2025)
 
 # Prepare cluster:
@@ -187,6 +204,8 @@ Now we will run 100 simulations to showcase how this method works. The actual si
 
 ```{r}
 #| eval: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 rerun <- F
 if(rerun){
@@ -198,7 +217,7 @@ if(rerun){
          .errorhandling = "pass",
          .packages = c("data.table", "MASS", "tmvtnorm")) %dopar% {
            
-  # Simulate data for each scenario in an lapply: --------------------------------------------
+  # Simulate data for each scenario in an lapply: 
    sim_dat <- lapply(1:nrow(guide), function(x){
      
      # Simulate data for guide
@@ -283,6 +302,8 @@ Load the final simulation (with 1e5 iterations) for lnRoM here:
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 res <- readRDS("../../large_data/simulation_summaries/lnRoM.Rds")
 
@@ -308,10 +329,17 @@ Here we will calculate bias in our estimates of effect sizes:
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
-point.bias <- res[, .(plugin_1st = (mean(sim_y_plugin_1st) - unique(true_y_plugin_1st)),
-                      plugin_2nd = (mean(sim_y_plugin_2nd) - unique(true_y_plugin_1st)),
-                      safe = (mean(yi_safe) - unique(true_y_plugin_1st))),
+
+bias <- function(estimates, estimand){
+  return(mean(estimates) - unique(estimand))
+}
+
+point.bias <- res[, .(plugin_1st_bias = bias(sim_y_plugin_1st, true_y_plugin_1st),
+                      plugin_2nd_bias = bias(sim_y_plugin_2nd, true_y_plugin_1st),
+                      safe_bias = bias(yi_safe, true_y_plugin_1st)),
                   by = .(scenario_id, sample_size1, sample_size2)] |> unique()
 head(point.bias)
 
@@ -332,9 +360,9 @@ ggplot(data = point.bias.long[sample_size1 == sample_size2, ],
   ylab("Bias")+
   coord_cartesian(ylim = c(-0.01, 0.01))+
   scale_color_discrete("Estimator",
-                       labels = c("plugin_1st" = "1st order plugin (definition formula)",
-                                  "plugin_2nd" = "2nd order plugin (bias-corrected formula)",
-                                  "safe" = "SAFE bootstrapping"))+
+                       labels = c("plugin_1st_bias" = "1st order plugin (definition formula)",
+                                  "plugin_2nd_bias" = "2nd order plugin (bias-corrected formula)",
+                                  "safe_bias" = "SAFE bootstrapping"))+
   theme_bw()+
   theme(panel.border = element_blank(),
         panel.grid = element_blank(),
@@ -349,17 +377,19 @@ This indicates that the least biased estimator is the first order definition for
 
 Interestingly, there is no way to know the 'true' estimand for sampling variance. **WHICH I DON'T FULLY UNDERSTAND**. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use each of these as the estimand. With 3 estimators, we'll thus end up with 9 calculations of bias.
 
-Since we're interested in relative bias (not absolute bias as with the point estimates because we're not interested in whether estimates are more negative or positive), we'll calculate bias as above but divide by the estimand and multiply by 100.
+Since we're interested in relative bias (**Not entirely sure why**), we'll calculate bias as above but divide by the estimand and multiply by 100.
 
 ```{r}
 #| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 # First, calculate variance in point estimates as our 'estimand'
-res[, variance_estimand_1st_order := var(sim_y_plugin_1st), 
+res[, var_estimand_1st := var(sim_y_plugin_1st), 
     by = .(scenario_id)]
-res[, variance_estimand_2nd_order := var(sim_y_plugin_2nd), 
+res[, var_estimand_2nd := var(sim_y_plugin_2nd), 
     by = .(scenario_id)]
-res[, variance_estimand_SAFE := var(yi_safe), 
+res[, var_estimand_SAFE := var(yi_safe), 
     by = .(scenario_id)]
 
 # To make this easier to read, we'll encapsulate the relative bias in a function:
@@ -368,17 +398,16 @@ relative_bias <- function(estimates,
   return(((mean(estimates) - unique(estimand)) / estimand) * 100)
 }
 
-# Now let's calculate relative bias:
-
-var.bias <- res[, .(SAFE_estimate.1st_order_estimand = relative_bias(vi_safe, variance_estimand_1st_order),
-                    SAFE_estimate.2nd_order_estimand = relative_bias(vi_safe, variance_estimand_2nd_order),
-                    SAFE_estimate.SAFE_estimand = relative_bias(vi_safe, variance_estimand_SAFE),
-                    plugin_1st_estimate.1st_order_estimand = relative_bias(sim_v_plugin_1st, variance_estimand_1st_order),
-                    plugin_1st_estimate.2nd_order_estimand = relative_bias(sim_v_plugin_1st, variance_estimand_2nd_order),
-                    plugin_1st_estimate.SAFE_estimand = relative_bias(sim_v_plugin_1st, variance_estimand_SAFE),
-                    plugin_2nd_estimate.1st_order_estimand = relative_bias(sim_v_plugin_2nd, variance_estimand_1st_order),
-                    plugin_2nd_estimate.2nd_order_estimand = relative_bias(sim_v_plugin_2nd, variance_estimand_2nd_order),
-                    plugin_2nd_estimate.SAFE_estimand = relative_bias(sim_v_plugin_2nd, variance_estimand_SAFE)),
+# Now summarize and calculate relative bias per scenario ID
+var.bias <- res[, .(SAFE_estimate.1st_estimand = relative_bias(vi_safe, var_estimand_1st),
+                    SAFE_estimate.2nd_estimand = relative_bias(vi_safe, var_estimand_2nd),
+                    SAFE_estimate.SAFE_estimand = relative_bias(vi_safe, var_estimand_SAFE),
+                    plugin_1st_estimate.1st_estimand = relative_bias(sim_v_plugin_1st, var_estimand_1st),
+                    plugin_1st_estimate.2nd_estimand = relative_bias(sim_v_plugin_1st, var_estimand_2nd),
+                    plugin_1st_estimate.SAFE_estimand = relative_bias(sim_v_plugin_1st, var_estimand_SAFE),
+                    plugin_2nd_estimate.1st_estimand = relative_bias(sim_v_plugin_2nd, var_estimand_1st),
+                    plugin_2nd_estimate.2nd_estimand = relative_bias(sim_v_plugin_2nd, var_estimand_2nd),
+                    plugin_2nd_estimate.SAFE_estimand = relative_bias(sim_v_plugin_2nd, var_estimand_SAFE)),
     by = .(scenario_id, sample_size1, sample_size2)] |> unique()
 
 
@@ -389,10 +418,6 @@ head(var.bias.long)
 
 # Split the 'variable' into estimator and estimand for plotting
 var.bias.long[, c("Estimator", "Estimand") := tstrsplit(variable, ".", fixed = TRUE)]
-var.bias.long[, Estimator := gsub("_estimate", "", Estimator)]
-var.bias.long[, Estimator := gsub("_", " ", Estimator)]
-var.bias.long[, Estimand := gsub("_estimand", "", Estimand)]
-var.bias.long[, Estimand := gsub("_", " ", Estimand)]
 
 # Sort the dataset by sample size
 setorder(var.bias.long, sample_size1)
@@ -405,20 +430,24 @@ ggplot(data = var.bias.long[sample_size1 == sample_size2, ],
   xlab("Sample size")+
   ylab("Relative bias (%)")+
   scale_color_discrete("Estimator",
-                       labels = c("plugin_1st" = "1st order plugin (definition formula)",
-                                  "plugin_2nd" = "2nd order plugin (bias-corrected formula)",
-                                  "SAFE" = "SAFE bootstrapping"))+
+                       labels = c("plugin_1st_estimate" = "1st order plugin (definition formula)",
+                                  "plugin_2nd_estimate" = "2nd order plugin (bias-corrected formula)",
+                                  "SAFE_estimate" = "SAFE bootstrapping"))+
   facet_wrap(~Estimand,
-             ncol = 1)+
+             ncol = 1,
+             labeller = as_labeller(c("1st_estimand" = "1st order plugin estimand\n(definition formula)",
+                                    "2nd_estimand" = "2nd order plugin estimand",
+                                    "SAFE_estimand" = "SAFE estimand")))+
   theme_bw()+
   theme(panel.border = element_blank(),
         panel.grid = element_blank(),
+        strip.background = element_blank(),
         legend.position = "inside",
         legend.position.inside = c(.8, .9))
 
 ```
 
-We see here that SAFE is more biased than the other estimators but not by much.
+We see here that SAFE is slightly more biased than the other estimators.
 
 ## Plot all simulations results
 
@@ -426,7 +455,14 @@ Now let's look at the rest of the simulation results. The summaries are saved as
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+
 sim_results <- readRDS("builds/all_scenarios_summarized.Rds")
+
+var_lab <- "Relative bias of\nvariance estimates (%)"
+point_lab <- "Bias of point\nestimates"
 
 ```
 
@@ -436,6 +472,8 @@ sim_results <- readRDS("builds/all_scenarios_summarized.Rds")
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 theme_SAFE <- theme_bw()+
   theme(panel.border = element_blank(),
@@ -468,7 +506,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias"), ],
                 group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -486,7 +524,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias"), ],
                  group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -509,6 +547,8 @@ The SAFE estimator for this effect size was calculated with a multivariate norma
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "SMD_normal", ]
 
@@ -519,7 +559,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -538,7 +578,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -564,6 +604,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "SMD_Wishart", ]
 setorder(sub_dat, sample_size1)
@@ -573,7 +615,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -592,7 +634,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -620,6 +662,8 @@ The SAFE estimator for this effect size was calculated with a multivariate norma
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "lnCVR_normal", ]
 setorder(sub_dat, sample_size1)
@@ -630,7 +674,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -649,7 +693,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -671,6 +715,8 @@ The SAFE estimator for this effect size was calculated with a multivariate norma
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "lnCVR_Wishart", ]
 setorder(sub_dat, sample_size1)
@@ -681,7 +727,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -694,7 +740,6 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
           subtitle = "with n1==n2")+
   theme_SAFE+
   theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
-p.point
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ], 
@@ -702,7 +747,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -713,8 +758,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
-p.variance
-
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -726,6 +769,8 @@ In this effect size estimation, the SAFE calculation used a binomial distributio
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "lnOR", ]
 setorder(sub_dat, sample_size1)
@@ -736,7 +781,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -745,7 +790,6 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
           subtitle = "with n1==n2")+
   theme_SAFE+
   theme(legend.position = "none") 
-p.point
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == n2 &
@@ -754,7 +798,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -765,7 +809,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
-p.variance
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -777,6 +820,8 @@ In this effect size estimation, the SAFE calculation used a normal distribution 
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "lnOR_normal", ]
 setorder(sub_dat, sample_size1)
@@ -787,7 +832,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -800,7 +845,6 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
           subtitle = "with n1==n2")+
   theme_SAFE+
   theme(legend.position = "none") 
-p.point
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == n2 &
@@ -809,7 +853,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -820,7 +864,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
-p.variance
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -832,6 +875,8 @@ In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a bin
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "lnRR", ]
 setorder(sub_dat, sample_size1)
@@ -842,7 +887,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -855,7 +900,6 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
           subtitle = "with n1==n2")+
   theme_SAFE+
   theme(legend.position = "none") 
-p.point
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == n2 &
@@ -864,7 +908,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -875,7 +919,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
-p.variance
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -887,6 +930,8 @@ In this effect size estimation, the SAFE calculation drew 'p1' and 'p2' from a n
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "lnRR_normal", ]
 setorder(sub_dat, sample_size1)
@@ -897,7 +942,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -909,7 +954,6 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
           subtitle = "with n1==n2")+
   theme_SAFE+
   theme(legend.position = "none") 
-p.point
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == n2 &
@@ -918,7 +962,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -929,7 +973,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & n1 == 
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
-p.variance
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -941,6 +984,8 @@ In this effect size estimation, the SAFE calculation drew 'n_AA', 'n_Aa', and 'n
 
 ```{r}
 #| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
 sub_dat <- sim_results[effect_type == "lnHWE_A", ]
 setorder(sub_dat, sample_size1)
@@ -951,7 +996,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & #n1 == n2 &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Bias of point estimates\nMean estimate - estimand")+
+  ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -962,7 +1007,6 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & #n1 == n2 &
   ggtitle("lnHWD")+
   theme_SAFE+
   theme(legend.position = "none") 
-p.point
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & 
@@ -971,7 +1015,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") &
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-  ylab("Relative bias of variance estimates\n(Mean estimate - estimand) / estimand * 100")+
+  ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -982,7 +1026,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") &
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
-p.variance
+
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
