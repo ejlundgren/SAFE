@@ -194,9 +194,9 @@ Be sure that all variables in formula are correctly named.
 SAFE: 1 / 1 </code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre style="font-size: 0.7em"><code>    yi_first yi_second    vi_first   vi_second   yi_safe     vi_safe    SE_safe
-       &lt;num&gt;     &lt;num&gt;       &lt;num&gt;       &lt;num&gt;     &lt;num&gt;       &lt;num&gt;      &lt;num&gt;
-1: 0.6072859 0.6058845 0.003606517 0.003611733 0.6058391 0.003628787 0.06023941</code></pre>
+<pre style="font-size: 0.7em"><code>    yi_first yi_second    vi_first   vi_second   yi_safe     vi_safe   SE_safe
+       &lt;num&gt;     &lt;num&gt;       &lt;num&gt;       &lt;num&gt;     &lt;num&gt;       &lt;num&gt;     &lt;num&gt;
+1: 0.6072859 0.6058845 0.003606517 0.003611733 0.6059205 0.003633859 0.0602815</code></pre>
 </div>
 </div>
 <p>Or with a vector of raw data:</p>
@@ -227,9 +227,9 @@ SAFE: 3 / 3 </code></pre>
 <div class="cell-output cell-output-stdout">
 <pre style="font-size: 0.7em"><code>    yi_first yi_second  vi_first vi_second   yi_safe   vi_safe   SE_safe
        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;
-1:  3.912937  3.835196 0.3014615 0.2975274  3.821036 0.3651637 0.6042877
-2: -3.167230 -3.094698 0.2686568 0.2633745 -3.408833 0.2523059 0.5023006
-3: -1.545312 -1.512893 0.1387221 0.1343396 -1.540979 0.1402361 0.3744812</code></pre>
+1:  3.912937  3.835196 0.3014615 0.2975274  3.820885 0.3649126 0.6040800
+2: -3.167230 -3.094698 0.2686568 0.2633745 -3.408932 0.2524278 0.5024219
+3: -1.545312 -1.512893 0.1387221 0.1343396 -1.540845 0.1404803 0.3748071</code></pre>
 </div>
 </div>
 <p>For a full list of options that eff_size can calculate, please see information by running:</p>
@@ -1680,543 +1680,545 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb26-519"><a href="#cb26-519" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"safe_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo SAFE variance estimand"</span>,</span>
 <span id="cb26-520"><a href="#cb26-520" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"true_1st"</span> <span class="ot">=</span> <span class="st">"True 1st order point estimand"</span>,</span>
 <span id="cb26-521"><a href="#cb26-521" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"true_2nd"</span> <span class="ot">=</span> <span class="st">"True 2nd order point estimand"</span>))</span>
-<span id="cb26-522"><a href="#cb26-522" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-523"><a href="#cb26-523" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-524"><a href="#cb26-524" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"reciprocal"</span>, ]</span>
-<span id="cb26-525"><a href="#cb26-525" aria-hidden="true" tabindex="-1"></a><span class="co"># sub_dat</span></span>
-<span id="cb26-526"><a href="#cb26-526" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size)</span>
-<span id="cb26-527"><a href="#cb26-527" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-528"><a href="#cb26-528" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>), ], </span>
-<span id="cb26-529"><a href="#cb26-529" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> sample_size, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-530"><a href="#cb26-530" aria-hidden="true" tabindex="-1"></a>                <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-531"><a href="#cb26-531" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-532"><a href="#cb26-532" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-533"><a href="#cb26-533" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-534"><a href="#cb26-534" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-535"><a href="#cb26-535" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-536"><a href="#cb26-536" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-537"><a href="#cb26-537" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-538"><a href="#cb26-538" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-539"><a href="#cb26-539" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-540"><a href="#cb26-540" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-541"><a href="#cb26-541" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Reciprocal (1 / x)"</span>)<span class="sc">+</span></span>
-<span id="cb26-542"><a href="#cb26-542" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-543"><a href="#cb26-543" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="co">#, legend.position.inside = c(.85, .85)</span></span>
-<span id="cb26-544"><a href="#cb26-544" aria-hidden="true" tabindex="-1"></a><span class="co"># p.point</span></span>
-<span id="cb26-545"><a href="#cb26-545" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-546"><a href="#cb26-546" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>), ], </span>
-<span id="cb26-547"><a href="#cb26-547" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> sample_size, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-548"><a href="#cb26-548" aria-hidden="true" tabindex="-1"></a>                 <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-549"><a href="#cb26-549" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-550"><a href="#cb26-550" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-551"><a href="#cb26-551" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-552"><a href="#cb26-552" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-553"><a href="#cb26-553" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-554"><a href="#cb26-554" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-555"><a href="#cb26-555" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-556"><a href="#cb26-556" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-557"><a href="#cb26-557" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-558"><a href="#cb26-558" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs,</span>
-<span id="cb26-559"><a href="#cb26-559" aria-hidden="true" tabindex="-1"></a>             <span class="at">nrow =</span> <span class="dv">2</span>)<span class="sc">+</span></span>
-<span id="cb26-560"><a href="#cb26-560" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-561"><a href="#cb26-561" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-562"><a href="#cb26-562" aria-hidden="true" tabindex="-1"></a><span class="co"># p.variance</span></span>
-<span id="cb26-563"><a href="#cb26-563" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-564"><a href="#cb26-564" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>))</span>
-<span id="cb26-565"><a href="#cb26-565" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-566"><a href="#cb26-566" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-567"><a href="#cb26-567" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-568"><a href="#cb26-568" aria-hidden="true" tabindex="-1"></a><span class="fu">### SMD 4-multivariate normal</span></span>
-<span id="cb26-569"><a href="#cb26-569" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-570"><a href="#cb26-570" aria-hidden="true" tabindex="-1"></a>The SAFE estimator for this effect size was calculated with a multivariate normal distribution for both mean and SD.</span>
-<span id="cb26-571"><a href="#cb26-571" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-574"><a href="#cb26-574" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-575"><a href="#cb26-575" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-576"><a href="#cb26-576" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-577"><a href="#cb26-577" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-578"><a href="#cb26-578" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-579"><a href="#cb26-579" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"SMD_normal"</span>, ]</span>
-<span id="cb26-580"><a href="#cb26-580" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-581"><a href="#cb26-581" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
-<span id="cb26-582"><a href="#cb26-582" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-583"><a href="#cb26-583" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-584"><a href="#cb26-584" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-585"><a href="#cb26-585" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-586"><a href="#cb26-586" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-587"><a href="#cb26-587" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-588"><a href="#cb26-588" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-589"><a href="#cb26-589" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-590"><a href="#cb26-590" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-591"><a href="#cb26-591" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-592"><a href="#cb26-592" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-593"><a href="#cb26-593" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-594"><a href="#cb26-594" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-595"><a href="#cb26-595" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-596"><a href="#cb26-596" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"SMD (x1 - x2) / pooled SD"</span>,</span>
-<span id="cb26-597"><a href="#cb26-597" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-598"><a href="#cb26-598" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-599"><a href="#cb26-599" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-600"><a href="#cb26-600" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-601"><a href="#cb26-601" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-602"><a href="#cb26-602" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-603"><a href="#cb26-603" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-604"><a href="#cb26-604" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-605"><a href="#cb26-605" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-606"><a href="#cb26-606" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-607"><a href="#cb26-607" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-608"><a href="#cb26-608" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-609"><a href="#cb26-609" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-610"><a href="#cb26-610" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-611"><a href="#cb26-611" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">plugin_1st =</span> <span class="st">"Cohen's d"</span>, </span>
-<span id="cb26-612"><a href="#cb26-612" aria-hidden="true" tabindex="-1"></a>                                <span class="at">plugin_2nd =</span> <span class="st">"Hedges' g"</span>, </span>
-<span id="cb26-613"><a href="#cb26-613" aria-hidden="true" tabindex="-1"></a>                                <span class="at">safe =</span> <span class="st">"SAFE"</span>))<span class="sc">+</span></span>
-<span id="cb26-614"><a href="#cb26-614" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-615"><a href="#cb26-615" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-616"><a href="#cb26-616" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-617"><a href="#cb26-617" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> <span class="fu">as_labeller</span>(<span class="fu">c</span>(<span class="st">"plugin_1st_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Cohen's d estimand"</span>,</span>
-<span id="cb26-618"><a href="#cb26-618" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"plugin_2nd_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Hedges' g estimand"</span>,</span>
-<span id="cb26-619"><a href="#cb26-619" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"safe_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo SAFE variance estimand"</span>,</span>
-<span id="cb26-620"><a href="#cb26-620" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_1st"</span> <span class="ot">=</span> <span class="st">"True Cohen's d point estimand"</span>,</span>
-<span id="cb26-621"><a href="#cb26-621" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_2nd"</span> <span class="ot">=</span> <span class="st">"True Hedges' g point estimand"</span>)))<span class="sc">+</span></span>
-<span id="cb26-622"><a href="#cb26-622" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-623"><a href="#cb26-623" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-624"><a href="#cb26-624" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-625"><a href="#cb26-625" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
-<span id="cb26-626"><a href="#cb26-626" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-627"><a href="#cb26-627" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-628"><a href="#cb26-628" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-629"><a href="#cb26-629" aria-hidden="true" tabindex="-1"></a><span class="fu">### SMD 2-multivariate normal and 2-Wishart </span></span>
-<span id="cb26-630"><a href="#cb26-630" aria-hidden="true" tabindex="-1"></a>With this estimator, the SAFE calculation used the normal distribution for the two means but the Wishart distribution to estimate the SD.</span>
+<span id="cb26-522"><a href="#cb26-522" aria-hidden="true" tabindex="-1"></a><span class="co"># annotation &lt;- data.table(y = c(-3, 3),</span></span>
+<span id="cb26-523"><a href="#cb26-523" aria-hidden="true" tabindex="-1"></a><span class="co">#                          x = c(0, 0),</span></span>
+<span id="cb26-524"><a href="#cb26-524" aria-hidden="true" tabindex="-1"></a><span class="co">#                          label = c("More conservative", "Less conservative"),</span></span>
+<span id="cb26-525"><a href="#cb26-525" aria-hidden="true" tabindex="-1"></a><span class="co">#                          estimand = "plugin_1st_mc")</span></span>
+<span id="cb26-526"><a href="#cb26-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-527"><a href="#cb26-527" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"reciprocal"</span>, ]</span>
+<span id="cb26-528"><a href="#cb26-528" aria-hidden="true" tabindex="-1"></a><span class="co"># sub_dat</span></span>
+<span id="cb26-529"><a href="#cb26-529" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size)</span>
+<span id="cb26-530"><a href="#cb26-530" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-531"><a href="#cb26-531" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>), ], </span>
+<span id="cb26-532"><a href="#cb26-532" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> sample_size, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-533"><a href="#cb26-533" aria-hidden="true" tabindex="-1"></a>                <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-534"><a href="#cb26-534" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-535"><a href="#cb26-535" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-536"><a href="#cb26-536" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-537"><a href="#cb26-537" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-538"><a href="#cb26-538" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-539"><a href="#cb26-539" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-540"><a href="#cb26-540" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-541"><a href="#cb26-541" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-542"><a href="#cb26-542" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-543"><a href="#cb26-543" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.0001</span>, <span class="fl">0.0001</span>))<span class="sc">+</span></span>
+<span id="cb26-544"><a href="#cb26-544" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Reciprocal (1 / x)"</span>)<span class="sc">+</span></span>
+<span id="cb26-545"><a href="#cb26-545" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-546"><a href="#cb26-546" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="co">#, legend.position.inside = c(.85, .85)</span></span>
+<span id="cb26-547"><a href="#cb26-547" aria-hidden="true" tabindex="-1"></a><span class="co"># p.point</span></span>
+<span id="cb26-548"><a href="#cb26-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-549"><a href="#cb26-549" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>), ], </span>
+<span id="cb26-550"><a href="#cb26-550" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> sample_size, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-551"><a href="#cb26-551" aria-hidden="true" tabindex="-1"></a>                 <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-552"><a href="#cb26-552" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-553"><a href="#cb26-553" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-554"><a href="#cb26-554" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-555"><a href="#cb26-555" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-556"><a href="#cb26-556" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-557"><a href="#cb26-557" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-558"><a href="#cb26-558" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-559"><a href="#cb26-559" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-560"><a href="#cb26-560" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs,</span>
+<span id="cb26-561"><a href="#cb26-561" aria-hidden="true" tabindex="-1"></a>             <span class="at">nrow =</span> <span class="dv">2</span>)<span class="sc">+</span></span>
+<span id="cb26-562"><a href="#cb26-562" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>))<span class="sc">+</span></span>
+<span id="cb26-563"><a href="#cb26-563" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-564"><a href="#cb26-564" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb26-565"><a href="#cb26-565" aria-hidden="true" tabindex="-1"></a><span class="co"># p.variance</span></span>
+<span id="cb26-566"><a href="#cb26-566" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-567"><a href="#cb26-567" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>))</span>
+<span id="cb26-568"><a href="#cb26-568" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-569"><a href="#cb26-569" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-570"><a href="#cb26-570" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-571"><a href="#cb26-571" aria-hidden="true" tabindex="-1"></a><span class="fu">### SMD 4-multivariate normal</span></span>
+<span id="cb26-572"><a href="#cb26-572" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-573"><a href="#cb26-573" aria-hidden="true" tabindex="-1"></a>The SAFE estimator for this effect size was calculated with a multivariate normal distribution for both mean and SD.</span>
+<span id="cb26-574"><a href="#cb26-574" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-577"><a href="#cb26-577" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-578"><a href="#cb26-578" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-579"><a href="#cb26-579" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-580"><a href="#cb26-580" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
+<span id="cb26-581"><a href="#cb26-581" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-582"><a href="#cb26-582" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"SMD_normal"</span>, ]</span>
+<span id="cb26-583"><a href="#cb26-583" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-584"><a href="#cb26-584" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-585"><a href="#cb26-585" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-586"><a href="#cb26-586" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-587"><a href="#cb26-587" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-588"><a href="#cb26-588" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-589"><a href="#cb26-589" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-590"><a href="#cb26-590" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-591"><a href="#cb26-591" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-592"><a href="#cb26-592" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-593"><a href="#cb26-593" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-594"><a href="#cb26-594" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-595"><a href="#cb26-595" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-596"><a href="#cb26-596" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-597"><a href="#cb26-597" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-598"><a href="#cb26-598" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span>))<span class="sc">+</span></span>
+<span id="cb26-599"><a href="#cb26-599" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"SMD (x1 - x2) / pooled SD"</span>,</span>
+<span id="cb26-600"><a href="#cb26-600" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-601"><a href="#cb26-601" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-602"><a href="#cb26-602" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-603"><a href="#cb26-603" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-604"><a href="#cb26-604" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-605"><a href="#cb26-605" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-606"><a href="#cb26-606" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-607"><a href="#cb26-607" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-608"><a href="#cb26-608" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-609"><a href="#cb26-609" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-610"><a href="#cb26-610" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-611"><a href="#cb26-611" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-612"><a href="#cb26-612" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-613"><a href="#cb26-613" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-614"><a href="#cb26-614" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">plugin_1st =</span> <span class="st">"Cohen's d"</span>, </span>
+<span id="cb26-615"><a href="#cb26-615" aria-hidden="true" tabindex="-1"></a>                                <span class="at">plugin_2nd =</span> <span class="st">"Hedges' g"</span>, </span>
+<span id="cb26-616"><a href="#cb26-616" aria-hidden="true" tabindex="-1"></a>                                <span class="at">safe =</span> <span class="st">"SAFE"</span>))<span class="sc">+</span></span>
+<span id="cb26-617"><a href="#cb26-617" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">30</span>, <span class="dv">30</span>))<span class="sc">+</span></span>
+<span id="cb26-618"><a href="#cb26-618" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-619"><a href="#cb26-619" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-620"><a href="#cb26-620" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> <span class="fu">as_labeller</span>(<span class="fu">c</span>(<span class="st">"plugin_1st_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Cohen's d estimand"</span>,</span>
+<span id="cb26-621"><a href="#cb26-621" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"plugin_2nd_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Hedges' g estimand"</span>,</span>
+<span id="cb26-622"><a href="#cb26-622" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"safe_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo SAFE variance estimand"</span>,</span>
+<span id="cb26-623"><a href="#cb26-623" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_1st"</span> <span class="ot">=</span> <span class="st">"True Cohen's d point estimand"</span>,</span>
+<span id="cb26-624"><a href="#cb26-624" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_2nd"</span> <span class="ot">=</span> <span class="st">"True Hedges' g point estimand"</span>)))<span class="sc">+</span></span>
+<span id="cb26-625"><a href="#cb26-625" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-626"><a href="#cb26-626" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb26-627"><a href="#cb26-627" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-628"><a href="#cb26-628" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-629"><a href="#cb26-629" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-630"><a href="#cb26-630" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb26-631"><a href="#cb26-631" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-634"><a href="#cb26-634" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-635"><a href="#cb26-635" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-636"><a href="#cb26-636" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-637"><a href="#cb26-637" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-638"><a href="#cb26-638" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-639"><a href="#cb26-639" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"SMD_Wishart"</span>, ]</span>
-<span id="cb26-640"><a href="#cb26-640" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-632"><a href="#cb26-632" aria-hidden="true" tabindex="-1"></a><span class="fu">### SMD 2-multivariate normal and 2-Wishart </span></span>
+<span id="cb26-633"><a href="#cb26-633" aria-hidden="true" tabindex="-1"></a>With this estimator, the SAFE calculation used the normal distribution for the two means but the Wishart distribution to estimate the SD.</span>
+<span id="cb26-634"><a href="#cb26-634" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-637"><a href="#cb26-637" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-638"><a href="#cb26-638" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-639"><a href="#cb26-639" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-640"><a href="#cb26-640" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
 <span id="cb26-641"><a href="#cb26-641" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-642"><a href="#cb26-642" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-643"><a href="#cb26-643" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-644"><a href="#cb26-644" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-645"><a href="#cb26-645" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-646"><a href="#cb26-646" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-647"><a href="#cb26-647" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-648"><a href="#cb26-648" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-649"><a href="#cb26-649" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-650"><a href="#cb26-650" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-651"><a href="#cb26-651" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-652"><a href="#cb26-652" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-653"><a href="#cb26-653" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-654"><a href="#cb26-654" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-655"><a href="#cb26-655" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"SMD (x1 - x2) / pooled SD"</span>,</span>
-<span id="cb26-656"><a href="#cb26-656" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-657"><a href="#cb26-657" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-658"><a href="#cb26-658" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-659"><a href="#cb26-659" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-660"><a href="#cb26-660" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-661"><a href="#cb26-661" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-662"><a href="#cb26-662" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-663"><a href="#cb26-663" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-664"><a href="#cb26-664" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-665"><a href="#cb26-665" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-666"><a href="#cb26-666" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-667"><a href="#cb26-667" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-668"><a href="#cb26-668" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-669"><a href="#cb26-669" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-670"><a href="#cb26-670" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">plugin_1st =</span> <span class="st">"Cohen's d"</span>, </span>
-<span id="cb26-671"><a href="#cb26-671" aria-hidden="true" tabindex="-1"></a>                                <span class="at">plugin_2nd =</span> <span class="st">"Hedges' g"</span>, </span>
-<span id="cb26-672"><a href="#cb26-672" aria-hidden="true" tabindex="-1"></a>                                <span class="at">safe =</span> <span class="st">"SAFE"</span>))<span class="sc">+</span></span>
-<span id="cb26-673"><a href="#cb26-673" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-674"><a href="#cb26-674" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-675"><a href="#cb26-675" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-676"><a href="#cb26-676" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> <span class="fu">as_labeller</span>(<span class="fu">c</span>(<span class="st">"plugin_1st_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Cohen's d estimand"</span>,</span>
-<span id="cb26-677"><a href="#cb26-677" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"plugin_2nd_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Hedges' g estimand"</span>,</span>
-<span id="cb26-678"><a href="#cb26-678" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"safe_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo SAFE variance estimand"</span>,</span>
-<span id="cb26-679"><a href="#cb26-679" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_1st"</span> <span class="ot">=</span> <span class="st">"True Cohen's d point estimand"</span>,</span>
-<span id="cb26-680"><a href="#cb26-680" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_2nd"</span> <span class="ot">=</span> <span class="st">"True Hedges' g point estimand"</span>)))<span class="sc">+</span></span>
-<span id="cb26-681"><a href="#cb26-681" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-682"><a href="#cb26-682" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-683"><a href="#cb26-683" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-684"><a href="#cb26-684" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
-<span id="cb26-685"><a href="#cb26-685" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-686"><a href="#cb26-686" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-687"><a href="#cb26-687" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-688"><a href="#cb26-688" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnCVR 4-multivariate normal</span></span>
-<span id="cb26-689"><a href="#cb26-689" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-690"><a href="#cb26-690" aria-hidden="true" tabindex="-1"></a>The SAFE estimator for this effect size was calculated with a multivariate normal distribution for both mean and SD.</span>
-<span id="cb26-691"><a href="#cb26-691" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-694"><a href="#cb26-694" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-695"><a href="#cb26-695" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-696"><a href="#cb26-696" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-697"><a href="#cb26-697" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-698"><a href="#cb26-698" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-699"><a href="#cb26-699" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnCVR_normal"</span>, ]</span>
-<span id="cb26-700"><a href="#cb26-700" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-642"><a href="#cb26-642" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"SMD_Wishart"</span>, ]</span>
+<span id="cb26-643"><a href="#cb26-643" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-644"><a href="#cb26-644" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-645"><a href="#cb26-645" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-646"><a href="#cb26-646" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-647"><a href="#cb26-647" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-648"><a href="#cb26-648" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-649"><a href="#cb26-649" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-650"><a href="#cb26-650" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-651"><a href="#cb26-651" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-652"><a href="#cb26-652" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-653"><a href="#cb26-653" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-654"><a href="#cb26-654" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-655"><a href="#cb26-655" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-656"><a href="#cb26-656" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-657"><a href="#cb26-657" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span>))<span class="sc">+</span></span>
+<span id="cb26-658"><a href="#cb26-658" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"SMD (x1 - x2) / pooled SD"</span>,</span>
+<span id="cb26-659"><a href="#cb26-659" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-660"><a href="#cb26-660" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-661"><a href="#cb26-661" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-662"><a href="#cb26-662" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-663"><a href="#cb26-663" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-664"><a href="#cb26-664" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-665"><a href="#cb26-665" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-666"><a href="#cb26-666" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-667"><a href="#cb26-667" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-668"><a href="#cb26-668" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-669"><a href="#cb26-669" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-670"><a href="#cb26-670" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-671"><a href="#cb26-671" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-672"><a href="#cb26-672" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-673"><a href="#cb26-673" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">plugin_1st =</span> <span class="st">"Cohen's d"</span>, </span>
+<span id="cb26-674"><a href="#cb26-674" aria-hidden="true" tabindex="-1"></a>                                <span class="at">plugin_2nd =</span> <span class="st">"Hedges' g"</span>, </span>
+<span id="cb26-675"><a href="#cb26-675" aria-hidden="true" tabindex="-1"></a>                                <span class="at">safe =</span> <span class="st">"SAFE"</span>))<span class="sc">+</span></span>
+<span id="cb26-676"><a href="#cb26-676" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-677"><a href="#cb26-677" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-678"><a href="#cb26-678" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> <span class="fu">as_labeller</span>(<span class="fu">c</span>(<span class="st">"plugin_1st_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Cohen's d estimand"</span>,</span>
+<span id="cb26-679"><a href="#cb26-679" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"plugin_2nd_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo Hedges' g estimand"</span>,</span>
+<span id="cb26-680"><a href="#cb26-680" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"safe_mc"</span> <span class="ot">=</span> <span class="st">"Monte Carlo SAFE variance estimand"</span>,</span>
+<span id="cb26-681"><a href="#cb26-681" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_1st"</span> <span class="ot">=</span> <span class="st">"True Cohen's d point estimand"</span>,</span>
+<span id="cb26-682"><a href="#cb26-682" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"true_2nd"</span> <span class="ot">=</span> <span class="st">"True Hedges' g point estimand"</span>)))<span class="sc">+</span></span>
+<span id="cb26-683"><a href="#cb26-683" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">60</span>, <span class="dv">60</span>))<span class="sc">+</span></span>
+<span id="cb26-684"><a href="#cb26-684" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-685"><a href="#cb26-685" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb26-686"><a href="#cb26-686" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-687"><a href="#cb26-687" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-688"><a href="#cb26-688" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-689"><a href="#cb26-689" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-690"><a href="#cb26-690" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-691"><a href="#cb26-691" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnCVR 4-multivariate normal</span></span>
+<span id="cb26-692"><a href="#cb26-692" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-693"><a href="#cb26-693" aria-hidden="true" tabindex="-1"></a>The SAFE estimator for this effect size was calculated with a multivariate normal distribution for both mean and SD.</span>
+<span id="cb26-694"><a href="#cb26-694" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-697"><a href="#cb26-697" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-698"><a href="#cb26-698" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-699"><a href="#cb26-699" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-700"><a href="#cb26-700" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
 <span id="cb26-701"><a href="#cb26-701" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-702"><a href="#cb26-702" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> </span>
-<span id="cb26-703"><a href="#cb26-703" aria-hidden="true" tabindex="-1"></a>                                   sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-704"><a href="#cb26-704" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-705"><a href="#cb26-705" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-706"><a href="#cb26-706" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-707"><a href="#cb26-707" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-708"><a href="#cb26-708" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-709"><a href="#cb26-709" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-710"><a href="#cb26-710" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-711"><a href="#cb26-711" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-712"><a href="#cb26-712" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-713"><a href="#cb26-713" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-714"><a href="#cb26-714" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-715"><a href="#cb26-715" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-716"><a href="#cb26-716" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnCVR"</span>,</span>
-<span id="cb26-717"><a href="#cb26-717" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-718"><a href="#cb26-718" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-719"><a href="#cb26-719" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-720"><a href="#cb26-720" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-721"><a href="#cb26-721" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-722"><a href="#cb26-722" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-723"><a href="#cb26-723" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-724"><a href="#cb26-724" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-725"><a href="#cb26-725" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-726"><a href="#cb26-726" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-727"><a href="#cb26-727" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-728"><a href="#cb26-728" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-729"><a href="#cb26-729" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-730"><a href="#cb26-730" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-731"><a href="#cb26-731" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-732"><a href="#cb26-732" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-733"><a href="#cb26-733" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-734"><a href="#cb26-734" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-735"><a href="#cb26-735" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-736"><a href="#cb26-736" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-737"><a href="#cb26-737" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-738"><a href="#cb26-738" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-739"><a href="#cb26-739" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
-<span id="cb26-740"><a href="#cb26-740" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-741"><a href="#cb26-741" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-742"><a href="#cb26-742" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-743"><a href="#cb26-743" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnCVR 2-multivariate normal and 2-Wishart</span></span>
-<span id="cb26-744"><a href="#cb26-744" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-745"><a href="#cb26-745" aria-hidden="true" tabindex="-1"></a>The SAFE estimator for this effect size was calculated with a multivariate normal distribution for both mean and SD.</span>
-<span id="cb26-746"><a href="#cb26-746" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-749"><a href="#cb26-749" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-750"><a href="#cb26-750" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-751"><a href="#cb26-751" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-752"><a href="#cb26-752" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-753"><a href="#cb26-753" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-754"><a href="#cb26-754" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnCVR_Wishart"</span>, ]</span>
-<span id="cb26-755"><a href="#cb26-755" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-702"><a href="#cb26-702" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnCVR_normal"</span>, ]</span>
+<span id="cb26-703"><a href="#cb26-703" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-704"><a href="#cb26-704" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-705"><a href="#cb26-705" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> </span>
+<span id="cb26-706"><a href="#cb26-706" aria-hidden="true" tabindex="-1"></a>                                   sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-707"><a href="#cb26-707" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-708"><a href="#cb26-708" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-709"><a href="#cb26-709" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-710"><a href="#cb26-710" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-711"><a href="#cb26-711" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-712"><a href="#cb26-712" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-713"><a href="#cb26-713" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-714"><a href="#cb26-714" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-715"><a href="#cb26-715" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-716"><a href="#cb26-716" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-717"><a href="#cb26-717" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-718"><a href="#cb26-718" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.01</span>, <span class="fl">0.01</span>))<span class="sc">+</span></span>
+<span id="cb26-719"><a href="#cb26-719" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnCVR"</span>,</span>
+<span id="cb26-720"><a href="#cb26-720" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-721"><a href="#cb26-721" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-722"><a href="#cb26-722" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-723"><a href="#cb26-723" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-724"><a href="#cb26-724" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-725"><a href="#cb26-725" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-726"><a href="#cb26-726" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-727"><a href="#cb26-727" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-728"><a href="#cb26-728" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-729"><a href="#cb26-729" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-730"><a href="#cb26-730" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-731"><a href="#cb26-731" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-732"><a href="#cb26-732" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-733"><a href="#cb26-733" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-734"><a href="#cb26-734" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-735"><a href="#cb26-735" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-736"><a href="#cb26-736" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-737"><a href="#cb26-737" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-738"><a href="#cb26-738" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">50</span>, <span class="dv">50</span>))<span class="sc">+</span></span>
+<span id="cb26-739"><a href="#cb26-739" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-740"><a href="#cb26-740" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb26-741"><a href="#cb26-741" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-742"><a href="#cb26-742" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-743"><a href="#cb26-743" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-744"><a href="#cb26-744" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-745"><a href="#cb26-745" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-746"><a href="#cb26-746" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnCVR 2-multivariate normal and 2-Wishart</span></span>
+<span id="cb26-747"><a href="#cb26-747" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-748"><a href="#cb26-748" aria-hidden="true" tabindex="-1"></a>The SAFE estimator for this effect size was calculated with a multivariate normal distribution for both mean and SD.</span>
+<span id="cb26-749"><a href="#cb26-749" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-752"><a href="#cb26-752" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-753"><a href="#cb26-753" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-754"><a href="#cb26-754" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-755"><a href="#cb26-755" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
 <span id="cb26-756"><a href="#cb26-756" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-757"><a href="#cb26-757" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> </span>
-<span id="cb26-758"><a href="#cb26-758" aria-hidden="true" tabindex="-1"></a>                                   sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-759"><a href="#cb26-759" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-760"><a href="#cb26-760" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-761"><a href="#cb26-761" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-762"><a href="#cb26-762" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-763"><a href="#cb26-763" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-764"><a href="#cb26-764" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-765"><a href="#cb26-765" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-766"><a href="#cb26-766" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-767"><a href="#cb26-767" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-768"><a href="#cb26-768" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.05</span>, <span class="fl">0.05</span>))<span class="sc">+</span></span>
-<span id="cb26-769"><a href="#cb26-769" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-770"><a href="#cb26-770" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-771"><a href="#cb26-771" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-772"><a href="#cb26-772" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnCVR"</span>,</span>
-<span id="cb26-773"><a href="#cb26-773" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-774"><a href="#cb26-774" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-775"><a href="#cb26-775" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="co">#, legend.position.inside = c(.85, .85)</span></span>
-<span id="cb26-776"><a href="#cb26-776" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-777"><a href="#cb26-777" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-778"><a href="#cb26-778" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
-<span id="cb26-779"><a href="#cb26-779" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-780"><a href="#cb26-780" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-781"><a href="#cb26-781" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-782"><a href="#cb26-782" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-783"><a href="#cb26-783" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-784"><a href="#cb26-784" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-785"><a href="#cb26-785" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-786"><a href="#cb26-786" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-787"><a href="#cb26-787" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-788"><a href="#cb26-788" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-789"><a href="#cb26-789" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-790"><a href="#cb26-790" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-791"><a href="#cb26-791" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-792"><a href="#cb26-792" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-793"><a href="#cb26-793" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-794"><a href="#cb26-794" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-795"><a href="#cb26-795" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-757"><a href="#cb26-757" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnCVR_Wishart"</span>, ]</span>
+<span id="cb26-758"><a href="#cb26-758" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-759"><a href="#cb26-759" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-760"><a href="#cb26-760" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> </span>
+<span id="cb26-761"><a href="#cb26-761" aria-hidden="true" tabindex="-1"></a>                                   sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-762"><a href="#cb26-762" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-763"><a href="#cb26-763" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-764"><a href="#cb26-764" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-765"><a href="#cb26-765" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-766"><a href="#cb26-766" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-767"><a href="#cb26-767" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-768"><a href="#cb26-768" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-769"><a href="#cb26-769" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-770"><a href="#cb26-770" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-771"><a href="#cb26-771" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.05</span>, <span class="fl">0.05</span>))<span class="sc">+</span></span>
+<span id="cb26-772"><a href="#cb26-772" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-773"><a href="#cb26-773" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-774"><a href="#cb26-774" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnCVR"</span>,</span>
+<span id="cb26-775"><a href="#cb26-775" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-776"><a href="#cb26-776" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-777"><a href="#cb26-777" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="co">#, legend.position.inside = c(.85, .85)</span></span>
+<span id="cb26-778"><a href="#cb26-778" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-779"><a href="#cb26-779" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-780"><a href="#cb26-780" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> sample_size_ratio <span class="sc">==</span> <span class="dv">1</span>, ], </span>
+<span id="cb26-781"><a href="#cb26-781" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> sample_size1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-782"><a href="#cb26-782" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-783"><a href="#cb26-783" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-784"><a href="#cb26-784" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-785"><a href="#cb26-785" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-786"><a href="#cb26-786" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-787"><a href="#cb26-787" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-788"><a href="#cb26-788" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-789"><a href="#cb26-789" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-790"><a href="#cb26-790" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">30</span>, <span class="dv">30</span>))<span class="sc">+</span></span>
+<span id="cb26-791"><a href="#cb26-791" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-792"><a href="#cb26-792" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-793"><a href="#cb26-793" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-794"><a href="#cb26-794" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-795"><a href="#cb26-795" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
 <span id="cb26-796"><a href="#cb26-796" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-797"><a href="#cb26-797" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-797"><a href="#cb26-797" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
 <span id="cb26-798"><a href="#cb26-798" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-799"><a href="#cb26-799" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnOR Binomial</span></span>
+<span id="cb26-799"><a href="#cb26-799" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb26-800"><a href="#cb26-800" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-801"><a href="#cb26-801" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation used a binomial distribution to draw random binomial samples for 'a' and 'c'.</span>
+<span id="cb26-801"><a href="#cb26-801" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnOR Binomial</span></span>
 <span id="cb26-802"><a href="#cb26-802" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-805"><a href="#cb26-805" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-806"><a href="#cb26-806" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-807"><a href="#cb26-807" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-808"><a href="#cb26-808" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-809"><a href="#cb26-809" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-810"><a href="#cb26-810" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnOR"</span>, ]</span>
-<span id="cb26-811"><a href="#cb26-811" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
-<span id="cb26-812"><a href="#cb26-812" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-813"><a href="#cb26-813" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-814"><a href="#cb26-814" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-815"><a href="#cb26-815" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-816"><a href="#cb26-816" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-817"><a href="#cb26-817" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-818"><a href="#cb26-818" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-819"><a href="#cb26-819" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-820"><a href="#cb26-820" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-821"><a href="#cb26-821" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-822"><a href="#cb26-822" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-823"><a href="#cb26-823" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-824"><a href="#cb26-824" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnOR"</span>,</span>
-<span id="cb26-825"><a href="#cb26-825" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-826"><a href="#cb26-826" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-827"><a href="#cb26-827" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-828"><a href="#cb26-828" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-829"><a href="#cb26-829" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-830"><a href="#cb26-830" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-831"><a href="#cb26-831" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-832"><a href="#cb26-832" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-833"><a href="#cb26-833" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-834"><a href="#cb26-834" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-835"><a href="#cb26-835" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-836"><a href="#cb26-836" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-837"><a href="#cb26-837" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-838"><a href="#cb26-838" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-839"><a href="#cb26-839" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-840"><a href="#cb26-840" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-841"><a href="#cb26-841" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-842"><a href="#cb26-842" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-843"><a href="#cb26-843" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-844"><a href="#cb26-844" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-845"><a href="#cb26-845" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-846"><a href="#cb26-846" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-847"><a href="#cb26-847" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-848"><a href="#cb26-848" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
-<span id="cb26-849"><a href="#cb26-849" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-850"><a href="#cb26-850" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-803"><a href="#cb26-803" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation used a binomial distribution to draw random binomial samples for 'a' and 'c'.</span>
+<span id="cb26-804"><a href="#cb26-804" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-807"><a href="#cb26-807" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-808"><a href="#cb26-808" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-809"><a href="#cb26-809" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-810"><a href="#cb26-810" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
+<span id="cb26-811"><a href="#cb26-811" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-812"><a href="#cb26-812" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnOR"</span>, ]</span>
+<span id="cb26-813"><a href="#cb26-813" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-814"><a href="#cb26-814" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-815"><a href="#cb26-815" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-816"><a href="#cb26-816" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-817"><a href="#cb26-817" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-818"><a href="#cb26-818" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-819"><a href="#cb26-819" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-820"><a href="#cb26-820" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-821"><a href="#cb26-821" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-822"><a href="#cb26-822" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-823"><a href="#cb26-823" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-824"><a href="#cb26-824" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-825"><a href="#cb26-825" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-826"><a href="#cb26-826" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand)<span class="sc">+</span></span>
+<span id="cb26-827"><a href="#cb26-827" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))<span class="sc">+</span></span>
+<span id="cb26-828"><a href="#cb26-828" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnOR"</span>,</span>
+<span id="cb26-829"><a href="#cb26-829" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-830"><a href="#cb26-830" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-831"><a href="#cb26-831" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-832"><a href="#cb26-832" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-833"><a href="#cb26-833" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-834"><a href="#cb26-834" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-835"><a href="#cb26-835" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-836"><a href="#cb26-836" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-837"><a href="#cb26-837" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-838"><a href="#cb26-838" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-839"><a href="#cb26-839" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-840"><a href="#cb26-840" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-841"><a href="#cb26-841" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-842"><a href="#cb26-842" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-843"><a href="#cb26-843" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-844"><a href="#cb26-844" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-845"><a href="#cb26-845" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-846"><a href="#cb26-846" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-847"><a href="#cb26-847" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-848"><a href="#cb26-848" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">90</span>, <span class="dv">90</span>))<span class="sc">+</span></span>
+<span id="cb26-849"><a href="#cb26-849" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-850"><a href="#cb26-850" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
 <span id="cb26-851"><a href="#cb26-851" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-852"><a href="#cb26-852" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnOR Normal</span></span>
+<span id="cb26-852"><a href="#cb26-852" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
 <span id="cb26-853"><a href="#cb26-853" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-854"><a href="#cb26-854" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation used a normal distribution to draw 'p1' and 'p2' from which 'a' and 'c' were calculated. **Something is still off...**</span>
+<span id="cb26-854"><a href="#cb26-854" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb26-855"><a href="#cb26-855" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-858"><a href="#cb26-858" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-859"><a href="#cb26-859" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-860"><a href="#cb26-860" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-861"><a href="#cb26-861" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-862"><a href="#cb26-862" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-863"><a href="#cb26-863" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnOR_normal"</span>, ]</span>
-<span id="cb26-864"><a href="#cb26-864" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
-<span id="cb26-865"><a href="#cb26-865" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-866"><a href="#cb26-866" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-867"><a href="#cb26-867" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-868"><a href="#cb26-868" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-869"><a href="#cb26-869" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-870"><a href="#cb26-870" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-871"><a href="#cb26-871" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-872"><a href="#cb26-872" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-873"><a href="#cb26-873" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-874"><a href="#cb26-874" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-875"><a href="#cb26-875" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-876"><a href="#cb26-876" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-877"><a href="#cb26-877" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-878"><a href="#cb26-878" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-879"><a href="#cb26-879" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-880"><a href="#cb26-880" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>))<span class="sc">+</span></span>
-<span id="cb26-881"><a href="#cb26-881" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnOR"</span>,</span>
-<span id="cb26-882"><a href="#cb26-882" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-883"><a href="#cb26-883" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-884"><a href="#cb26-884" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-885"><a href="#cb26-885" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-886"><a href="#cb26-886" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-887"><a href="#cb26-887" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-888"><a href="#cb26-888" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-889"><a href="#cb26-889" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-890"><a href="#cb26-890" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-891"><a href="#cb26-891" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-892"><a href="#cb26-892" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-893"><a href="#cb26-893" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-894"><a href="#cb26-894" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-895"><a href="#cb26-895" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-896"><a href="#cb26-896" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-897"><a href="#cb26-897" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-898"><a href="#cb26-898" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-899"><a href="#cb26-899" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-900"><a href="#cb26-900" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-901"><a href="#cb26-901" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-902"><a href="#cb26-902" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-903"><a href="#cb26-903" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-904"><a href="#cb26-904" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-905"><a href="#cb26-905" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
-<span id="cb26-906"><a href="#cb26-906" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-907"><a href="#cb26-907" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-908"><a href="#cb26-908" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-909"><a href="#cb26-909" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnRR Binomial</span></span>
-<span id="cb26-910"><a href="#cb26-910" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-911"><a href="#cb26-911" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a binomial distribution.</span>
-<span id="cb26-912"><a href="#cb26-912" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-915"><a href="#cb26-915" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-916"><a href="#cb26-916" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-917"><a href="#cb26-917" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-918"><a href="#cb26-918" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-919"><a href="#cb26-919" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-920"><a href="#cb26-920" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnRR"</span>, ]</span>
-<span id="cb26-921"><a href="#cb26-921" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-856"><a href="#cb26-856" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnOR Normal</span></span>
+<span id="cb26-857"><a href="#cb26-857" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-858"><a href="#cb26-858" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation used a normal distribution to draw 'p1' and 'p2' from which 'a' and 'c' were calculated. **Something is still off...**</span>
+<span id="cb26-859"><a href="#cb26-859" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-862"><a href="#cb26-862" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-863"><a href="#cb26-863" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-864"><a href="#cb26-864" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-865"><a href="#cb26-865" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
+<span id="cb26-866"><a href="#cb26-866" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-867"><a href="#cb26-867" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnOR_normal"</span>, ]</span>
+<span id="cb26-868"><a href="#cb26-868" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-869"><a href="#cb26-869" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-870"><a href="#cb26-870" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-871"><a href="#cb26-871" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-872"><a href="#cb26-872" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-873"><a href="#cb26-873" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-874"><a href="#cb26-874" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-875"><a href="#cb26-875" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-876"><a href="#cb26-876" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-877"><a href="#cb26-877" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-878"><a href="#cb26-878" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-879"><a href="#cb26-879" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-880"><a href="#cb26-880" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-881"><a href="#cb26-881" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-882"><a href="#cb26-882" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-883"><a href="#cb26-883" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>))<span class="sc">+</span></span>
+<span id="cb26-884"><a href="#cb26-884" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnOR"</span>,</span>
+<span id="cb26-885"><a href="#cb26-885" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-886"><a href="#cb26-886" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-887"><a href="#cb26-887" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-888"><a href="#cb26-888" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-889"><a href="#cb26-889" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-890"><a href="#cb26-890" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-891"><a href="#cb26-891" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-892"><a href="#cb26-892" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-893"><a href="#cb26-893" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-894"><a href="#cb26-894" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-895"><a href="#cb26-895" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-896"><a href="#cb26-896" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-897"><a href="#cb26-897" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-898"><a href="#cb26-898" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-899"><a href="#cb26-899" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-900"><a href="#cb26-900" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-901"><a href="#cb26-901" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-902"><a href="#cb26-902" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-903"><a href="#cb26-903" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-904"><a href="#cb26-904" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">500</span>, <span class="dv">500</span>))<span class="sc">+</span></span>
+<span id="cb26-905"><a href="#cb26-905" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-906"><a href="#cb26-906" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb26-907"><a href="#cb26-907" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-908"><a href="#cb26-908" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-909"><a href="#cb26-909" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-910"><a href="#cb26-910" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-911"><a href="#cb26-911" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-912"><a href="#cb26-912" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnRR Binomial</span></span>
+<span id="cb26-913"><a href="#cb26-913" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-914"><a href="#cb26-914" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a binomial distribution.</span>
+<span id="cb26-915"><a href="#cb26-915" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-918"><a href="#cb26-918" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-919"><a href="#cb26-919" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-920"><a href="#cb26-920" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-921"><a href="#cb26-921" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
 <span id="cb26-922"><a href="#cb26-922" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-923"><a href="#cb26-923" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-924"><a href="#cb26-924" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-925"><a href="#cb26-925" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-926"><a href="#cb26-926" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-927"><a href="#cb26-927" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-928"><a href="#cb26-928" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-929"><a href="#cb26-929" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-930"><a href="#cb26-930" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-931"><a href="#cb26-931" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-932"><a href="#cb26-932" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-933"><a href="#cb26-933" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-934"><a href="#cb26-934" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-935"><a href="#cb26-935" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-936"><a href="#cb26-936" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-937"><a href="#cb26-937" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>))<span class="sc">+</span></span>
-<span id="cb26-938"><a href="#cb26-938" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnRR"</span>,</span>
-<span id="cb26-939"><a href="#cb26-939" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-940"><a href="#cb26-940" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-941"><a href="#cb26-941" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-942"><a href="#cb26-942" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-943"><a href="#cb26-943" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-944"><a href="#cb26-944" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-945"><a href="#cb26-945" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-946"><a href="#cb26-946" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-947"><a href="#cb26-947" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-948"><a href="#cb26-948" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-949"><a href="#cb26-949" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-950"><a href="#cb26-950" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-951"><a href="#cb26-951" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-952"><a href="#cb26-952" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-953"><a href="#cb26-953" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-954"><a href="#cb26-954" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-955"><a href="#cb26-955" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-956"><a href="#cb26-956" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-957"><a href="#cb26-957" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-958"><a href="#cb26-958" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-959"><a href="#cb26-959" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-960"><a href="#cb26-960" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-961"><a href="#cb26-961" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-962"><a href="#cb26-962" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-923"><a href="#cb26-923" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnRR"</span>, ]</span>
+<span id="cb26-924"><a href="#cb26-924" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-925"><a href="#cb26-925" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-926"><a href="#cb26-926" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-927"><a href="#cb26-927" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-928"><a href="#cb26-928" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-929"><a href="#cb26-929" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-930"><a href="#cb26-930" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-931"><a href="#cb26-931" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-932"><a href="#cb26-932" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-933"><a href="#cb26-933" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-934"><a href="#cb26-934" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-935"><a href="#cb26-935" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-936"><a href="#cb26-936" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-937"><a href="#cb26-937" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-938"><a href="#cb26-938" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-939"><a href="#cb26-939" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))<span class="sc">+</span></span>
+<span id="cb26-940"><a href="#cb26-940" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnRR"</span>,</span>
+<span id="cb26-941"><a href="#cb26-941" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-942"><a href="#cb26-942" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-943"><a href="#cb26-943" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-944"><a href="#cb26-944" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-945"><a href="#cb26-945" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-946"><a href="#cb26-946" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-947"><a href="#cb26-947" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-948"><a href="#cb26-948" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-949"><a href="#cb26-949" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-950"><a href="#cb26-950" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-951"><a href="#cb26-951" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-952"><a href="#cb26-952" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-953"><a href="#cb26-953" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-954"><a href="#cb26-954" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-955"><a href="#cb26-955" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-956"><a href="#cb26-956" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-957"><a href="#cb26-957" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-958"><a href="#cb26-958" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-959"><a href="#cb26-959" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-960"><a href="#cb26-960" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">150</span>, <span class="dv">150</span>))<span class="sc">+</span></span>
+<span id="cb26-961"><a href="#cb26-961" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-962"><a href="#cb26-962" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
 <span id="cb26-963"><a href="#cb26-963" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-964"><a href="#cb26-964" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-964"><a href="#cb26-964" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
 <span id="cb26-965"><a href="#cb26-965" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-966"><a href="#cb26-966" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnRR Normal</span></span>
+<span id="cb26-966"><a href="#cb26-966" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb26-967"><a href="#cb26-967" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-968"><a href="#cb26-968" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation drew 'p1' and 'p2' from a normal distribution.</span>
+<span id="cb26-968"><a href="#cb26-968" aria-hidden="true" tabindex="-1"></a><span class="fu">### lnRR Normal</span></span>
 <span id="cb26-969"><a href="#cb26-969" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-972"><a href="#cb26-972" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-973"><a href="#cb26-973" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-974"><a href="#cb26-974" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-975"><a href="#cb26-975" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-976"><a href="#cb26-976" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-977"><a href="#cb26-977" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnRR_normal"</span>, ]</span>
-<span id="cb26-978"><a href="#cb26-978" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
-<span id="cb26-979"><a href="#cb26-979" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-980"><a href="#cb26-980" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-981"><a href="#cb26-981" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-982"><a href="#cb26-982" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-983"><a href="#cb26-983" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-984"><a href="#cb26-984" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-985"><a href="#cb26-985" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-986"><a href="#cb26-986" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-987"><a href="#cb26-987" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-988"><a href="#cb26-988" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-989"><a href="#cb26-989" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-990"><a href="#cb26-990" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-991"><a href="#cb26-991" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-992"><a href="#cb26-992" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-993"><a href="#cb26-993" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-994"><a href="#cb26-994" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnRR"</span>,</span>
-<span id="cb26-995"><a href="#cb26-995" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
-<span id="cb26-996"><a href="#cb26-996" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-997"><a href="#cb26-997" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-998"><a href="#cb26-998" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-999"><a href="#cb26-999" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-1000"><a href="#cb26-1000" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
-<span id="cb26-1001"><a href="#cb26-1001" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
-<span id="cb26-1002"><a href="#cb26-1002" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-1003"><a href="#cb26-1003" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-1004"><a href="#cb26-1004" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-1005"><a href="#cb26-1005" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-1006"><a href="#cb26-1006" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-1007"><a href="#cb26-1007" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-1008"><a href="#cb26-1008" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-1009"><a href="#cb26-1009" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-1010"><a href="#cb26-1010" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-1011"><a href="#cb26-1011" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-1012"><a href="#cb26-1012" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-1013"><a href="#cb26-1013" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-1014"><a href="#cb26-1014" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-1015"><a href="#cb26-1015" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-1016"><a href="#cb26-1016" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-1017"><a href="#cb26-1017" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1018"><a href="#cb26-1018" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-970"><a href="#cb26-970" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation drew 'p1' and 'p2' from a normal distribution.</span>
+<span id="cb26-971"><a href="#cb26-971" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-974"><a href="#cb26-974" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-975"><a href="#cb26-975" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-976"><a href="#cb26-976" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-977"><a href="#cb26-977" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
+<span id="cb26-978"><a href="#cb26-978" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-979"><a href="#cb26-979" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnRR_normal"</span>, ]</span>
+<span id="cb26-980"><a href="#cb26-980" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-981"><a href="#cb26-981" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-982"><a href="#cb26-982" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-983"><a href="#cb26-983" aria-hidden="true" tabindex="-1"></a>                                   true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-984"><a href="#cb26-984" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-985"><a href="#cb26-985" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-986"><a href="#cb26-986" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-987"><a href="#cb26-987" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-988"><a href="#cb26-988" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-989"><a href="#cb26-989" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-990"><a href="#cb26-990" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-991"><a href="#cb26-991" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-992"><a href="#cb26-992" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-993"><a href="#cb26-993" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-994"><a href="#cb26-994" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-995"><a href="#cb26-995" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>))<span class="sc">+</span></span>
+<span id="cb26-996"><a href="#cb26-996" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnRR"</span>,</span>
+<span id="cb26-997"><a href="#cb26-997" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">"with n1==n2"</span>)<span class="sc">+</span></span>
+<span id="cb26-998"><a href="#cb26-998" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-999"><a href="#cb26-999" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-1000"><a href="#cb26-1000" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-1001"><a href="#cb26-1001" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-1002"><a href="#cb26-1002" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> n1 <span class="sc">==</span> n2 <span class="sc">&amp;</span></span>
+<span id="cb26-1003"><a href="#cb26-1003" aria-hidden="true" tabindex="-1"></a>                                      true_p_a <span class="sc">==</span> .<span class="dv">1</span> <span class="sc">&amp;</span> true_p_c <span class="sc">==</span> .<span class="dv">7</span>, ], </span>
+<span id="cb26-1004"><a href="#cb26-1004" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n1, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-1005"><a href="#cb26-1005" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-1006"><a href="#cb26-1006" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-1007"><a href="#cb26-1007" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-1008"><a href="#cb26-1008" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-1009"><a href="#cb26-1009" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-1010"><a href="#cb26-1010" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-1011"><a href="#cb26-1011" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-1012"><a href="#cb26-1012" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-1013"><a href="#cb26-1013" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-1014"><a href="#cb26-1014" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-1015"><a href="#cb26-1015" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-1016"><a href="#cb26-1016" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">600</span>, <span class="dv">600</span>))<span class="sc">+</span></span>
+<span id="cb26-1017"><a href="#cb26-1017" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-1018"><a href="#cb26-1018" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
 <span id="cb26-1019"><a href="#cb26-1019" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1020"><a href="#cb26-1020" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-1020"><a href="#cb26-1020" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
 <span id="cb26-1021"><a href="#cb26-1021" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1022"><a href="#cb26-1022" aria-hidden="true" tabindex="-1"></a><span class="fu">### Hardy Weinberg Disequilibrium</span></span>
+<span id="cb26-1022"><a href="#cb26-1022" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb26-1023"><a href="#cb26-1023" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1024"><a href="#cb26-1024" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation drew 'n_AA', 'n_Aa', and 'n_aa' from a binomial distribution.</span>
+<span id="cb26-1024"><a href="#cb26-1024" aria-hidden="true" tabindex="-1"></a><span class="fu">### Hardy Weinberg Disequilibrium</span></span>
 <span id="cb26-1025"><a href="#cb26-1025" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1028"><a href="#cb26-1028" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb26-1029"><a href="#cb26-1029" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb26-1030"><a href="#cb26-1030" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
-<span id="cb26-1031"><a href="#cb26-1031" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
-<span id="cb26-1032"><a href="#cb26-1032" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1033"><a href="#cb26-1033" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnHWE_A"</span>, ]</span>
-<span id="cb26-1034"><a href="#cb26-1034" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
-<span id="cb26-1035"><a href="#cb26-1035" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1036"><a href="#cb26-1036" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> <span class="co">#n1 == n2 &amp;</span></span>
-<span id="cb26-1037"><a href="#cb26-1037" aria-hidden="true" tabindex="-1"></a>                                   p_AA <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_aa <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_Aa <span class="sc">==</span> <span class="fl">0.5</span>, ], </span>
-<span id="cb26-1038"><a href="#cb26-1038" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-1039"><a href="#cb26-1039" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-1040"><a href="#cb26-1040" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-1041"><a href="#cb26-1041" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-1042"><a href="#cb26-1042" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
-<span id="cb26-1043"><a href="#cb26-1043" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-1044"><a href="#cb26-1044" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-1045"><a href="#cb26-1045" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-1046"><a href="#cb26-1046" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-1047"><a href="#cb26-1047" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-1048"><a href="#cb26-1048" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-1049"><a href="#cb26-1049" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-1050"><a href="#cb26-1050" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnHWD"</span>)<span class="sc">+</span></span>
-<span id="cb26-1051"><a href="#cb26-1051" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-1052"><a href="#cb26-1052" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
-<span id="cb26-1053"><a href="#cb26-1053" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1054"><a href="#cb26-1054" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb26-1055"><a href="#cb26-1055" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> </span>
-<span id="cb26-1056"><a href="#cb26-1056" aria-hidden="true" tabindex="-1"></a>                                   p_AA <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_aa <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_Aa <span class="sc">==</span> <span class="fl">0.5</span>, ], </span>
-<span id="cb26-1057"><a href="#cb26-1057" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
-<span id="cb26-1058"><a href="#cb26-1058" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
-<span id="cb26-1059"><a href="#cb26-1059" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb26-1060"><a href="#cb26-1060" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-1061"><a href="#cb26-1061" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
-<span id="cb26-1062"><a href="#cb26-1062" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
-<span id="cb26-1063"><a href="#cb26-1063" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
-<span id="cb26-1064"><a href="#cb26-1064" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
-<span id="cb26-1065"><a href="#cb26-1065" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
-<span id="cb26-1066"><a href="#cb26-1066" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
-<span id="cb26-1067"><a href="#cb26-1067" aria-hidden="true" tabindex="-1"></a>             <span class="at">scales =</span> <span class="st">"free_y"</span>,</span>
-<span id="cb26-1068"><a href="#cb26-1068" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb26-1069"><a href="#cb26-1069" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
-<span id="cb26-1070"><a href="#cb26-1070" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
-<span id="cb26-1071"><a href="#cb26-1071" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb26-1072"><a href="#cb26-1072" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1073"><a href="#cb26-1073" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1074"><a href="#cb26-1074" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-1026"><a href="#cb26-1026" aria-hidden="true" tabindex="-1"></a>In this effect size estimation, the SAFE calculation drew 'n_AA', 'n_Aa', and 'n_aa' from a binomial distribution.</span>
+<span id="cb26-1027"><a href="#cb26-1027" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-1030"><a href="#cb26-1030" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-1031"><a href="#cb26-1031" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb26-1032"><a href="#cb26-1032" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-source: "style='font-size: 0.8em;'"</span></span>
+<span id="cb26-1033"><a href="#cb26-1033" aria-hidden="true" tabindex="-1"></a><span class="co">#| attr-output: "style='font-size: 0.7em'"</span></span>
+<span id="cb26-1034"><a href="#cb26-1034" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-1035"><a href="#cb26-1035" aria-hidden="true" tabindex="-1"></a>sub_dat <span class="ot">&lt;-</span> sim_results[effect_type <span class="sc">==</span> <span class="st">"lnHWE_A"</span>, ]</span>
+<span id="cb26-1036"><a href="#cb26-1036" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sub_dat, sample_size1)</span>
+<span id="cb26-1037"><a href="#cb26-1037" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-1038"><a href="#cb26-1038" aria-hidden="true" tabindex="-1"></a>p.point <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bias"</span>) <span class="sc">&amp;</span> <span class="co">#n1 == n2 &amp;</span></span>
+<span id="cb26-1039"><a href="#cb26-1039" aria-hidden="true" tabindex="-1"></a>                                   p_AA <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_aa <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_Aa <span class="sc">==</span> <span class="fl">0.5</span>, ], </span>
+<span id="cb26-1040"><a href="#cb26-1040" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-1041"><a href="#cb26-1041" aria-hidden="true" tabindex="-1"></a>                      <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-1042"><a href="#cb26-1042" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-1043"><a href="#cb26-1043" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-1044"><a href="#cb26-1044" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(point_lab)<span class="sc">+</span></span>
+<span id="cb26-1045"><a href="#cb26-1045" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-1046"><a href="#cb26-1046" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-1047"><a href="#cb26-1047" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-1048"><a href="#cb26-1048" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-1049"><a href="#cb26-1049" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-1050"><a href="#cb26-1050" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-1051"><a href="#cb26-1051" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span>))<span class="sc">+</span></span>
+<span id="cb26-1052"><a href="#cb26-1052" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"lnHWD"</span>)<span class="sc">+</span></span>
+<span id="cb26-1053"><a href="#cb26-1053" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-1054"><a href="#cb26-1054" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb26-1055"><a href="#cb26-1055" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-1056"><a href="#cb26-1056" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb26-1057"><a href="#cb26-1057" aria-hidden="true" tabindex="-1"></a>p.variance <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sub_dat[calculation <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"relative_bias"</span>) <span class="sc">&amp;</span> </span>
+<span id="cb26-1058"><a href="#cb26-1058" aria-hidden="true" tabindex="-1"></a>                                   p_AA <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_aa <span class="sc">==</span> <span class="fl">0.25</span> <span class="sc">&amp;</span> p_Aa <span class="sc">==</span> <span class="fl">0.5</span>, ], </span>
+<span id="cb26-1059"><a href="#cb26-1059" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> value, <span class="at">color =</span> estimator,</span>
+<span id="cb26-1060"><a href="#cb26-1060" aria-hidden="true" tabindex="-1"></a>                         <span class="at">group =</span> estimator))<span class="sc">+</span></span>
+<span id="cb26-1061"><a href="#cb26-1061" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb26-1062"><a href="#cb26-1062" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">lwd =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-1063"><a href="#cb26-1063" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(var_lab)<span class="sc">+</span></span>
+<span id="cb26-1064"><a href="#cb26-1064" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Sample size"</span>)<span class="sc">+</span></span>
+<span id="cb26-1065"><a href="#cb26-1065" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name =</span> <span class="st">"Estimator"</span>, </span>
+<span id="cb26-1066"><a href="#cb26-1066" aria-hidden="true" tabindex="-1"></a>                     <span class="at">values =</span> pal,</span>
+<span id="cb26-1067"><a href="#cb26-1067" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> labs)<span class="sc">+</span></span>
+<span id="cb26-1068"><a href="#cb26-1068" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>estimand, </span>
+<span id="cb26-1069"><a href="#cb26-1069" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb26-1070"><a href="#cb26-1070" aria-hidden="true" tabindex="-1"></a>             <span class="at">labeller =</span> facet_labs)<span class="sc">+</span></span>
+<span id="cb26-1071"><a href="#cb26-1071" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">15</span>, <span class="dv">15</span>))<span class="sc">+</span></span>
+<span id="cb26-1072"><a href="#cb26-1072" aria-hidden="true" tabindex="-1"></a>  theme_SAFE<span class="sc">+</span></span>
+<span id="cb26-1073"><a href="#cb26-1073" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb26-1074"><a href="#cb26-1074" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-1075"><a href="#cb26-1075" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-1076"><a href="#cb26-1076" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-1076"><a href="#cb26-1076" aria-hidden="true" tabindex="-1"></a>p.point <span class="sc">+</span> <span class="fu">xlab</span>(<span class="cn">NULL</span>) <span class="sc">+</span> p.variance <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>))</span>
+<span id="cb26-1077"><a href="#cb26-1077" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-1078"><a href="#cb26-1078" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
