@@ -454,15 +454,12 @@ We see here that SAFE is slightly more biased than the other estimators.
 Now let's look at the rest of the simulation results. The summaries are saved as an .Rds in the 'builds' folder in the repo.
 
 ```{r}
-#| echo: false
+#| echo: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
 
 sim_results <- readRDS("builds/all_scenarios_summarized.Rds")
-
-var_lab <- "Relative bias of\nvariance estimates (%)"
-point_lab <- "Bias of point\nestimates"
 
 ```
 
@@ -474,6 +471,9 @@ point_lab <- "Bias of point\nestimates"
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
+
+var_lab <- "Relative bias of\nvariance estimates (%)"
+point_lab <- "Bias of point\nestimates"
 
 theme_SAFE <- theme_bw()+
   theme(panel.border = element_blank(),
@@ -600,7 +600,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
-###SMD 2-multivariate normal and 2-Wishart With this estimator, the SAFE calculation used the normal distribution for the two means but the Wishart distribution to estimate the SD.
+### SMD 2-multivariate normal and 2-Wishart 
+With this estimator, the SAFE calculation used the normal distribution for the two means but the Wishart distribution to estimate the SD.
 
 ```{r}
 #| echo: false
