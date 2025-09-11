@@ -6,8 +6,10 @@ author:
   - name: Shinichi Nakagawa
   - name: Ayumi Mizuno
   - name: Santiago Ortega
+  - name: Daniel Noble
+  - name: Alistair Senior
+  - name: Erick J Lundgren
   - name: many others order TBD
-  - name: Erick J Lundgren*
 format: 
   html:
     toc: true
@@ -52,13 +54,13 @@ execute:
 
 If you have any questions, errors or bug reports, please feel free to contact Erick Lundgren (erick.lundgren\@gmail.com).
 
-The simulations take a long time to run on a personal computer. We have therefore uploaded all simulation results as .Rds files, though we show exactly how we ran each simulation.
+The simulations take a long time to run on a personal computer. We have therefore uploaded all simulation results as .Rds files, though we show exactly how we ran the simulations.
 
 To run the code interactively (instead of just reading this lovely tutorial), do the following:
 
-1.  Clone the github repo: https://github.com/itchyshin/SAFE_bootstrap.git
+1.  Clone the github repo: https://github.com/ejlundgren/SAFE.git
 2.  Download the raw simulation from **XXXXX** and place one directory level above the github project repo.
-3.  Run the code chunks in the online_tutorial.qmd while in the R project session.
+3.  Run the code chunks in the SAFE simulations tutorial.qmd while in the R project session.
 
 ## Load libraries
 
@@ -145,7 +147,7 @@ guide[, .(effect_type, scenario_id,
 
 To evaluate effect size performance, we conducted Monte Carlo simulations for each scenario. In these simulations, we created simulated datasets based on true values for each scenario. We then calculated effect sizes and sampling variances (both with plugin formulas and SAFE) for the 'true' values and based on the simulated dataset. We did this 1e5 times for each scenario.
 
-In these Monte Carlo simulation, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data.
+In these Monte Carlo simulation, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data. We'll explain the difference between estimands, estimators, and estimates below.
 
 To illustrate, we'll do a dummy simulation for lnRoM. Note that the means/sd for each scenario are the same. The only variables that differ are sample sizes. To make this tractable, we'll only run 100 simulations.
 
@@ -196,7 +198,7 @@ if(rerun){
          .errorhandling = "pass",
          .packages = c("data.table", "MASS", "tmvtnorm")) %dopar% {
            
-  # Simulate data in an lapply: --------------------------------------------
+  # Simulate data for each scenario in an lapply: --------------------------------------------
    sim_dat <- lapply(1:nrow(guide), function(x){
      
      # Simulate data for guide
@@ -216,7 +218,7 @@ if(rerun){
        setDT()
      names(y) <- c("m1", "m2")
      
-     #' [Filter to number of samples per treatment]
+     # Filter to number of samples per treatment
      sim_dat <- list(x1 = y[1:guide$sample_size1[x], ]$m1,
                      x2 = y[1:guide$sample_size2[x], ]$m2)
      
@@ -236,7 +238,7 @@ if(rerun){
                           effect_type = "lnRoM",
                           SAFE = FALSE,
                           verbose = FALSE,
-                          parallelize = F,
+                          parallelize = FALSE,
                           SAFE_boots = 1e6)
    setnames(true_point,
             c("yi_first", "vi_first", 
@@ -250,7 +252,7 @@ if(rerun){
                    effect_type = "lnRoM",
                    SAFE = TRUE,
                    verbose = FALSE,
-                   parallelize = F,
+                   parallelize = FALSE,
                    SAFE_boots = 1e6)
    setnames(out,
             c("yi_first", "vi_first", 
@@ -277,7 +279,7 @@ if(rerun){
 
 ```
 
-Load the final simulation for lnRoM here instead:
+Load the final simulation (with 1e5 iterations) for lnRoM here:
 
 ```{r}
 #| eval: true
@@ -292,11 +294,11 @@ head(res, 3)
 
 To interpret the simulation results, it is essential to understand the difference between *estimands*, *estimators*, and *estimates*.
 
-*Estimands* are the 'true' value.
+**Estimands** are the 'true' value.
 
-*Estimators* are the methods used to estimate the estimand. What a tongue twister! In our case, the estimators are the 1st order effect size (e.g., definition formula), the 2nd order effect size that has been adjusted (usually using the delta method, except for Hedges' g) to reduce bias, and the SAFE method.
+**Estimators** are the methods used to estimate the estimand. What a tongue twister! In our case, the estimators are the 1st order effect size (e.g., definition formula), the 2nd order effect size that has been adjusted (usually using the delta method, except for Hedges' g) to reduce bias, and the SAFE method.
 
-*Estimates* are the estimates of the estimands produced by the estimators. 
+**Estimates** are the estimates of the estimands produced by the estimators. 
 
 ### Effect size (point estimate) bias
 
@@ -345,9 +347,9 @@ This indicates that the least biased estimator is the first order definition for
 
 ### Sampling variance bias
 
-Interestingly, there is no way to know the 'true' estimand for sampling variance. **WHICH I DON'T FULLY UNDERSTAND**. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates from each estimator and use each of these as the estimand. For 3 estimators, we'll thus end up with 9 calculations of bias.
+Interestingly, there is no way to know the 'true' estimand for sampling variance. **WHICH I DON'T FULLY UNDERSTAND**. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use each of these as the estimand. With 3 estimators, we'll thus end up with 9 calculations of bias.
 
-Since we're interested in relative bias (not absolute bias as with the point estimates because we're not interested in whether estimates are more negative or positive), we'll calculate bias but divide by the estimand and multiply by 100.
+Since we're interested in relative bias (not absolute bias as with the point estimates because we're not interested in whether estimates are more negative or positive), we'll calculate bias as above but divide by the estimand and multiply by 100.
 
 ```{r}
 #| eval: true
@@ -385,7 +387,7 @@ var.bias.long <- melt(var.bias,
                       id.vars = c("scenario_id", "sample_size1", "sample_size2"))
 head(var.bias.long)
 
-# Split the 'variable' to make more sense.
+# Split the 'variable' into estimator and estimand for plotting
 var.bias.long[, c("Estimator", "Estimand") := tstrsplit(variable, ".", fixed = TRUE)]
 var.bias.long[, Estimator := gsub("_estimate", "", Estimator)]
 var.bias.long[, Estimator := gsub("_", " ", Estimator)]
@@ -509,7 +511,7 @@ The SAFE estimator for this effect size was calculated with a multivariate norma
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "SMD_normal", ]
-# sub_dat
+
 setorder(sub_dat, sample_size1)
 
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio == 1, ], 
@@ -528,8 +530,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
   ggtitle("SMD (x1 - x2) / pooled SD",
           subtitle = "with n1==n2")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
-# p.point
+  theme(legend.position = "none") 
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ], 
@@ -554,7 +555,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                                       "true_2nd" = "True Hedges' g point estimand")))+
   theme_SAFE+
   theme(legend.position = "bottom")
-# p.variance
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -566,7 +566,6 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "SMD_Wishart", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio == 1, ], 
@@ -585,8 +584,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
   ggtitle("SMD (x1 - x2) / pooled SD",
           subtitle = "with n1==n2")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
-# p.point
+  theme(legend.position = "none") 
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ], 
@@ -611,7 +609,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                                       "true_2nd" = "True Hedges' g point estimand")))+
   theme_SAFE+
   theme(legend.position = "bottom")
-# p.variance
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -625,7 +622,6 @@ The SAFE estimator for this effect size was calculated with a multivariate norma
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "lnCVR_normal", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & 
@@ -645,8 +641,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
   ggtitle("lnCVR",
           subtitle = "with n1==n2")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
-p.point
+  theme(legend.position = "none") 
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ], 
@@ -665,8 +660,6 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
-p.variance
-
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
@@ -680,7 +673,6 @@ The SAFE estimator for this effect size was calculated with a multivariate norma
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "lnCVR_Wishart", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & 
@@ -736,10 +728,8 @@ In this effect size estimation, the SAFE calculation used a binomial distributio
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "lnOR", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
-# SOME RANDOM pr selections
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                                    true_p_a == .1 & true_p_c == .7, ], 
                   aes(x = n1, y = value, color = estimator,
@@ -754,7 +744,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
   ggtitle("lnOR",
           subtitle = "with n1==n2")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
+  theme(legend.position = "none") 
 p.point
 
 #
@@ -789,10 +779,8 @@ In this effect size estimation, the SAFE calculation used a normal distribution 
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "lnOR_normal", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
-# SOME RANDOM pr selections
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                                    true_p_a == .1 & true_p_c == .7, ], 
                   aes(x = n1, y = value, color = estimator,
@@ -811,7 +799,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
   ggtitle("lnOR",
           subtitle = "with n1==n2")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
+  theme(legend.position = "none") 
 p.point
 
 #
@@ -846,10 +834,8 @@ In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a bin
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "lnRR", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
-# SOME RANDOM pr selections
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                                    true_p_a == .1 & true_p_c == .7, ], 
                   aes(x = n1, y = value, color = estimator,
@@ -868,7 +854,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
   ggtitle("lnRR",
           subtitle = "with n1==n2")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
+  theme(legend.position = "none") 
 p.point
 
 #
@@ -903,10 +889,8 @@ In this effect size estimation, the SAFE calculation drew 'p1' and 'p2' from a n
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "lnRR_normal", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
-# SOME RANDOM pr selections
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
                                    true_p_a == .1 & true_p_c == .7, ], 
                   aes(x = n1, y = value, color = estimator,
@@ -921,11 +905,10 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & n1 == n2 &
   facet_wrap(~estimand, 
              scales = "free_y",
              labeller = facet_labs)+
-  # coord_cartesian(ylim = c(-2, 2))+
   ggtitle("lnRR",
           subtitle = "with n1==n2")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
+  theme(legend.position = "none") 
 p.point
 
 #
@@ -960,10 +943,8 @@ In this effect size estimation, the SAFE calculation drew 'n_AA', 'n_Aa', and 'n
 #| echo: false
 
 sub_dat <- sim_results[effect_type == "lnHWE_A", ]
-# sub_dat
 setorder(sub_dat, sample_size1)
 
-# SOME RANDOM pr selections
 p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & #n1 == n2 &
                                    p_AA == 0.25 & p_aa == 0.25 & p_Aa == 0.5, ], 
                   aes(x = n, y = value, color = estimator,
@@ -980,11 +961,11 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & #n1 == n2 &
              labeller = facet_labs)+
   ggtitle("lnHWD")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
+  theme(legend.position = "none") 
 p.point
 
 #
-p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & #n1 == n2 &
+p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & 
                                    p_AA == 0.25 & p_aa == 0.25 & p_Aa == 0.5, ], 
                      aes(x = n, y = value, color = estimator,
                          group = estimator))+
