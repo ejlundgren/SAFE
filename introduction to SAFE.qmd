@@ -65,7 +65,8 @@ To run the code interactively (instead of just reading this lovely tutorial), do
 
 The `groundhog` package ensures that the library versions you use are the same as ours. You will need R version 4.5.0. Be sure to install `groundhog` if it is not already installed with `install.packages()`.
 
-```{r}
+```{r, load_libraries}
+#| label: load_libraries
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -86,7 +87,7 @@ groundhog.library(pkg = c("data.table", "MASS", "crayon",
 
 # An introduction to SAFE bootstrapping
 
-SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes. This is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plugin formulas for variance and point estimates.
+SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes. SAFE bootstrapping is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plugin formulas for variance and point estimates.
 
 ## How does it work?
 
@@ -96,13 +97,14 @@ You can then calculate a bias-transformed point estimate by taking the mean of t
 
 Let's demonstrate.
 
-Imagine you're conducting a meta-analysis of animal responses to something or other. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with 3 mean latency times and convert to our new 'speed' effect size
+Imagine you're conducting a meta-analysis of animal responses to an environmental stressor. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with three mean latency times and convert to our new 'speed' effect size
 
-```{r}
+```{r, speed_example}
+#| label: speed_example
 # The type of data summaries you might extract for a meta-analysis:
 mean_latency <- c(15, 30, 21)
-n <- c(25, 31, 50)
-sd <- c(4.6, 3.1, 2.5)
+           n <- c(25, 31, 50)
+          sd <- c(4.6, 3.1, 2.5)
 
 # New effect size:
 1/mean_latency
@@ -110,43 +112,50 @@ sd <- c(4.6, 3.1, 2.5)
 ```
 The effect size is trivial to calculate. But what is the sampling variance of this effect size, given that each of these measurements was associated with measurement sample size and standard deviation?
 
-You could use calculus to derive a first-order sampling variance formula. Or you could use SAFE. 
+You could use calculus to derive a first-order sampling variance formula. Or you could use SAFE bootstrapping. 
 
 ### Step 1: Draw hyperparameters.
 If the word 'hyperparameter' is scary, what we mean is a distribution associated with the variables in our effect size formula, in this case mean `latency`. 
 
-This is different than drawing from a population based on mean and standard deviation, which will have a broad distribution, reflecting the underlying population. Instead, we're interested in drawing a distribution of the *means*—the hyperparameter of our effect size of interest. To do this, we draw from a normal distribution with *standard error* to describe dispersion.
+This is different than drawing from a population based on mean and standard deviation, which will have a broad distribution, reflecting the underlying population. Instead, we're interested in drawing a distribution of the **means**—the hyperparameter of our effect size of interest. To do this, we draw from a normal distribution with **standard error** to describe dispersion.
 
 To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 10,000 samples of the mean latency hyperparameter from a normal distribution, with standard error as our `sd`. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size. 
 
-**Shinichi, I don't fully understand why we square root the N for this effect size but not the others**
+**Shinichi, I don't fully understand why we square root the N for this effect size but not the others** DN COMMENT: Erick, we sqrt N because we need the sampling error of the mean, which is se = sd/sqrt(N). Depending on the effect size you use, the sampling error for those will be a bit different. For example, with logRoM, the sampling error is sqrt((sd1^2/(n1*x1^2)) + (sd2^2/(n2*x2^2))). You will notice that for this you have two groups and you are 1) log transforming the means and 2) using sd and n for both groups. So the sampling error is a bit more complex because you need to account for the scale change when log transforming the means and you also now have two groups each with their own sampling variance. So, the total sampling variance is simply their sum.
 
-```{r}
-x <- 15 # The mean latency time
+```{r, speed_cloud}
+#| label: speed_cloud
+
+# Define the variables
+ x <- 15  # The mean latency time
 sd <- 4.6 # standard deviation of latency time
-n <- 25 # sample size, e.g., number of animals in the experiment
+ n <- 25  # sample size, e.g., number of animals in the experiment
 
-cloud <- rnorm(1e6,
-               mean = x,
-               sd = sd / sqrt(n))
+# Simulate a cloud of hyperparameters
+cloud <- rnorm(1e6,                  # number of samples
+               mean = x,             # mean latency time
+                 sd = sd / sqrt(n))  # standard error
+
+# Have a look a the cloud (distribution)
 head(cloud)
 hist(cloud)
 
 ```
 
 ### Step 2: Transform hyperparameters to target effect size
-Now, let's transform this cloud of hyperparameters to 'speed' with our definition formula `1/x`. These values are centered on our original effect size, which we'll overlay in red
+Now, let's transform this cloud of hyperparameters to 'speed' with our 'plugin' or definition formula `1/x`. These values are centered on our original effect size, which we'll overlay in red
 
-```{r}
+```{r, speed_transform}
+#| label: speed_transform
+# Transform the cloud to our effect size we want
+       cloud_trans <- 1/cloud
 
-cloud_trans <- 1/cloud
-
-x <- 15
-
+# Our plugin effect size
+                 x <- 15
 plugin_effect_size <- 1/x
-
 plugin_effect_size
 
+# Our plugin effect size
 hist(cloud_trans, main = "Transformed hyperparameter cloud")
 abline(v = plugin_effect_size, col = "red")
 
