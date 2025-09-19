@@ -4,9 +4,8 @@ This repo contains an online tutorial as well as scripts to conduct Monte Carlo 
 
 Please create an Issue if you have any questions for find any errors.
 
-Repo structure is as follows:
+## Repo structure is as follows:
 
-SAFE
 scripts: Transcribe_effect_formulas.R *This script is for writing effect sizes, and associated transformations, into formulas* 
          SAFE_function.R *This script has the functions that calculate plugin and SAFE effect sizes and sampling variance*
 
