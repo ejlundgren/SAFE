@@ -1329,7 +1329,7 @@ ggplot(data = sub_dat,
 
 sub_dat <- sim_results[effect_type == "SMD_normal", ]
 setorder(sub_dat, boots)
-sub_dat
+# sub_dat
 
 ggplot(data = sub_dat, 
             aes(x = boots, y = value, 
