@@ -644,7 +644,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias"), ],
                      labels = labs)+
   facet_wrap(~estimand, 
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-0.0005, 0.0005))+
+  coord_cartesian(ylim = c(-0.0003, 0.0003))+
   ggtitle("Speed (1 / x)")+
   theme_SAFE+
   theme(legend.position = "none") 
@@ -750,7 +750,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-geom_point(size = pt_size)+
+  geom_point(size = pt_size)+
   ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator",
@@ -770,7 +770,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-geom_point(size = pt_size)+
+  geom_point(size = pt_size)+
   ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator",
@@ -780,11 +780,9 @@ geom_point(size = pt_size)+
                                 safe = "SAFE"))+
   facet_wrap(~estimand,
              ncol = 1,
-             labeller = as_labeller(c("plugin_1st_mc" = "Monte Carlo Cohen's d estimand",
-                                      "plugin_2nd_mc" = "Monte Carlo Hedges' g estimand",
-                                      "safe_mc" = "Monte Carlo SAFE variance estimand",
-                                      "true_1st" = "True Cohen's d point estimand",
-                                      "true_2nd" = "True Hedges' g point estimand")))+
+             labeller = as_labeller(c("plugin_1st" = "Cohen's d estimand",
+                                      "plugin_2nd" = "Hedges' g estimand",
+                                      "safe" = "SAFE estimand")))+
   coord_cartesian(ylim = c(-60, 60))+
   theme_SAFE+
   theme(legend.position = "bottom")
@@ -822,7 +820,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
                      labels = labs)+
   facet_wrap(~estimand, 
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-0.05, 0.05))+
+  coord_cartesian(ylim = c(-0.02, 0.02))+
   ggtitle("lnCVR")+
   theme_SAFE+
   theme(legend.position = "none") 
@@ -842,7 +840,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   facet_wrap(~estimand, 
              ncol = 1,
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-60, 60))+
+  coord_cartesian(ylim = c(-30, 30))+
   theme_SAFE+
   theme(legend.position = "bottom")
 
@@ -871,13 +869,13 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
                       group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-geom_point(size = pt_size)+
+  geom_point(size = pt_size)+
   ylab(point_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator",
                      values = pal,
                      labels = labs)+
-  coord_cartesian(ylim = c(-0.05, 0.05))+
+  coord_cartesian(ylim = c(-0.02, 0.02))+
   facet_wrap(~estimand,
              labeller = facet_labs)+
   ggtitle("lnCVR",
@@ -891,13 +889,13 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
                          group = estimator))+
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
-geom_point(size = pt_size)+
+  geom_point(size = pt_size)+
   ylab(var_lab)+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator",
                      values = pal,
                      labels = labs)+
-  coord_cartesian(ylim = c(-30, 30))+
+  coord_cartesian(ylim = c(-20, 20))+
   facet_wrap(~estimand,
              ncol = 1,
              labeller = facet_labs)+
@@ -954,7 +952,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias"), ],
   facet_wrap(~estimand, 
              ncol = 1,
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-90, 90))+
+  coord_cartesian(ylim = c(-30, 30))+
   theme_SAFE+
   theme(legend.position = "bottom")
 
@@ -1243,6 +1241,7 @@ ggplot(data = res.summary.mlt,
   geom_path()+
   geom_point(size = pt_size)+
   facet_wrap(~variable,
+             scales = "free_y",
              labeller = as_labeller(c("sd_point_estimate" = "Point estimate",
                                       "sd_variance_estimate" = "Variance estimate")))+
   scale_color_scico("Scenario sample size",
