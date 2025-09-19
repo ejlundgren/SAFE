@@ -6,18 +6,22 @@ Please create an Issue if you have any questions for find any errors.
 
 ## Repo structure is as follows:
 
-*scripts:* **Transcribe_effect_formulas.R** This script is for writing effect sizes, and associated transformations, into formulas
-         **SAFE_function.R** This script has the functions that calculate plugin and SAFE effect sizes and sampling variance
+**scripts:** This folder contains scripts to run SAFE calculation functions
 
-*builds:* Simulation output data. These are loaded in the tutorial
+**scripts/Transcribe_effect_formulas.R** This script is for writing effect sizes, and associated transformations, into formulas
 
-*data:* **effect_size_formulas.csv** This the data that guides the functions in SAFE_function.R
+**scripts/SAFE_function.R** This script has the functions that calculate plugin and SAFE effect sizes and sampling variance
 
-*run_simulations:* This folder has the scripts to manage cluster runs of the simulations, as well as a remote mirror of the cluster.
+**builds:** Simulation output data. These are loaded in the tutorial
 
-*run_simulations/manage_simulations:* Scripts to manage simulations, including creating scenarios, managing cluster runs, and summarizing results
+**data:** 
+**effect_size_formulas.csv** This the data that guides the functions in SAFE_function.R
 
-*run_simulations/remote_mirrors:* This folder is synced to the Canada Alliance SLURM cluster and managed with the `.sh` shell scripts.
+**run_simulations:** This folder has the scripts to manage cluster runs of the simulations, as well as a remote mirror of the cluster.
 
-                           **SAFE_simulation.R**  This is the key R script that conducts simulations
+**run_simulations/manage_simulations:** Scripts to manage simulations, including creating scenarios, managing cluster runs, and summarizing results. The same methods are used in the tutorial webpage.
+
+**run_simulations/remote_mirrors:** This folder is synced to the Canada Alliance SLURM cluster and managed with the `.sh` shell scripts.
+
+**run_simulations/remote_mirrors/SAFE_simulation.R**  This is the key R script that conducts the Monte Carlo simulations
                                       
