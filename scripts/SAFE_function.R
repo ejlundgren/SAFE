@@ -25,6 +25,7 @@ eff_size <- function(...,
                      SAFE_boots = 1e6,
                      SAFE_distribution = NULL,
                      sigma_matrix = NULL, 
+                     parallelize = TRUE,
                      verbose = T){
   
   # >>> Prepare function ----------------------------------------------------
@@ -34,6 +35,7 @@ eff_size <- function(...,
   require("crayon")
   require("MASS")
   require("tmvtnorm")
+  require("parallel")
   
   effect_formulas <- fread("data/effect_size_formulas.csv")
   setorder(effect_formulas, name, calc_type)
@@ -127,7 +129,7 @@ eff_size <- function(...,
   # index <- seq(1:5)
   # Run SAFE function for each element of input_vars:
   
-  safe_out <- lapply(index, function(k){
+  safe_out <- parallel::mclapply(index, function(k){
     if(verbose) cat("SAFE:", magenta(k, "/", max(index), "\r"))
     
     return(SAFE_calc(formulas = effect_formulas.sub,
@@ -136,7 +138,11 @@ eff_size <- function(...,
               sigma_matrix_k = sigma_matrix[[k]], # submit custom sigma_matrix if it exists.
               verbose = verbose,
               SAFE_boots = SAFE_boots)) 
-  }) |> 
+  },
+  mc.cores = ifelse(parallelize == TRUE,
+                    (parallel::detectCores()-1),
+                    1),
+  mc.allow.recursive = TRUE) |> 
     rbindlist()
   
   out <- cbind(plugins, safe_out)
