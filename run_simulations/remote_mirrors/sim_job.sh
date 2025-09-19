@@ -8,7 +8,7 @@
 #SBATCH --mail-type=FAIL,END
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --cpus-per-task 1
-#SBATCH --time 15:00:00
+#SBATCH --time 12:00:00
 #SBATCH --output=outfiles/B_sim_job_%j.out
 
 module load gcc/13.3 r/4.5.0  

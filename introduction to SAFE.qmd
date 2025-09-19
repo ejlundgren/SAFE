@@ -57,7 +57,9 @@ If you have any questions, errors or bug reports, please feel free to contact Er
 To run the code interactively (instead of just reading this lovely tutorial), do the following:
 
 1.  Clone the github repo: https://github.com/ejlundgren/SAFE.git
-2.  Run the code chunks in the SAFE simulations tutorial.qmd while in the R project session or just follow along here on the web :)
+2.  Run the code chunks in the SAFE simulations tutorial.qmd while in the R project session or just follow along here on the web
+
+**QUESTION: I prefer data.table() and I wrote everything in that function...I can convert to dplyr no problem though if people are that picky. Does anyone care?**
 
 ## Load libraries
 
@@ -88,13 +90,13 @@ SAFE bootstrapping is an incredible, seemingly magical, technique to calculate b
 
 ## How does it work?
 
-With SAFE bootstrapping, one draws a cloud of *hyperparameters* of all variables used in an effect size formula. You then apply your effect size formula to this cloud. The variance of this transformed cloud, is the sampling variance of your effect size! 
+With SAFE bootstrapping, one draws a cloud of *hyperparameters* of all variables used in an effect size formula. You then apply your effect size formula to this cloud. The variance of this transformed cloud is the sampling variance of your effect size! 
 
-You can then calculate a bias-transformed point estimate by taking the mean of this transformed cloud and subtracting 2 times the point estimate derived simply from the original variables.
+You can then calculate a bias-transformed point estimate by taking the mean of this transformed cloud and subtracting it from 2 times the point estimate derived from the original variables.
 
 Let's demonstrate.
 
-Imagine you want to create an effect size of 'speed' from mean latency time (e.g., time until an event happens). Here let's start with 3 mean latency times and convert to our new 'speed' effect size
+Imagine you're conducting a meta-analysis of animal responses to something or other. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with 3 mean latency times and convert to our new 'speed' effect size
 
 ```{r}
 # The type of data summaries you might extract for a meta-analysis:
@@ -110,19 +112,19 @@ The effect size is trivial to calculate. But what is the sampling variance of th
 
 You could use calculus to derive a first-order sampling variance formula. Or you could use SAFE. 
 
-### Step 1: draw hyperparameters.
+### Step 1: Draw hyperparameters.
 If the word 'hyperparameter' is scary, what we mean is a distribution associated with the variables in our effect size formula, in this case mean `latency`. 
 
-This is different than drawing from a population based on mean and standard deviation, which will have a broad distribution. Instead, we're interested in drawing a distribution of the *means*—the hyperparameter of our effect size of interest. To do this, we draw from a normal distribution with standard error for our dispersion.
+This is different than drawing from a population based on mean and standard deviation, which will have a broad distribution, reflecting the underlying population. Instead, we're interested in drawing a distribution of the *means*—the hyperparameter of our effect size of interest. To do this, we draw from a normal distribution with *standard error* to describe dispersion.
 
-To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 10,000 samples of this hyperparameter from a normal distribution. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size. 
+To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 10,000 samples of the mean latency hyperparameter from a normal distribution, with standard error as our `sd`. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size. 
 
 **Shinichi, I don't fully understand why we square root the N for this effect size but not the others**
 
 ```{r}
-x <- 15 # The mean
-sd <- 4.6 # standard deviation
-n <- 25 # sample size
+x <- 15 # The mean latency time
+sd <- 4.6 # standard deviation of latency time
+n <- 25 # sample size, e.g., number of animals in the experiment
 
 cloud <- rnorm(1e6,
                mean = x,
@@ -132,7 +134,7 @@ hist(cloud)
 
 ```
 
-### Step 2: transform hyperparameters to target effect size
+### Step 2: Transform hyperparameters to target effect size
 Now, let's transform this cloud of hyperparameters to 'speed' with our definition formula `1/x`. These values are centered on our original effect size, which we'll overlay in red
 
 ```{r}
@@ -152,12 +154,10 @@ abline(v = plugin_effect_size, col = "red")
 
 ### Step 3: Calculate sampling variance
 
-To calculate sampling variance for this effect size we'll calculate standard error of this transformed cloud. This can be confusing: you do this with `sd`, the standard deviation function because this is a hyperparameter (not a population). Squaring this produces sampling variance:
+To calculate sampling variance, we'll simply calculate the variance of this transformed cloud.
 
 ```{r}
-safe_SE <- sd(cloud_trans)
-
-safe_vi <- safe_SE^2
+safe_vi <- var(cloud_trans)
 
 safe_vi
 ```
@@ -167,6 +167,8 @@ Voila! Sampling variance for a novel effect size.
 ### Step 4: Calculate bias-corrected effect size
 
 However, given low sample sizes for some measurements, and the knowledge that point estimates can be biased at low N, let's also calculate a bias-corrected point estimate from this cloud of hyperparameters:
+
+**It'd be nice to explain the logic here better...without formulas haha**
 
 ```{r}
 
@@ -188,15 +190,12 @@ So similar! And potentially less biased. Let's find out. Below, we'll use Monte 
 
 ## Load encapsulated functions
 
-We wrote a function to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at tutorial/SAFE_function.R. This function returns a data.table (basically a *fast* data.frame) with columns for plugin effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
+We wrote a function to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. This function returns a data.table (basically a *fast* data.frame) with columns for plugin effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
 
 ```{r}
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
-
-#' *COMMENT OUT FOR RENDERING AND DELETE PRIOR TO PUBLICATION:*
-# setwd("tutorial")
 
 source("scripts/SAFE_function.R")
 
@@ -232,7 +231,7 @@ eff_size(x1 = c(14.5, 13, 15.8),
 
 ```
 
-For a full list of options that eff_size can calculate, please see information by running:
+For a full list of options that eff_size can calculate, run:
 
 ```{r}
 #| eval: true
@@ -271,7 +270,7 @@ In these Monte Carlo simulation, we were interested in bias, or the difference b
 
 To illustrate, we'll do a dummy simulation for lnRoM. Note that the means/sd for each scenario are the same. The only variables that differ are sample sizes. To make this tractable, we'll only run 100 simulations.
 
-To speed things up we will do this in parallel. The function `prepare_cluster()` below can help set things up and provides a progress bar so you don't lose your mind wondering what's going on in there.
+To speed things up we will do this in parallel. The function `prepare_cluster()` below can help set things up, including a progress bar so you don't lose your mind wondering what's going on in there.
 
 ```{r}
 #| eval: true
@@ -281,8 +280,7 @@ To speed things up we will do this in parallel. The function `prepare_cluster()`
 set.seed(2025)
 
 # Prepare cluster:
-prepare_cluster <- function(n,
-                             progress_bar = TRUE){
+prepare_cluster <- function(n){
     require("parallel")
     require("foreach")
     require("doSNOW")
@@ -292,17 +290,12 @@ prepare_cluster <- function(n,
     registerDoSNOW(cl)
     
     # Progress bar
-    if(progress_bar == TRUE){
-      pb <- txtProgressBar(max = n, style = 3)
-      progress <- function(n) setTxtProgressBar(pb, n)
-      opts <- list(progress = progress)
-      ret <- list(opts, pb, cl)
-      names(ret) <- c("options", "progress", "cluster")
-    }else{
-      ret <- list(cl)
-      names(ret) <- c("cluster")
-    }
-
+    pb <- txtProgressBar(max = n, style = 3)
+    progress <- function(n) setTxtProgressBar(pb, n)
+    opts <- list(progress = progress)
+    ret <- list(opts, pb, cl)
+    names(ret) <- c("options", "progress", "cluster")
+    
     return(ret)
     
     cat("Pass 'x$options' to .opts in foreach;
@@ -409,6 +402,7 @@ if(rerun){
   res <- rbindlist(res)  
   head(res)
 }
+
 ```
 
 Or just load the full simulation (1e5) here:
@@ -474,9 +468,9 @@ ggplot(data = point.bias.long[sample_size1 == sample_size2, ],
   ylab("Bias")+
   coord_cartesian(ylim = c(-0.01, 0.01))+
   scale_color_manual("Estimator",
-                       labels = c("plugin_1st_bias" = "1st order plugin (definition formula)",
-                                  "plugin_2nd_bias" = "2nd order plugin (bias-corrected formula)",
-                                  "safe_bias" = "SAFE bootstrapping"),
+                       labels = c("plugin_1st" = "1st order plugin\n(definition formula)",
+                                  "plugin_2nd" = "2nd order plugin\n(bias-corrected formula)",
+                                  "safe" = "SAFE bootstrapping"),
                        values = c("plugin_1st" = "#A8DADC",
                                    "plugin_2nd" = "#1D3557",
                                    "safe" = "#E63946"))+
@@ -546,8 +540,8 @@ ggplot(data = var.bias.long[sample_size1 == sample_size2, ],
   xlab("Sample size")+
   ylab("Relative bias (%)")+
   scale_color_manual("Estimator",
-                     labels = c("plugin_1st_estimate" = "1st order plugin (definition formula)",
-                                  "plugin_2nd_estimate" = "2nd order plugin (bias-corrected formula)",
+                     labels = c("plugin_1st_estimate" = "1st order plugin\n(definition formula)",
+                                  "plugin_2nd_estimate" = "2nd order plugin\n(bias-corrected formula)",
                                   "SAFE_estimate" = "SAFE bootstrapping"),
                      values = c("plugin_1st_estimate" = "#A8DADC",
                                "plugin_2nd_estimate" = "#1D3557",
@@ -577,10 +571,11 @@ Now let's look at the rest of the simulation results.
 #| attr-output: "style='font-size: 0.7em'"
 
 sim_results <- readRDS("builds/all_scenarios_summarized.Rds")
-sim_results <- sim_results[boots == 1e6, ]
+sim_results <- sim_results[boots == 1e5, ]
 
 ```
 
+# **These are plotting 1e5 right now...Rerunning 1e6. Will update soon**
 ### Speed
 
 This was our dummy effect size in the beginning. How do the point and variance estimates calculated by SAFE compare to just calculating 1 / x for point estimates? 
@@ -589,6 +584,7 @@ We compared the variance estimates from SAFE to variance estimates produced by a
 
 ```{r}
 #| echo: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -611,12 +607,17 @@ pal = c("plugin_1st" = "#A8DADC",
            "safe" = "#E63946")
 pt_size <- 2
 
-facet_labs <- as_labeller(c("plugin_1st_mc" = "Monte Carlo 1st order plugin estimand",
-                            "plugin_2nd_mc" = "Monte Carlo 2nd order plugin estimand",
-                            "safe_mc" = "Monte Carlo SAFE variance estimand",
-                            "true_1st" = "True 1st order point estimand",
-                            "true_2nd" = "True 2nd order point estimand"))
+facet_labs <- as_labeller(c("plugin_1st" = "1st order estimand",
+                            "plugin_2nd" = "2nd order plugin estimand",
+                            "safe" = "SAFE estimand"))
+```
 
+
+```{r}
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 sub_dat <- sim_results[effect_type == "reciprocal", ]
 
 setorder(sub_dat, sample_size)
@@ -634,7 +635,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias"), ],
                      labels = labs)+
   facet_wrap(~estimand, 
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-0.0001, 0.0001))+
+  coord_cartesian(ylim = c(-0.0005, 0.0005))+
   ggtitle("Speed (1 / x)")+
   theme_SAFE+
   theme(legend.position = "none") 
@@ -668,6 +669,7 @@ The SAFE estimator for this effect size was calculated with 4 multivariate norma
 
 ```{r}
 #| echo: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -687,7 +689,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
                      values = pal,
                      labels = labs)+
   facet_wrap(~estimand, 
-             labeller = facet_labs)+
+             labeller = as_labeller(c("plugin_1st" = "Cohen's d estimand")))+
   coord_cartesian(ylim = c(-0.1, 0.1))+
   ggtitle("SMD")+
   theme_SAFE+
@@ -710,11 +712,9 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   coord_cartesian(ylim = c(-30, 30))+
   facet_wrap(~estimand, 
              ncol = 1,
-             labeller = as_labeller(c("plugin_1st_mc" = "Monte Carlo Cohen's d estimand",
-                                      "plugin_2nd_mc" = "Monte Carlo Hedges' g estimand",
-                                      "safe_mc" = "Monte Carlo SAFE variance estimand",
-                                      "true_1st" = "True Cohen's d point estimand",
-                                      "true_2nd" = "True Hedges' g point estimand")))+
+             labeller = as_labeller(c("plugin_1st" = "Cohen's d estimand",
+                                      "plugin_2nd" = "Hedges' g estimand",
+                                      "safe" = "SAFE estimand")))+
   theme_SAFE+
   theme(legend.position = "bottom")
 
@@ -729,57 +729,58 @@ With this estimator, the SAFE calculation used the normal distribution to simula
 **This is finishing up on the cluster**
 ```{r}
 #| echo: false
+#| eval: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-# sub_dat <- sim_results[effect_type == "SMD_Wishart", ]
-# setorder(sub_dat, sample_size1)
-# 
-# p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio == 1, ], 
-#                   aes(x = sample_size1, y = value, color = estimator,
-#                       group = estimator))+
-#   geom_hline(yintercept = 0)+
-#   geom_path(lwd = 1)+
-  # geom_point(size = pt_size)+
-#   ylab(point_lab)+
-#   xlab("Sample size")+
-#   scale_color_manual(name = "Estimator", 
-#                      values = pal,
-#                      labels = labs)+
-#   facet_wrap(~estimand, 
-#              labeller = facet_labs)+
-#   coord_cartesian(ylim = c(-0.1, 0.1))+
-#   ggtitle("SMD (x1 - x2) / pooled SD",
-#           subtitle = "with n1==n2")+
-#   theme_SAFE+
-#   theme(legend.position = "none") 
-# 
-# #
-# p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ], 
-#                      aes(x = sample_size1, y = value, color = estimator,
-#                          group = estimator))+
-#   geom_hline(yintercept = 0)+
-#   geom_path(lwd = 1)+
-  # geom_point(size = pt_size)+
-#   ylab(var_lab)+
-#   xlab("Sample size")+
-#   scale_color_manual(name = "Estimator", 
-#                      values = pal,
-#                      labels = c(plugin_1st = "Cohen's d", 
-#                                 plugin_2nd = "Hedges' g", 
-#                                 safe = "SAFE"))+
-#   facet_wrap(~estimand, 
-#              ncol = 1,
-#              labeller = as_labeller(c("plugin_1st_mc" = "Monte Carlo Cohen's d estimand",
-#                                       "plugin_2nd_mc" = "Monte Carlo Hedges' g estimand",
-#                                       "safe_mc" = "Monte Carlo SAFE variance estimand",
-#                                       "true_1st" = "True Cohen's d point estimand",
-#                                       "true_2nd" = "True Hedges' g point estimand")))+
-#   coord_cartesian(ylim = c(-60, 60))+
-#   theme_SAFE+
-#   theme(legend.position = "bottom")
-# 
-# p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+sub_dat <- sim_results[effect_type == "SMD_Wishart", ]
+setorder(sub_dat, sample_size1)
+
+p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio == 1, ],
+                  aes(x = sample_size1, y = value, color = estimator,
+                      group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+geom_point(size = pt_size)+
+  ylab(point_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator",
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand,
+             labeller = facet_labs)+
+  coord_cartesian(ylim = c(-0.1, 0.1))+
+  ggtitle("SMD (x1 - x2) / pooled SD",
+          subtitle = "with n1==n2")+
+  theme_SAFE+
+  theme(legend.position = "none")
+
+#
+p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ],
+                     aes(x = sample_size1, y = value, color = estimator,
+                         group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+geom_point(size = pt_size)+
+  ylab(var_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator",
+                     values = pal,
+                     labels = c(plugin_1st = "Cohen's d",
+                                plugin_2nd = "Hedges' g",
+                                safe = "SAFE"))+
+  facet_wrap(~estimand,
+             ncol = 1,
+             labeller = as_labeller(c("plugin_1st_mc" = "Monte Carlo Cohen's d estimand",
+                                      "plugin_2nd_mc" = "Monte Carlo Hedges' g estimand",
+                                      "safe_mc" = "Monte Carlo SAFE variance estimand",
+                                      "true_1st" = "True Cohen's d point estimand",
+                                      "true_2nd" = "True Hedges' g point estimand")))+
+  coord_cartesian(ylim = c(-60, 60))+
+  theme_SAFE+
+  theme(legend.position = "bottom")
+
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
@@ -787,8 +788,11 @@ With this estimator, the SAFE calculation used the normal distribution to simula
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD.
 
+**Finishing up on cluster**
+
 ```{r}
 #| echo: false
+#| eval: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -845,52 +849,53 @@ The SAFE estimator for this effect size was calculated with 2-multivariate norma
 
 ```{r}
 #| echo: false
+#| eval: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-# sub_dat <- sim_results[effect_type == "lnCVR_Wishart", ]
-# setorder(sub_dat, sample_size1)
-# 
-# p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & 
-#                                    sample_size_ratio == 1, ], 
-#                   aes(x = sample_size1, y = value, color = estimator,
-#                       group = estimator))+
-#   geom_hline(yintercept = 0)+
-#   geom_path(lwd = 1)+
-  # geom_point(size = pt_size)+
-#   ylab(point_lab)+
-#   xlab("Sample size")+
-#   scale_color_manual(name = "Estimator", 
-#                      values = pal,
-#                      labels = labs)+
-#   coord_cartesian(ylim = c(-0.05, 0.05))+
-#   facet_wrap(~estimand, 
-#              labeller = facet_labs)+
-#   ggtitle("lnCVR",
-#           subtitle = "with n1==n2")+
-#   theme_SAFE+
-#   theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
-# 
-# #
-# p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ], 
-#                      aes(x = sample_size1, y = value, color = estimator,
-#                          group = estimator))+
-#   geom_hline(yintercept = 0)+
-#   geom_path(lwd = 1)+
-  # geom_point(size = pt_size)+
-#   ylab(var_lab)+
-#   xlab("Sample size")+
-#   scale_color_manual(name = "Estimator", 
-#                      values = pal,
-#                      labels = labs)+
-#   coord_cartesian(ylim = c(-30, 30))+
-#   facet_wrap(~estimand, 
-#              ncol = 1,
-#              labeller = facet_labs)+
-#   theme_SAFE+
-#   theme(legend.position = "bottom")
-# 
-# p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+sub_dat <- sim_results[effect_type == "lnCVR_Wishart", ]
+setorder(sub_dat, sample_size1)
+
+p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
+                                   sample_size_ratio == 1, ],
+                  aes(x = sample_size1, y = value, color = estimator,
+                      group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+geom_point(size = pt_size)+
+  ylab(point_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator",
+                     values = pal,
+                     labels = labs)+
+  coord_cartesian(ylim = c(-0.05, 0.05))+
+  facet_wrap(~estimand,
+             labeller = facet_labs)+
+  ggtitle("lnCVR",
+          subtitle = "with n1==n2")+
+  theme_SAFE+
+  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
+
+#
+p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ],
+                     aes(x = sample_size1, y = value, color = estimator,
+                         group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+geom_point(size = pt_size)+
+  ylab(var_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator",
+                     values = pal,
+                     labels = labs)+
+  coord_cartesian(ylim = c(-30, 30))+
+  facet_wrap(~estimand,
+             ncol = 1,
+             labeller = facet_labs)+
+  theme_SAFE+
+  theme(legend.position = "bottom")
+
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
@@ -900,6 +905,7 @@ In this effect size estimation, the SAFE calculation used a binomial distributio
 
 ```{r}
 #| echo: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -919,7 +925,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias"), ],
                      labels = labs)+
   facet_wrap(~estimand,
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-1, 1))+
+  coord_cartesian(ylim = c(-.25, .25))+
   ggtitle("lnOR")+
   theme_SAFE+
   theme(legend.position = "none") 
@@ -953,6 +959,7 @@ In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a bin
 
 ```{r}
 #| echo: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -972,7 +979,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") , ],
                      labels = labs)+
   facet_wrap(~estimand, 
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-.1, .1))+
+  coord_cartesian(ylim = c(-.2, .2))+
   ggtitle("lnRR")+
   theme_SAFE+
   theme(legend.position = "none") 
@@ -992,7 +999,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias"), ],
   facet_wrap(~estimand, 
              ncol = 1,
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-40, 40))+
+  coord_cartesian(ylim = c(-30, 30))+
   theme_SAFE+
   theme(legend.position = "bottom")
 
@@ -1006,6 +1013,7 @@ In this effect size estimation, the SAFE calculation drew 'n_AA', 'n_Aa', and 'n
 
 ```{r}
 #| echo: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -1026,7 +1034,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias"), ],
   facet_wrap(~estimand, 
              labeller = facet_labs)+
   coord_cartesian(ylim = c(-0.1, 0.1))+
-  ggtitle("lnHWD")+
+  ggtitle("Hardy-Weinburg Disequilibrium")+
   theme_SAFE+
   theme(legend.position = "none") 
 
@@ -1065,11 +1073,9 @@ Let's choose two bootstrap lengths: 100 and 1,000. We'll run a simulation 1,000 
 #| attr-output: "style='font-size: 0.7em'"
 
   # Create some scenarios based on combinations of sample size and boot-length
-  scenario <- CJ(effect_type = "lnRoM",
-                 true_mean1 = 13.4, true_sd1 = 4.6,
+  scenario <- CJ(true_mean1 = 13.4, true_sd1 = 4.6,
                  true_mean2 = 16.1, true_sd2 = 3.9,
-                 sample_size1 = c(5, 10, 150),
-                 boots = c(100, 1000))
+                 sample_size1 = c(5, 10, 150))
   scenario[, sample_size2 := sample_size1]
   scenario
 
@@ -1088,55 +1094,59 @@ Now let's run this in a foreach loop. If you'd rather not run this on your machi
 out <- list()
 sub_scenario <- c()
 N <- 1000
-clust_out <- prepare_cluster(n = N, 
-                             progress_bar = FALSE)
 res <- list()
 
+clust_out <- prepare_cluster(n = N)
 
 res <- foreach(i = 1:N, 
               .options.snow = clust_out$options,
              .errorhandling = "stop",
              .packages = c("data.table", "MASS",
                            "crayon", "tmvtnorm")) %dopar% {
-                             
- sub_scenario <- scenario[boots == 100, ]                                        
- out[[1]] <- eff_size(x1 = sub_scenario$true_mean1,
-                 x2 = sub_scenario$true_mean2,
-                 sd1 = sub_scenario$true_sd1,
-                 sd2 = sub_scenario$true_sd2,
-                 n1 = sub_scenario$sample_size1,
-                 n2 = sub_scenario$sample_size2,
-                 effect_type = "SMD",
+
+ # Now calculate SAFE with 100 bootstraps                                         
+ out[[1]] <- eff_size(x1 = scenario$true_mean1,
+                 x2 = scenario$true_mean2,
+                 sd1 = scenario$true_sd1,
+                 sd2 = scenario$true_sd2,
+                 n1 = scenario$sample_size1,
+                 n2 = scenario$sample_size2,
+                 effect_type = "lnRoM",
                  SAFE = TRUE,
                  verbose = FALSE,
                  parallelize = FALSE,
-                 SAFE_boots = unique(sub_scenario$boots)) 
+                 SAFE_boots = 100) 
+ 
   out[[1]] <- data.table(out[[1]],
-                         sub_scenario[, .(boots, sample_size1)])
+                         sample_size = scenario$sample_size1,
+                         boots = 100)
   out[[1]]
   
-  sub_scenario <- scenario[boots == 1000, ]                                        
-  out[[2]] <- eff_size(x1 = sub_scenario$true_mean1,
-                 x2 = sub_scenario$true_mean2,
-                 sd1 = sub_scenario$true_sd1,
-                 sd2 = sub_scenario$true_sd2,
-                 n1 = sub_scenario$sample_size1,
-                 n2 = sub_scenario$sample_size2,
-                 effect_type = "SMD",
+  # Now with 1000 bootstraps
+  out[[2]] <- eff_size(x1 = scenario$true_mean1,
+                 x2 = scenario$true_mean2,
+                 sd1 = scenario$true_sd1,
+                 sd2 = scenario$true_sd2,
+                 n1 = scenario$sample_size1,
+                 n2 = scenario$sample_size2,
+                 effect_type = "lnRoM",
                  SAFE = TRUE,
                  verbose = FALSE,
                  parallelize = FALSE,
-                 SAFE_boots = unique(sub_scenario$boots)) 
-   out[[2]] <- data.table(out[[2]],
-                         sub_scenario[, .(boots, sample_size1)])
-   out[[2]]   
+                 SAFE_boots = 1000) 
   
-   return(rbindlist(out))
+  out[[2]] <-  data.table(out[[2]],
+                         sample_size = scenario$sample_size1,
+                         boots = 1000)
+  out[[2]]   
+  
+  return(rbindlist(out))
 }
 
 res.dt <- rbindlist(res)
 
 saveRDS(res.dt, "builds/dummy_bootstrap_simulation.Rds")
+
 ```
 
 ```{r}
@@ -1144,6 +1154,7 @@ saveRDS(res.dt, "builds/dummy_bootstrap_simulation.Rds")
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 res.dt <- readRDS("builds/dummy_bootstrap_simulation.Rds")
+
 ```
 
 Let's look at the dispersion of the SAFE estimates as a function of sample size and bootstrap length.
@@ -1156,9 +1167,9 @@ head(res.dt)
 
 # First, the point estimates:
 ggplot(data = res.dt, 
-       aes(x = as.factor(sample_size1), y = yi_safe, 
+       aes(x = as.factor(sample_size), y = yi_safe, 
            fill = boots,
-           group = interaction(sample_size1, boots)))+
+           group = interaction(sample_size, boots)))+
   geom_jitter(alpha = .5, shape = 21,
               position = position_jitterdodge(dodge.width = 1))+
   geom_violin(position = position_dodge(width = 1))+
@@ -1181,9 +1192,9 @@ Now let's look at the variance estimates:
 #| attr-output: "style='font-size: 0.7em'"
 
 ggplot(data = res.dt, 
-       aes(x = as.factor(sample_size1), y = vi_safe, 
+       aes(x = as.factor(sample_size), y = vi_safe, 
            fill = boots,
-           group = interaction(sample_size1, boots)))+
+           group = interaction(sample_size, boots)))+
   geom_jitter(alpha = .5, shape = 21,
               position = position_jitterdodge(dodge.width = 1))+
   geom_violin(position = position_dodge(width = 1))+
@@ -1208,18 +1219,18 @@ Looks like the dispersion in estimates is shaped by number of SAFE bootstraps an
 
 res.summary <- res.dt[, .(sd_point_estimate = sd(yi_safe),
                        sd_variance_estimate = sd(vi_safe)),
-                   by = .(sample_size1, boots)]
+                   by = .(sample_size, boots)]
 res.summary
 
 # Let's melt this to make a single plot:
 res.summary.mlt <- melt(res.summary,
-                        id.vars = c("sample_size1", "boots"))
+                        id.vars = c("sample_size", "boots"))
 res.summary.mlt
 setorder(res.summary.mlt, boots)
 
 ggplot(data = res.summary.mlt,
-       aes(x = boots, y = value, color = sample_size1,
-           group = interaction(sample_size1)))+
+       aes(x = boots, y = value, color = sample_size,
+           group = interaction(sample_size)))+
   geom_path()+
   geom_point(size = pt_size)+
   facet_wrap(~variable,
@@ -1240,6 +1251,8 @@ ggplot(data = res.summary.mlt,
 ## Bootstrap scenario results
 Now let's look at the full Monte Carlo simulation results for the influence of bootstrap length.
 
+**THESE ARE INCORRECT AND ARE BEING UPDATED RIGHT NOW...**
+
 ```{r}
 #| echo: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -1254,7 +1267,7 @@ head(sim_results)
 
 ### Speed
 
-Once again, here's our novel effect size of speed, 1 / x. How do our SAFE estimates change as we change the number of bootstraps?
+Once again, here's our novel effect size 'speed', 1 / x. How do our SAFE estimates of speed and its sampling variance change as we change the number of bootstraps?
 
 ```{r}
 #| echo: false
@@ -1291,7 +1304,7 @@ ggplot(data = sub_dat,
   facet_wrap(~estimate_of, 
              scales = "free_y",
              labeller = facet_labs)+
-  ggtitle("Reciprocal (1 / x)")+
+  ggtitle("Speed (1 / x)")+
   theme_SAFE+
   theme(legend.position = "bottom")
 

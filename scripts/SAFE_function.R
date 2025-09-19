@@ -2,6 +2,7 @@
 #
 # Functions to calculate effect sizes based on plugin formulas and SAFE.
 #
+# 
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -------------------------------------
 # FUNCTIONS ---------------------------------------------------------------
@@ -11,12 +12,13 @@
 #' *1. eff_size:* This is the master function that executes both plugin and SAFE calculations and is meant to be the user-facing function
 #' *2. calc_effect* This function evaluates the formulas to calculate point/SE effect size calculations
 #' *3. SAFE_calc* This function manages the SAFE calculations, including transforming the hyperparameters and calculating bias-corrected point estimates
-#' *4. parameter_cloud* This function is the most complex as it creates sigma matrices appropriate for different types of effect sizes. It is called by SAFE_calc and returns a parameter cloud 
+#' *4. parameter_cloud* This function is the most complex as it creates sigma matrices appropriate for different types of effect sizes. It returns a hyperparameter cloud
 #' 
 #' [CALLS:]
 #' *eff_size* [->] *calc_effect*
 #' *eff_size* [->] *SAFE_calc*
 #' *SAFE_calc* [->] *parameter_cloud* [->] *calc_effect*
+# See below for debugging / testing workspace
 
 #' *MASTER FUNCTION*
 eff_size <- function(..., 
@@ -117,7 +119,7 @@ eff_size <- function(...,
   index <- seq(1:max(lengths(input_vars)))
   k <- 1
   
-  if(length(plugin_effect_size) != max(index)){ return(cat("Shit.")) }
+  if(length(plugin_effect_size) != max(index)){ return(cat("Error 1")) }
   
   #' *For debugging:*
   # formulas = effect_formulas.sub
@@ -451,4 +453,66 @@ parameter_cloud <- function(formulas,
   }
   return(cat("unexpected error 1: sim_family did not match"))
 }
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -------------------------------------
+
+# DEBUGGING ---------------------------------------------------------------
+
+
+debugging <- F
+if(debugging){
+  
+  rm(list = ls())
+  library("data.table")
+  library("MASS")
+  library("tmvtnorm")
+  source("scripts/SAFE_function.R")
+  # So that subfunctions are in environment
+  
+  effect_formulas <- fread("data/effect_size_formulas.csv")
+  effect_formulas
+  
+  # The function works thanks to this table of effect size formulas.
+  # This contains the formuals, transformations, etc. (though the function needs a bit of development on the parameter_cloud side)
+  effect_formulas[name == "lnOR"]$sim_family
+  
+  eff_size(a = 5, b = 15, c = 10, d = 15,
+           effect_type = "lnOR",
+           SAFE_distribution = "2_multinomial_as_normal",
+           verbose = F,
+           SAFE_boots = 1e6)
+  eff_size(a = 5, b = 15, c = 10, d = 15,
+           effect_type = "lnOR",
+           SAFE_distribution = "4_binomial",
+           verbose = F,
+           SAFE_boots = 1e6)
+  
+  
+  eff_size(a = 5*10, b = 15*10, c = 10*10, d = 15*10,
+           effect_type = "lnOR",
+           SAFE_distribution = "2_multinomial_as_normal",
+           verbose = F,
+           SAFE_boots = 1e6)
+  eff_size(a = 5*10, b = 15*10, c = 10*10, d = 15*10,
+           effect_type = "lnOR",
+           SAFE_distribution = "4_binomial",
+           verbose = F,
+           SAFE_boots = 1e6)
+  
+  
+  input_vars <- list(a = 5*10, b = 15*10, c = 10*10, d = 15*10)
+  effect_type = "SMD"
+  SAFE_distribution = "4_normal"
+  verbose = F
+  SAFE_boots = 1e6
+  sigma_matrix <- NULL
+  
+  
+  
+}
+
+
+
+
+
 

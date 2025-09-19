@@ -79,12 +79,14 @@ reciprocal <- function(scens){
                          x = scens$true_mean,
                          sd = scens$true_sd,
                          effect_type = "reciprocal",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
-           c("yi_first", "vi_first"),
-           c("true_y_plugin_1st", "true_v_plugin_1st"))
+           c("yi_first", "vi_first", 
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st", 
+             "true_yi_safe", "true_vi_safe"))
   
   out <- eff_size(x = sim_dat$sim_mean,
                   sd = sim_dat$sim_sd, #' [we used to use sd_of_hyperpopulation. But this needs to be clarified programmatically]
@@ -149,14 +151,16 @@ lnRoM <- function(scens){
                          sd1 = scens$true_sd1,  sd2 = scens$true_sd2,
                          n1 = scens$sample_size1, n2 = scens$sample_size2, 
                          effect_type = "lnRoM",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
                          SAFE_boots = unique(scens$boots))
   setnames(true_point,
            c("yi_first", "vi_first", 
-             "yi_second", "vi_second"),
-           c("true_y_plugin_1st", "true_v_plugin_1st",
-             "true_y_plugin_2nd", "true_v_plugin_2nd"))
+             "yi_second", "vi_second",
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st", 
+             "true_y_plugin_2nd", "true_v_plugin_2nd",
+             "true_yi_safe", "true_vi_safe"))
   
   out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
                   sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
@@ -210,14 +214,16 @@ SMD <- function(scens){
                          n1 = scens$sample_size1, n2 = scens$sample_size2, 
                          effect_type = "SMD",
                          SAFE_distribution = "4_multivariate_normal",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
            c("yi_first", "vi_first", 
-             "yi_second", "vi_second"),
-           c("true_y_plugin_1st", "true_v_plugin_1st",
-             "true_y_plugin_2nd", "true_v_plugin_2nd"))
+             "yi_second", "vi_second",
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st", 
+             "true_y_plugin_2nd", "true_v_plugin_2nd",
+             "true_yi_safe", "true_vi_safe"))
   
   out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
                   sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
@@ -277,14 +283,16 @@ SMD_Wishart <- function(scens){
                          n1 = scens$sample_size1, n2 = scens$sample_size2, 
                          effect_type = "SMD",
                          SAFE_distribution = "4_multivariate_normal_wishart",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
            c("yi_first", "vi_first", 
-             "yi_second", "vi_second"),
-           c("true_y_plugin_1st", "true_v_plugin_1st",
-             "true_y_plugin_2nd", "true_v_plugin_2nd"))
+             "yi_second", "vi_second",
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st", 
+             "true_y_plugin_2nd", "true_v_plugin_2nd",
+             "true_yi_safe", "true_vi_safe"))
   
   out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
                   sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
@@ -339,13 +347,15 @@ lnOR <- function(scens){
                          c = scens$true_c,  d = scens$true_d,
                          effect_type = "lnOR",
                          SAFE_distribution = "4_binomial",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
-           c("yi_first", "vi_first"),
-           c("true_y_plugin_1st", "true_v_plugin_1st"))
-  
+           c("yi_first", "vi_first",
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st",
+             "true_yi_safe", "true_vi_safe"))
+
   # This will take a while (not parallelizing SAFE because of cluster conflicts...)
   out <- eff_size(a = sim_dat$sim_a, b = sim_dat$sim_b,
                   c = sim_dat$sim_c,  d = sim_dat$sim_d,
@@ -368,7 +378,6 @@ lnOR <- function(scens){
   return(results)
   
 }
-
 
 lnOR_normal <- function(scens){
 
@@ -421,12 +430,14 @@ lnOR_normal <- function(scens){
                          c = scens$true_c,  d = scens$true_d,
                          effect_type = "lnOR",
                          SAFE_distribution = "2_multinomial_as_normal",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
-           c("yi_first", "vi_first"),
-           c("true_y_plugin_1st", "true_v_plugin_1st"))
+           c("yi_first", "vi_first",
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st",
+             "true_yi_safe", "true_vi_safe"))
 
   # This will take a while (not parallelizing SAFE because of cluster conflicts...)
   out <- eff_size(a = sim_dat$sim_a, b = sim_dat$sim_b,
@@ -474,12 +485,14 @@ lnRR <- function(scens){
                          n1 = scens$n1,  n2 = scens$n2,
                          effect_type = "lnRR",
                          SAFE_distribution = "2_binomial",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
-           c("yi_first", "vi_first"),
-           c("true_y_plugin_1st", "true_v_plugin_1st"))
+           c("yi_first", "vi_first",
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st",
+             "true_yi_safe", "true_vi_safe"))
   
   # a = sim_dat$sim_a; c = sim_dat$sim_c
   # n1 = sim_dat$n1;  n2 = sim_dat$n2
@@ -506,85 +519,87 @@ lnRR <- function(scens){
 
 }
 
-#' lnRR_normal <- function(scens){
-#'   # Add 0.5 just to affected group and 1 to n, unlike with OR (because a, b, c, d require symmetry but lnRR doens't)
-#'   #' [Simulate data:]
-#'   sim_dat <- lapply(1:nrow(scens),
-#'                     function(x){
-#'                       
-#'                       sig <- diag(c((scens$true_p_a[x] * (1 - scens$true_p_a[x])) / scens$n1[x],
-#'                                     (scens$true_p_c[x] * (1 - scens$true_p_c[x])) / scens$n2[x]))
-#'                       if(nrow(sig) > 2) print("what the absolute hell")
-#'                       
-#'                       means <- c(p1 = scens$true_p_a[x],
-#'                                  p2 = scens$true_p_c[x])
-#'                       y <- rtmvnorm(n = max(c(scens$n1[x], scens$n2[x])),
-#'                                     mean = means,
-#'                                     sigma = sig,
-#'                                     lower = rep(0, length(means)),
-#'                                     upper = rep(1, length(means)),
-#'                                     algorithm = "gibbs") |>
-#'                         as.data.frame() |>
-#'                         setDT()
-#'                       names(y) <- c("p1", "p2")
-#'                       
-#'                       sim_dat <- list(p1 = y[1:scens$n1[x], ]$p1,
-#'                                       p2 = y[1:scens$n2[x], ]$p2)
-#'                       
-#'                       sim_dat <- data.table(sim_p1 = mean(sim_dat$p1),
-#'                                             sim_p2 = mean(sim_dat$p2),
-#'                                             sim_n1 = length(sim_dat$p1),
-#'                                             sim_n2 = length(sim_dat$p2))
-#'                       sim_dat
-#'                       
-#'                       #' [need to draw from binomial with the new p...]
-#'                       
-#' 
-#'                     }) |> rbindlist()
-#'   
-#'   sim_dat[, `:=` (sim_a = round(sim_p1 * sim_n1) |> as.double(),
-#'                   sim_c = round(sim_p2 * sim_n2) |> as.double())]
-#'   
-#'   sim_dat[sim_a == 0, `:=` (sim_a = sim_a + 0.5, 
-#'                             sim_n1 = sim_n1 + 1)]
-#'   sim_dat[sim_c == 0, `:=` (sim_c = sim_c + 0.5, 
-#'                             sim_n2 = sim_n2 + 1)]
-#'   
-#'   true_point <- eff_size(a = scens$true_a, c = scens$true_c,
-#'                          n1 = scens$n1,  n2 = scens$n2,
-#'                          effect_type = "lnRR",
-#'                          SAFE_distribution = "2_multinomial_as_normal",
-#'                          SAFE = FALSE,
-#'                          verbose = FALSE,
-#'                         SAFE_boots = unique(scens$boots))
-#'   setnames(true_point,
-#'            c("yi_first", "vi_first"),
-#'            c("true_y_plugin_1st", "true_v_plugin_1st"))
-#'   
-#'   # a = sim_dat$sim_a; c = sim_dat$sim_c
-#'   # n1 = sim_dat$n1;  n2 = sim_dat$n2
-#'   
-#'   out <- eff_size(a = sim_dat$sim_a, c = sim_dat$sim_c,
-#'                   n1 = sim_dat$sim_n1,  n2 = sim_dat$sim_n2,
-#'                   effect_type = "lnRR",
-#'                   SAFE_distribution = "2_multinomial_as_normal",
-#'                   SAFE = TRUE,
-#'                   verbose = FALSE,
-#'                  SAFE_boots = unique(scens$boots))
-#'   
-#'   setnames(out,
-#'            c("yi_first", "vi_first"),
-#'            c("sim_y_plugin_1st", "sim_v_plugin_1st"))
-#'   
-#'   # Store results:
-#'   results <- data.table(scens,
-#'                         sim_dat,
-#'                         true_point,
-#'                         out)
-#'   
-#'   return(results)
-#' 
-#' }
+lnRR_normal <- function(scens){
+  # Add 0.5 just to affected group and 1 to n, unlike with OR (because a, b, c, d require symmetry but lnRR doens't)
+  #' [Simulate data:]
+  sim_dat <- lapply(1:nrow(scens),
+                    function(x){
+
+                      sig <- diag(c((scens$true_p_a[x] * (1 - scens$true_p_a[x])) / scens$n1[x],
+                                    (scens$true_p_c[x] * (1 - scens$true_p_c[x])) / scens$n2[x]))
+                      if(nrow(sig) > 2) print("what the absolute hell")
+
+                      means <- c(p1 = scens$true_p_a[x],
+                                 p2 = scens$true_p_c[x])
+                      y <- rtmvnorm(n = max(c(scens$n1[x], scens$n2[x])),
+                                    mean = means,
+                                    sigma = sig,
+                                    lower = rep(0, length(means)),
+                                    upper = rep(1, length(means)),
+                                    algorithm = "gibbs") |>
+                        as.data.frame() |>
+                        setDT()
+                      names(y) <- c("p1", "p2")
+
+                      sim_dat <- list(p1 = y[1:scens$n1[x], ]$p1,
+                                      p2 = y[1:scens$n2[x], ]$p2)
+
+                      sim_dat <- data.table(sim_p1 = mean(sim_dat$p1),
+                                            sim_p2 = mean(sim_dat$p2),
+                                            sim_n1 = length(sim_dat$p1),
+                                            sim_n2 = length(sim_dat$p2))
+                      sim_dat
+
+                      #' [need to draw from binomial with the new p...]
+
+
+                    }) |> rbindlist()
+
+  sim_dat[, `:=` (sim_a = round(sim_p1 * sim_n1) |> as.double(),
+                  sim_c = round(sim_p2 * sim_n2) |> as.double())]
+
+  sim_dat[sim_a == 0, `:=` (sim_a = sim_a + 0.5,
+                            sim_n1 = sim_n1 + 1)]
+  sim_dat[sim_c == 0, `:=` (sim_c = sim_c + 0.5,
+                            sim_n2 = sim_n2 + 1)]
+
+  true_point <- eff_size(a = scens$true_a, c = scens$true_c,
+                         n1 = scens$n1,  n2 = scens$n2,
+                         effect_type = "lnRR",
+                         SAFE_distribution = "2_multinomial_as_normal",
+                         SAFE = TRUE,
+                         verbose = FALSE,
+                         SAFE_boots = unique(scens$boots))
+  setnames(true_point,
+           c("yi_first", "vi_first",
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st",
+             "true_yi_safe", "true_vi_safe"))
+
+  # a = sim_dat$sim_a; c = sim_dat$sim_c
+  # n1 = sim_dat$n1;  n2 = sim_dat$n2
+
+  out <- eff_size(a = sim_dat$sim_a, c = sim_dat$sim_c,
+                  n1 = sim_dat$sim_n1,  n2 = sim_dat$sim_n2,
+                  effect_type = "lnRR",
+                  SAFE_distribution = "2_multinomial_as_normal",
+                  SAFE = TRUE,
+                  verbose = FALSE,
+                 SAFE_boots = unique(scens$boots))
+
+  setnames(out,
+           c("yi_first", "vi_first"),
+           c("sim_y_plugin_1st", "sim_v_plugin_1st"))
+
+  # Store results:
+  results <- data.table(scens,
+                        sim_dat,
+                        true_point,
+                        out)
+
+  return(results)
+
+}
 
 lnCVR <- function(scens){
   
@@ -617,20 +632,21 @@ lnCVR <- function(scens){
   }) |> rbindlist()
   sim_dat
   
-  #' [true plugins:]
   true_point <- eff_size(x1 = scens$true_mean1, x2 = scens$true_mean2,
                          sd1 = scens$true_sd1,  sd2 = scens$true_sd2,
                          n1 = scens$sample_size1, n2 = scens$sample_size2, 
                          effect_type = "lnCVR",
                          SAFE_distribution = "4_multivariate_normal",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
            c("yi_first", "vi_first", 
-             "yi_second", "vi_second"),
+             "yi_second", "vi_second",
+             "yi_safe", "vi_safe"),
            c("true_y_plugin_1st", "true_v_plugin_1st",
-             "true_y_plugin_2nd", "true_v_plugin_2nd"))
+             "true_y_plugin_2nd", "true_v_plugin_2nd",
+             "true_yi_safe", "true_vi_safe"))
   
   #' [Now sim:]
   out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
@@ -694,20 +710,21 @@ lnCVR_Wishart <- function(scens){
   }) |> rbindlist()
   sim_dat
   
-  #' [true plugins:]
   true_point <- eff_size(x1 = scens$true_mean1, x2 = scens$true_mean2,
                          sd1 = scens$true_sd1,  sd2 = scens$true_sd2,
                          n1 = scens$sample_size1, n2 = scens$sample_size2, 
                          effect_type = "lnCVR",
                          SAFE_distribution = "4_multivariate_normal_wishart",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
            c("yi_first", "vi_first", 
-             "yi_second", "vi_second"),
+             "yi_second", "vi_second",
+             "yi_safe", "vi_safe"),
            c("true_y_plugin_1st", "true_v_plugin_1st",
-             "true_y_plugin_2nd", "true_v_plugin_2nd"))
+             "true_y_plugin_2nd", "true_v_plugin_2nd",
+             "true_yi_safe", "true_vi_safe"))
   
   #' [Now sim:]
   out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
@@ -773,19 +790,19 @@ lnHWE <- function(scens){
     rbindlist()
   sim_dat
   
-  #' [true plugins:]
   true_point <- eff_size(n_AA = scens$true_n_AA, 
                          n_Aa = scens$true_n_Aa,
                          n_aa = scens$true_n_aa,  
                          effect_type = "lnHWE_A",
-                         SAFE = FALSE,
+                         SAFE = TRUE,
                          verbose = FALSE,
-                        SAFE_boots = unique(scens$boots))
+                         SAFE_boots = unique(scens$boots))
   setnames(true_point,
-           c("yi_first", "vi_first"),
-           c("true_y_plugin_1st", "true_v_plugin_1st"))
-  
-  
+           c("yi_first", "vi_first", 
+             "yi_safe", "vi_safe"),
+           c("true_y_plugin_1st", "true_v_plugin_1st",
+             "true_yi_safe", "true_vi_safe"))
+
   #' [Now sim:]
   out <- eff_size(n_AA = sim_dat$sim_n_AA, 
                   n_Aa = sim_dat$sim_n_Aa,
@@ -842,15 +859,14 @@ if(local){
       'x$cluster' to stopCluster(x$cluster) after foreach")
   }
   
-  
   scenarios <- readRDS("data/scenarios.Rds")
   source('remote_universal_SAFE.R')
   
   unique(scenarios$effect_type)
   
-  sub_scenarios <- scenarios[effect_type == "SMD_Wishart", .SD[1], by = .(boots)]
+  sub_scenarios <- scenarios[, .SD[1], by = .(effect_type)]
+  sub_scenarios
   
-  sub_scenarios[boots == 1e8, boots := 1e2]
   sub_scenarios
 
   runs <- unique(sub_scenarios$run_ID)
@@ -861,15 +877,15 @@ if(local){
   res <- list()
   inside.res <- list()
   
-  N <- 1000
-  clust_out <- prepare_cluster(n = N)
-  
-  res <- foreach(i = 1:N, 
-                           .options.snow = clust_out$options,
-                           .errorhandling = "stop",
-                           .packages = c("data.table", "MASS",
-                                         "crayon", "tmvtnorm")) %dopar% {
-    
+  # N <- 10
+  # clust_out <- prepare_cluster(n = N)
+  # 
+  # res <- foreach(i = 1:N, 
+  #                          .options.snow = clust_out$options,
+  #                          .errorhandling = "stop",
+  #                          .packages = c("data.table", "MASS",
+  #                                        "crayon", "tmvtnorm")) %dopar% {
+  #   
     for(k in 1:length(runs)){
       guide <- sub_scenarios[run_ID == runs[k], ]
       type <- unique(guide$effect_type)
@@ -897,10 +913,16 @@ if(local){
         stop("NAs in SAFE results")
       }
     }
+  inside.res <- rbindlist(inside.res, fill = TRUE)
+  setdiff(names(inside.res[[5]]), names(inside.res[[1]]))
   
-   setTxtProgressBar(pb = clust_out$progress, value = i)
-   return(rbindlist(inside.res))
-  }
+  inside.res$true_yi_safe
+  inside.res[is.na(true_yi_safe)]
+  inside.res[is.na(true_vi_safe)]
+  
+  #setTxtProgressBar(pb = clust_out$progress, value = i)
+   #return(rbindlist(inside.res))
+  #}
   #
   #
   #
@@ -941,14 +963,12 @@ res <- list()
 i <- 1
 start <- 1
 end <- unique(guide$iterations_per_core) # 1e5/200 # This is based on duplication in working guide to increase parallelization
-# 500 * 200
-# check_point_length <- round(unique(guide$iterations_per_core) * .01) # Save every 1 percent?
-check_point_length <- 15
+
+checkpoint_length <- 20
 
 if(local){
   end <- 20
 }
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ --------------------------------------
 # >>> Load checkpoint files... --------------------------------------------
@@ -1012,7 +1032,7 @@ for(i in start:end){
   res[[i]][, iter := i]
   print(paste("iteration", i, "successful"))
 
-  if(i %% check_point_length == 0){
+  if(i %% checkpoint_length == 0){
     saveRDS(res,
             unique(guide$checkpoint_path))
     print("Saving checkpoint file")
