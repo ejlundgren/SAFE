@@ -1087,10 +1087,7 @@ Let's choose two bootstrap lengths: 100 and 1,000. We'll run a simulation 1,000 
 
 ```
 
-Now let's run this in a foreach loop. If you'd rather not run this on your machine, if `run` == FALSE, the code will just load the already finished simulation. Note that in this simulation, we're evaluating SAFE estimates using only the 'true' values. In the full 1e5 simulations below, we'll evalaute SAFE on simulated data.
-
-**@Shinichi, @Alistair, @Daniel: Is that ok? This simulation right here is only for illustration purposes. I can simulate data for it though if you all think I should. Since we're not interested in bias from 'true' it seems like it doesn't matter?**
-
+Now let's run this in a foreach loop. If you'd rather not run this on your machine, if `run` == FALSE, the code will just load the already finished simulation. Note that in this simulation, we're evaluating SAFE estimates using only the 'true' values, instead of simulated data.
 
 ```{r}
 #| eval: false
