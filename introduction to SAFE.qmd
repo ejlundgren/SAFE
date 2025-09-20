@@ -309,7 +309,7 @@ prepare_cluster <- function(n){
     cat("Pass 'x$options' to .opts in foreach;
       'x$progress' to setTxtProgressBar(x$progress, i);
       'x$cluster' to stopCluster(x$cluster) after foreach")
-  }
+}
 
 ```
 
@@ -674,6 +674,7 @@ p.point + p.variance + plot_layout(ncol = 1, heights = c(1/3, 2/3))
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD, as both of these parameters are in the definition formula (Cohen's d) of SMD. Let's compare the bias of SAFE, Cohen's d, and Hedges' g.
 
+**Need to add explanation of 4-normal versus 2-normal/2-Wishart**
 
 ```{r}
 #| echo: false
@@ -693,6 +694,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
   geom_point(size = pt_size)+
   ylab(point_lab)+
   xlab("Sample size")+
+  ggtitle("SMD", subtitle= "4-multivariate normal")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
                      labels = labs)+
@@ -734,10 +736,9 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 With this estimator, the SAFE calculation used the normal distribution to simulate the two means but the Wishart distribution to estimate the SD. 
 
-**This is finishing up on the cluster**
 ```{r}
 #| echo: false
-#| eval: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -756,10 +757,9 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio 
                      values = pal,
                      labels = labs)+
   facet_wrap(~estimand,
-             labeller = facet_labs)+
+             labeller = as_labeller(c("plugin_1st" = "Cohen's d estimand")))+
   coord_cartesian(ylim = c(-0.1, 0.1))+
-  ggtitle("SMD (x1 - x2) / pooled SD",
-          subtitle = "with n1==n2")+
+  ggtitle("SMD", subtitle= "2-multivariate normal, 2-multivariate Wishart")+
   theme_SAFE+
   theme(legend.position = "none")
 
@@ -794,11 +794,9 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD.
 
-**Finishing up on cluster**
-
 ```{r}
 #| echo: false
-#| eval: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -820,7 +818,7 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
   facet_wrap(~estimand, 
              labeller = facet_labs)+
   coord_cartesian(ylim = c(-0.02, 0.02))+
-  ggtitle("lnCVR")+
+  ggtitle("lnCVR", subtitle = "4-multivariate normal")+
   theme_SAFE+
   theme(legend.position = "none") 
 
@@ -851,11 +849,10 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 The SAFE estimator for this effect size was calculated with 2-multivariate normal distribution for the means and 2-Wishart distributions for the SD.
 
-**This is finishing up on the cluster**
 
 ```{r}
 #| echo: false
-#| eval: false
+#| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -877,10 +874,9 @@ p.point <- ggplot(data = sub_dat[calculation %in% c("bias") &
   coord_cartesian(ylim = c(-0.02, 0.02))+
   facet_wrap(~estimand,
              labeller = facet_labs)+
-  ggtitle("lnCVR",
-          subtitle = "with n1==n2")+
+    ggtitle("lnCVR", subtitle = "2-multivariate normal, 2-multivariate Wishart")+
   theme_SAFE+
-  theme(legend.position = "none") #, legend.position.inside = c(.85, .85)
+  theme(legend.position = "none") 
 
 #
 p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ],
@@ -1254,8 +1250,6 @@ ggplot(data = res.summary.mlt,
 
 ## Bootstrap scenario results
 Now let's look at the full Monte Carlo simulation results for the influence of bootstrap length.
-
-**THESE ARE INCORRECT AND ARE BEING UPDATED RIGHT NOW...**
 
 ```{r}
 #| echo: true
