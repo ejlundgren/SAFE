@@ -1,13 +1,17 @@
 
 # set.seed(2025)
-
+#
+#
+# Set up simulation scenarios for each effect size. 
+#
+#
 rm(list = ls())
 
 library("groundhog")
 groundhog.library(pkg = c("data.table", 
                           "crayon", "MASS"),
                   date = "2025-04-15")
-source('remote_mirrors/final_simulations/remote_universal_SAFE.R')
+source('run_simulations/remote_mirrors/remote_universal_SAFE.R')
 
 n_reps <- 1e5
 
@@ -323,6 +327,6 @@ expanded.guide.mrg
 # >>> Save ----------------------------------------------------------------
 # expanded.guide.mrg$key <- NULL
 
-saveRDS(expanded.guide.mrg, "remote_mirrors/final_simulations/data/scenarios.Rds")
+saveRDS(expanded.guide.mrg, "run_simulations/remote_mirrors//data/scenarios.Rds")
 
 expanded.guide.mrg

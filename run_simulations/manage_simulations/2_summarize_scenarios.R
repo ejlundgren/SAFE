@@ -64,7 +64,7 @@ prepare_cluster <- function(n){
 }
 
 # >>> Load scenarios  -----------------------------------------------------
-scenarios <- readRDS("remote_mirrors/final_simulations/data/scenarios.Rds")
+scenarios <- readRDS("run_simulations/remote_mirrors/data/scenarios.Rds")
 
 unique(scenarios[effect_type == "lnHWE_A", .(scenario_id, n)])
 
