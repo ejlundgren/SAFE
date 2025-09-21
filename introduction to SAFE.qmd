@@ -265,6 +265,7 @@ scenarios <- readRDS("builds/scenarios.Rds")
 guide <- scenarios[effect_type == "lnRoM" &
                      boots == 1e6, ]
 
+# Select some columns to preview:
 guide[, .(effect_type, scenario_id, boots,
                    true_mean1, true_mean2, 
                    true_sd1, true_sd2,
