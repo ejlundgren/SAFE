@@ -147,14 +147,14 @@ Now, let's transform this cloud of hyperparameters to 'speed' with our 'plugin' 
 ```{r, speed_transform}
 #| label: speed_transform
 # Transform the cloud to our effect size we want
-       cloud_trans <- 1/cloud
+cloud_trans <- 1/cloud
 
-# Our plugin effect size
-                 x <- 15
+# Calculate the 'plugin' effect size from the definition formula
+x <- 15
 plugin_effect_size <- 1/x
 plugin_effect_size
 
-# Our plugin effect size
+# Compare to transformed cloud of hyperparameters:
 hist(cloud_trans, main = "Transformed hyperparameter cloud")
 abline(v = plugin_effect_size, col = "red")
 
@@ -182,15 +182,12 @@ However, given low sample sizes for some measurements, and the knowledge that po
 
 safe_yi <- (2 * plugin_effect_size) - mean(cloud_trans)
 
-safe_yi
-
 ```
 
 Let's compare this to the original point estimate:
 
 ```{r}
 
-safe_yi
 plugin_effect_size
 
 ```
@@ -580,11 +577,10 @@ Now let's look at the rest of the simulation results.
 #| attr-output: "style='font-size: 0.7em'"
 
 sim_results <- readRDS("builds/all_scenarios_summarized.Rds")
-sim_results <- sim_results[boots == 1e5, ]
+sim_results <- sim_results[boots == 1e6, ]
 
 ```
 
-# **These are plotting 1e5 right now...Rerunning 1e6. Will update soon**
 ### Speed
 
 This was our dummy effect size in the beginning. How do the point and variance estimates calculated by SAFE compare to just calculating 1 / x for point estimates? 
@@ -794,6 +790,7 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 ### lnCVR 4-multivariate normal
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD.
+**Odd how different these SAFE results are compared to the others**
 
 ```{r}
 #| echo: false
@@ -838,7 +835,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   facet_wrap(~estimand, 
              ncol = 1,
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-30, 30))+
+  coord_cartesian(ylim = c(-50, 50))+
   theme_SAFE+
   theme(legend.position = "bottom")
 
@@ -1002,7 +999,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias"), ],
   facet_wrap(~estimand, 
              ncol = 1,
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-30, 30))+
+  coord_cartesian(ylim = c(-40, 40))+
   theme_SAFE+
   theme(legend.position = "bottom")
 
@@ -1524,3 +1521,10 @@ ggplot(data = sub_dat,
   theme(legend.position = "bottom")
 
 ```
+
+# Conclusion
+Blah blah blah. 
+
+- Should summarize when SAFE is as good or better than plugin methods. Maybe a table?
+
+- That SAFE is generally best with 1e5 or 1e6 bootstraps
