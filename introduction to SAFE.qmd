@@ -491,7 +491,7 @@ This indicates that the least biased estimator is the first order definition for
 
 ### Sampling variance bias
 
-Interestingly, there is no way to know the 'true' estimand for sampling variance. **WHICH I DON'T FULLY UNDERSTAND**. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 3 estimators, and thus 3 estimands, we'll thus end up with 9 calculations of bias.
+Interestingly, there is no way to know the 'true' estimand for sampling variance. **I don't know how to explain this better...**. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 3 estimators, and thus 3 estimands, we'll thus end up with 9 calculations of bias.
 
 Since we're interested in relative bias (**Not entirely sure why**), we'll calculate bias as above but divide by the estimand and multiply by 100.
 
