@@ -164,7 +164,9 @@ abline(v = plugin_effect_size, col = "red")
 
 To calculate sampling variance, we'll simply calculate the variance of this transformed cloud. 
 
-```{r}
+```{r, speed_samplevar}
+#| label: speed_samplevar
+#| eval: true
 safe_vi <- var(cloud_trans)
 
 safe_vi
@@ -172,25 +174,48 @@ safe_vi
 
 Voila! Sampling variance for a novel effect size. Pretty magical right?
 
-### Step 4: Calculate bias-corrected effect size
+### Step 4: Calculate the bias-corrected effect size
 
-However, given low sample sizes for some measurements, and the knowledge that point estimates can be biased at low N, let's also calculate a bias-corrected point estimate from this cloud of hyperparameters:
+Given small sample sizes for some measurements, and the knowledge that point estimates can be biased at low N, let's also calculate a bias-corrected point estimate from this cloud of hyperparameters. We'll introduce the formulas again here to build some of the logic about how we arrive at the `2*plugin - mean(cloud)` formula you see in the code chunk below.  
 
-**It'd be nice to explain the logic here better...without formulas haha**
+Recall that bias is measuring how different the bootstrapped estimate is from the plugin estimate. Essentially, we know the bootstrap sample is biased with small sample sizes, so what we want to do is measure how different the plugin effect size is from the bootstrap sample mean (@eqn-bias):
 
-```{r}
+$$
+\widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{plugin}}
+$$ {#eq:bias}
+
+Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{plugin}}$ is the plugin value. If the bootstrapped estimate is larger than the plugin estimate, then the plugin estimate is biased low, and we need to push it up. If the bootstrapped estimate is smaller than the plugin estimate, then the plugin estimate is biased high, and we need to push it down. Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate (@eqn-bc):
+
+$$
+\hat{\theta}_{\text{bc}} = \hat{\theta}_{\text{plugin}} - \widehat{\text{bias}}
+= \hat{\theta}_{\text{plugin}} - \big(\bar{\theta}^* - \hat{\theta}_{\text{plugin}}\big).
+$$ {#eq:bc}
+
+Rearranging this gives us:
+
+$$
+\hat{\theta}_{\text{bc}} = 2 \hat{\theta}_{\text{plugin}} - \bar{\theta}^*
+$$
+
+You will notice that this is the same equation we use in the code chunk below.
+
+```{r, speed_bias_correction}
+#| label: speed_bias_correction
+#| eval: true 
 
 safe_yi <- (2 * plugin_effect_size) - mean(cloud_trans)
-
+safe_yi
 ```
 
-Let's compare this to the original point estimate:
+We can now compare our plugin effect size to our SAFE effect size:
 
-```{r}
-
+```{r, speed_plugin_effect_size}
+#| label: speed_plugin_effect_size
+#| eval: true
 plugin_effect_size
 
 ```
+
 So similar! And potentially less biased. Let's find out. Below, we'll use Monte Carlo simulations to compare the bias of estimates from SAFE to estimates from just plugging into a formula. But first, let's introduce a helpful function for calculating SAFE for a variety of effect sizes.
 
 ## Load encapsulated functions
