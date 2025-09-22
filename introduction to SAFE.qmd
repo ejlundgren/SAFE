@@ -896,7 +896,7 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   facet_wrap(~estimand, 
              ncol = 1,
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(-50, 50))+
+  coord_cartesian(ylim = c(-60, 60))+
   theme_SAFE+
   theme(legend.position = "bottom")
 
