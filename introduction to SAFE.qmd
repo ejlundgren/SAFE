@@ -549,7 +549,8 @@ Interestingly, there is no way to know the 'true' estimand for sampling variance
 
 To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above, but dividing by the estimand and multiplying by 100.
 
-```{r}
+```{r, calc_rel_bias}
+#| label: calc_rel_bias
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -625,7 +626,8 @@ We see here that SAFE (red) is slightly more biased, but in a conservative direc
 
 Now let's look at the rest of the simulation results.
 
-```{r}
+```{r, sim_all}
+#| label: sim_all
 #| echo: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -641,7 +643,8 @@ This was our dummy effect size in the beginning. How do the point and variance e
 
 We compared the variance estimates from SAFE to variance estimates produced by a 1st-order derivative sampling variance formula derived with the delta method (denoted as 1st order plugin here). Let's see which did better!
 
-```{r}
+```{r, themes}
+#| label: themes
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -672,7 +675,8 @@ facet_labs <- as_labeller(c("plugin_1st" = "1st order estimand",
 ```
 
 
-```{r}
+```{r, rec_speed}
+#| label: rec_speed
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -727,7 +731,8 @@ The SAFE estimator for this effect size was calculated with 4 multivariate norma
 
 **Need to add explanation of 4-normal versus 2-normal/2-Wishart**
 
-```{r}
+```{r, SMD_mvnormal}
+#| label: SMD_mvnormal
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -787,7 +792,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 With this estimator, the SAFE calculation used the normal distribution to simulate the two means but the Wishart distribution to estimate the SD. 
 
-```{r}
+```{r, SMD_Wishart}
+#| label: SMD_Wishart
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -846,7 +852,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD.
 **Odd how different these SAFE results are compared to the others**
 
-```{r}
+```{r, lnCVR_mvnormal}
+#| label: lnCVR_mvnormal
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -902,7 +909,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 The SAFE estimator for this effect size was calculated with 2-multivariate normal distribution for the means and 2-Wishart distributions for the SD.
 
 
-```{r}
+```{r, lnCVR_Wishart}
+#| label: lnCVR_Wishart
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -957,7 +965,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 In this effect size estimation, the SAFE calculation used a binomial distribution to draw random binomial samples for 'a' and 'c'.
 
-```{r}
+```{r, lnOR}
+#| label: lnOR
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -1011,7 +1020,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a binomial distribution.
 
-```{r}
+```{r, lnRR}
+#| label: lnRR
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -1065,7 +1075,8 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 In this effect size estimation, the SAFE calculation drew 'n_AA', 'n_Aa', and 'n_aa' from a binomial distribution.
 
-```{r}
+```{r, lnHWE_A}
+#| label: lnHWE_A
 #| echo: false
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
@@ -1122,7 +1133,8 @@ The SAFE method relies on bootstrapping to calculate effect size point estimates
 
 Let's choose two bootstrap lengths: 100 and 1,000. We'll run a simulation 1,000 times just to make this easy. (See below for full 1e5 simulation results)
 
-```{r}
+```{r, how_many_n_boots}
+#| label: how_many_n_boots
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -1137,22 +1149,23 @@ Let's choose two bootstrap lengths: 100 and 1,000. We'll run a simulation 1,000 
 
 Now let's run this in a foreach loop. If you'd rather not run this on your machine, if `run` == FALSE, the code will just load the already finished simulation. Note that in this simulation, we're evaluating SAFE estimates using only the 'true' values, instead of simulated data.
 
-```{r}
+```{r, how_many_n_boots_run}
+#| label: how_many_n_boots_run
 #| eval: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-out <- list()
+         out <- list()
 sub_scenario <- c()
-N <- 1000
-res <- list()
+           N <- 1000
+         res <- list()
 
-clust_out <- prepare_cluster(n = N)
+   clust_out <- prepare_cluster(n = N)
 
 res <- foreach(i = 1:N, 
               .options.snow = clust_out$options,
              .errorhandling = "stop",
-             .packages = c("data.table", "MASS",
+                  .packages = c("data.table", "MASS",
                            "crayon", "tmvtnorm")) %dopar% {
 
  # Now calculate SAFE with 100 bootstraps                                         
@@ -1200,7 +1213,8 @@ saveRDS(res.dt, "builds/dummy_bootstrap_simulation.Rds")
 
 ```
 
-```{r}
+```{r, read_bootstrap_sim}
+#| label: read_bootstrap_sim
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1210,7 +1224,8 @@ res.dt <- readRDS("builds/dummy_bootstrap_simulation.Rds")
 
 Let's look at the dispersion of the SAFE estimates as a function of sample size and bootstrap length.
 
-```{r}
+```{r, boots_results}
+#| label: boots_results
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -1238,7 +1253,8 @@ ggplot(data = res.dt,
 
 Now let's look at the variance estimates:
 
-```{r}
+```{r, boots_results_var}
+#| label: boots_results_var
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -1264,7 +1280,8 @@ ggplot(data = res.dt,
 
 Looks like the dispersion in estimates is shaped by number of SAFE bootstraps and improves considerably with 1,000 bootstraps, especially at low sample sizes. Another way to visualize this (which we'll use below in the proper 1e5 simulations) is to plot the standard deviation.
 
-```{r}
+```{r, boots_results_sd}
+#| label: boots_results_sd
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
@@ -1303,7 +1320,8 @@ ggplot(data = res.summary.mlt,
 ## Bootstrap scenario results
 Now let's look at the full Monte Carlo simulation results for the influence of bootstrap length.
 
-```{r}
+```{r, read_all_bootstrap_sim}
+#| label: read_all_bootstrap_sim
 #| echo: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
