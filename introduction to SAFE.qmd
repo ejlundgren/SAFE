@@ -566,7 +566,7 @@ res[, var_estimand_SAFE := var(yi_safe),
 relative_bias <- function(estimates,
                           estimand){
   return(((mean(estimates) - unique(estimand)) / estimand) * 100)
-} ### I DON"T THINK THIS IS CORRECT FOR RELATIVE BIAS AS I THINK YOU NEED TO TAKE THE SD OF THE ESTIMATES, NOT THE MEAN. I.E., RELATIVE BIAS OF VARIANCE ESTIMATES IS (SD(estimates) - TRUE VARIANCE) / TRUE VARIANCE * 100. PLEASE CHECK.  bias_sk_sv = ((mean(sk_sv) (mean of the sampling variance formula) - sd(sk)^2 (sd of the estimates)) / sd(sk)^2)*100, 
+}
 
 # Now summarize and calculate relative bias per scenario ID
 var.bias <- res[, .(SAFE_estimate.1st_estimand = relative_bias(vi_safe, var_estimand_1st),
