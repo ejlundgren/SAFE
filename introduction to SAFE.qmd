@@ -275,7 +275,8 @@ eff_size(x1 = c(14.5, 13, 15.8),
 
 For a full list of options that `eff_size` can calculate, run:
 
-```{r}
+```{r, eff_sizes_lookup}
+#| label: eff_sizes_lookup
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -299,7 +300,8 @@ To store results simply assign the output to an object in R. You will then be ab
 
 We simulated the bias of SAFE calculations versus normal plugin calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps. The creation of these scenarios differed for each effect size (based on input variables). The scenarios can be loaded as follows. Let's look at the simulations for lnRoM:
 
-```{r}
+```{r, scenarios}
+#| label: scenarios
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -320,13 +322,14 @@ guide[, .(effect_type, scenario_id, boots,
 
 To evaluate effect size performance, we conducted Monte Carlo simulations for each scenario. In these simulations, we created simulated datasets based on true values for each scenario. We then calculated effect sizes and sampling variances (both with plugin formulas and SAFE) for the 'true' values and based on the simulated dataset. We did this 1e5 times for each scenario.
 
-In these Monte Carlo simulation, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data. We'll explain the difference between estimands, estimators, and estimates below.
+In these Monte Carlo simulations, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data. We'll explain the difference between estimands, estimators, and estimates below.
 
 To illustrate, we'll do a dummy simulation for lnRoM. Note that the means/sd for each scenario are the same. The only variables that differ are sample sizes. To make this tractable, we'll only run 100 simulations.
 
 To speed things up we will do this in parallel. The function `prepare_cluster()` below can help set things up, including a progress bar so you don't lose your mind wondering what's going on in there.
 
-```{r}
+```{r, prepare_cluster}
+#| label: prepare_cluster
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -361,7 +364,8 @@ prepare_cluster <- function(n){
 
 Now we will run 100 simulations to showcase how this method works. The actual simulations had a length of 1e5 and are loaded and visualized below. The first part of this code (inside the `lapply`) creates simulated data based on 'true' means and standard deviations. This data is then summarized to a simulation mean and standard deviation. We will then calculate effect sizes and sampling variances for the 'true' values and simulated values. Note that even with only 100 iterations, this can take a minute, so feel free to load the already run dummy dataset in the next code block.
 
-```{r}
+```{r, monte_carlo}
+#| label: monte_carlo
 #| eval: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -461,7 +465,8 @@ if(rerun){
 
 Or just load the full simulation (1e5) here:
 
-```{r}
+```{r, monte_carlo_load}
+#| label: monte_carlo_load
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -476,7 +481,7 @@ head(res, 3)
 
 To interpret the simulation results, it is essential to understand the difference between *estimands*, *estimators*, and *estimates*.
 
-**Estimands** are the 'true' value.
+**Estimands** are the 'true' values.
 
 **Estimators** are the methods used to estimate the estimand. What a tongue twister! In our case, the estimators are the 1st order effect size (e.g., definition formula), the 2nd order effect size that has been adjusted (usually using the delta method, except for Hedges' g) to reduce bias, and the SAFE method.
 
@@ -488,7 +493,8 @@ In the case of our effect sizes, there are two estimands that we're interested i
 
 Here we will calculate bias in our estimates of effect sizes:
 
-```{r}
+```{r, calc_bias}
+#| label: calc_bias
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -539,9 +545,9 @@ This indicates that the least biased estimator is the first order definition for
 
 ### Sampling variance bias
 
-Interestingly, there is no way to know the 'true' estimand for sampling variance. **I don't know how to explain this better...**. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 3 estimators, and thus 3 estimands, we'll thus end up with 9 calculations of bias.
+Interestingly, there is no way to know the 'true' estimand for sampling variance because we typically only have one finite sample from a population. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 3 estimators, and thus 3 estimands, we'll thus end up with 9 calculations of bias.
 
-Since we're interested in relative bias (**Not entirely sure why**), we'll calculate bias as above but divide by the estimand and multiply by 100.
+To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above, but dividing by the estimand and multiplying by 100.
 
 ```{r}
 #| eval: true
@@ -560,7 +566,7 @@ res[, var_estimand_SAFE := var(yi_safe),
 relative_bias <- function(estimates,
                           estimand){
   return(((mean(estimates) - unique(estimand)) / estimand) * 100)
-}
+} ### I DON"T THINK THIS IS CORRECT FOR RELATIVE BIAS AS I THINK YOU NEED TO TAKE THE SD OF THE ESTIMATES, NOT THE MEAN. I.E., RELATIVE BIAS OF VARIANCE ESTIMATES IS (SD(estimates) - TRUE VARIANCE) / TRUE VARIANCE * 100. PLEASE CHECK.  bias_sk_sv = ((mean(sk_sv) (mean of the sampling variance formula) - sd(sk)^2 (sd of the estimates)) / sd(sk)^2)*100, 
 
 # Now summarize and calculate relative bias per scenario ID
 var.bias <- res[, .(SAFE_estimate.1st_estimand = relative_bias(vi_safe, var_estimand_1st),
