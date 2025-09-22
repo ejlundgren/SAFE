@@ -87,7 +87,6 @@ eff_size <- function(...,
   }
   # If unspecified (SAFE_distribution == NULL & effect_formulas.sub$default is all NA then do nothing)
   
-  
   if(nrow(effect_formulas.sub) == 0){    
     return(cat(red("\nEffect size not available after filtering to type."), 
                "\n\nEffect sizes currently supported include:", paste(sort(unique(effect_formulas$name)), collapse = "; "),
@@ -101,21 +100,17 @@ eff_size <- function(...,
   }
   
   # >>> Calculate plugin effect size: -------------------------------------------------
-
   plugins <- calc_effect(effect_formulas.sub,
                          input_vars)
   plugins
-  
   
   if(SAFE == FALSE){
     return(plugins)
   }
   # >>> SAFE calculation ----------------------------------------------------------------
-  
-  # Extract reference plugin effect size. First order.
+  # Extract reference plugin effect size. First order/definition
   plugin_effect_size <- plugins$yi_first
   
-  #' [Need to lapply through each element in input_vars. This would benefit from parallelization. But not on cluster..]
   index <- seq(1:max(lengths(input_vars)))
   k <- 1
   
@@ -187,8 +182,7 @@ SAFE_calc <- function(formulas,
                            input = input_k,
                            sigma_matrix = sigma_matrix_k, #' if specified by user. Otherwise calculated based on sim_family
                            SAFE_boots = SAFE_boots)
-  # unique(cloud[, .(a, b, c, d)])
-  
+
   # Add missing inputs (e.g., n)
   cloud <- data.table(cloud,
                       input_k[!names(input_k) %in% names(cloud)] |> unlist() |> t() |> data.table())
@@ -456,8 +450,7 @@ parameter_cloud <- function(formulas,
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -------------------------------------
 
-# DEBUGGING ---------------------------------------------------------------
-
+# DEBUGGING / TESTING---------------------------------------------------------------
 
 debugging <- F
 if(debugging){
