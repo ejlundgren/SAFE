@@ -1337,7 +1337,8 @@ head(sim_results)
 
 Once again, here's our novel effect size 'speed', 1 / x. How do our SAFE estimates of speed and its sampling variance change as we change the number of bootstraps?
 
-```{r}
+```{r, speed_num_boots}
+#| label: speed_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1381,7 +1382,8 @@ ggplot(data = sub_dat,
 ### SMD 4-multivariate normal
 
 
-```{r}
+```{r, SMD_mvnormal_num_boots}
+#| label: SMD_mvnormal_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1413,7 +1415,8 @@ ggplot(data = sub_dat,
 ### SMD 2-multivariate normal and 2-Wishart
 
 
-```{r}
+```{r, SMD_Wishart_num_boots}
+#| label: SMD_Wishart_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1444,7 +1447,8 @@ ggplot(data = sub_dat,
 ### lnCVR 4-multivariate normal
 
 
-```{r}
+```{r, lnCVR_mvnormal_num_boots}
+#| label: lnCVR_mvnormal_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1475,7 +1479,8 @@ ggplot(data = sub_dat,
 ### lnCVR 2-multivariate normal and 2-Wishart
 
 
-```{r}
+```{r, lnCVR_Wishart_num_boots}
+#| label: lnCVR_Wishart_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1506,7 +1511,8 @@ ggplot(data = sub_dat,
 ### lnOR
 
 
-```{r}
+```{r, lnOR_num_boots}
+#| label: lnOR_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1536,7 +1542,8 @@ ggplot(data = sub_dat,
 
 ### lnRR
 
-```{r}
+```{r, lnRR_num_boots}
+#| label: lnRR_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
@@ -1566,7 +1573,8 @@ ggplot(data = sub_dat,
 
 ### Hardy Weinberg Disequilibrium
 
-```{r}
+```{r, lnHWE_A_num_boots}
+#| label: lnHWE_A_num_boots
 #| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
