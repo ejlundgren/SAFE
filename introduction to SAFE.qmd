@@ -129,16 +129,16 @@ To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 1
  set.seed(2025)
 
 # Define the variables
- x <- 15  # The mean latency time
+x <- 15   # The mean latency time
 sd <- 4.6 # standard deviation of latency time
- n <- 25  # sample size, e.g., number of animals in the experiment
+n <- 25   # sample size, e.g., number of animals in the experiment
 
 # Simulate a cloud of hyperparameters
 cloud <- rnorm(1e6,                  # number of samples
                mean = x,             # mean latency time
-                 sd = sd / sqrt(n))  # standard error
+               sd = sd / sqrt(n))    # standard error
 
-# Have a look a the cloud (distribution)
+# Let's have a look at the hyperparameter cloud
 head(cloud)
 hist(cloud)
 
@@ -150,7 +150,7 @@ Now, let's transform this cloud of hyperparameters to 'speed' with our 'plugin' 
 ```{r, speed_transform}
 #| label: speed_transform
 
-# Transform the cloud to our effect size we want
+# Transform the cloud to our effect size
 cloud_trans <- 1/cloud
 
 # Calculate the 'plugin' effect size from the definition formula
@@ -158,7 +158,7 @@ x <- 15
 plugin_effect_size <- 1/x
 plugin_effect_size
 
-# Compare to transformed cloud of hyperparameters:
+# Compare plugin effect size to transformed cloud of hyperparameters:
 hist(cloud_trans, main = "Transformed hyperparameter cloud")
 abline(v = plugin_effect_size, col = "red")
 
@@ -407,11 +407,11 @@ if(rerun){
                 m2 = guide$true_mean2[x])
      
      y <- rtmvnorm(n = max(c(guide$sample_size1[x], guide$sample_size2[x])),
-                     mean = means,
-                     sigma = sig,
-                     lower = rep(0, length(means)),
-                     upper = rep(Inf, length(means)),
-                     algorithm = "gibbs") |>
+                   mean = means,
+                   sigma = sig,
+                   lower = rep(0, length(means)),
+                   upper = rep(Inf, length(means)),
+                   algorithm = "gibbs") |>
        as.data.frame() |>
        setDT()
      names(y) <- c("m1", "m2")
@@ -547,7 +547,7 @@ This indicates that the least biased estimator is the first order definition for
 
 Interestingly, there is no way to know the 'true' estimand for sampling variance because we typically only have one finite sample from a population. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 3 estimators, and thus 3 estimands, we'll thus end up with 9 calculations of bias.
 
-To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above, but dividing by the estimand and multiplying by 100.
+To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above but then dividing by the estimand and multiplying by 100.
 
 ```{r, calc_rel_bias}
 #| label: calc_rel_bias
@@ -725,11 +725,10 @@ p.point + p.variance + plot_layout(ncol = 1, heights = c(1/3, 2/3))
 
 ```
 
-### SMD 4-multivariate normal
+### SMD 4 multivariate normal
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD, as both of these parameters are in the definition formula (Cohen's d) of SMD. Let's compare the bias of SAFE, Cohen's d, and Hedges' g. 
 
-**Need to add explanation of 4-normal versus 2-normal/2-Wishart**
 
 ```{r, SMD_mvnormal}
 #| label: SMD_mvnormal
@@ -788,7 +787,7 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
-### SMD 2-multivariate normal and 2-Wishart
+### SMD 2 multivariate normal and 2-Wishart
 
 With this estimator, the SAFE calculation used the normal distribution to simulate the two means but the Wishart distribution to estimate the SD. 
 
@@ -847,10 +846,9 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
-### lnCVR 4-multivariate normal
+### lnCVR 4 multivariate normal
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD.
-**Odd how different these SAFE results are compared to the others**
 
 ```{r, lnCVR_mvnormal}
 #| label: lnCVR_mvnormal
@@ -904,9 +902,9 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
-### lnCVR 2-multivariate normal and 2-Wishart
+### lnCVR 2 multivariate normal and 2-Wishart
 
-The SAFE estimator for this effect size was calculated with 2-multivariate normal distribution for the means and 2-Wishart distributions for the SD.
+The SAFE estimator for this effect size was calculated with 2 multivariate normal distributions for the means and 2 Wishart distributions for the SD.
 
 
 ```{r, lnCVR_Wishart}
@@ -961,7 +959,7 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
-### lnOR
+### Log Odds Ratio (lnOR)
 
 In this effect size estimation, the SAFE calculation used a binomial distribution to draw random binomial samples for 'a' and 'c'.
 
@@ -1016,7 +1014,7 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
-### lnRR
+### Log Risk Ratio (lnRR)
 
 In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a binomial distribution.
 
@@ -1508,7 +1506,7 @@ ggplot(data = sub_dat,
 
 ```
 
-### lnOR
+### Log Odds Ratio (lnOR)
 
 
 ```{r, lnOR_num_boots}
@@ -1540,7 +1538,7 @@ ggplot(data = sub_dat,
 
 ```
 
-### lnRR
+### Log Risk Ratio (lnRR)
 
 ```{r, lnRR_num_boots}
 #| label: lnRR_num_boots
@@ -1605,6 +1603,6 @@ ggplot(data = sub_dat,
 # Conclusion
 Blah blah blah. 
 
-- Should summarize when SAFE is as good or better than plugin methods. Maybe a table?
+- Should summarize when SAFE is as good or better than plugin methods. 
 
 - That SAFE is generally best with 1e5 or 1e6 bootstraps
