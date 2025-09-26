@@ -1143,12 +1143,12 @@ Let's choose two bootstrap lengths: 100 and 1,000. We'll run a simulation 1,000 
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-  # Create some scenarios based on combinations of sample size and boot-length
-  scenario <- CJ(true_mean1 = 13.4, true_sd1 = 4.6,
-                 true_mean2 = 16.1, true_sd2 = 3.9,
-                 sample_size1 = c(5, 10, 150))
-  scenario[, sample_size2 := sample_size1]
-  scenario
+# Create some scenarios based on combinations of sample size and boot-length
+scenario <- CJ(true_mean1 = 13.4, true_sd1 = 4.6,
+               true_mean2 = 16.1, true_sd2 = 3.9,
+               sample_size1 = c(5, 10, 150))
+scenario[, sample_size2 := sample_size1]
+scenario
 
 ```
 
@@ -1160,12 +1160,12 @@ Now let's run this in a foreach loop. If you'd rather not run this on your machi
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-         out <- list()
+out <- list()
 sub_scenario <- c()
-           N <- 1000
-         res <- list()
+N <- 1000
+res <- list()
 
-   clust_out <- prepare_cluster(n = N)
+clust_out <- prepare_cluster(n = N)
 
 res <- foreach(i = 1:N, 
               .options.snow = clust_out$options,
@@ -1256,7 +1256,7 @@ ggplot(data = res.dt,
 
 ```
 
-Now let's look at the variance estimates:
+Now let's look at the sampling variance estimates:
 
 ```{r, boots_results_var}
 #| label: boots_results_var
@@ -1283,7 +1283,7 @@ ggplot(data = res.dt,
 
 ```
 
-Looks like the dispersion in estimates is shaped by number of SAFE bootstraps and improves considerably with 1,000 bootstraps, especially at low sample sizes. Another way to visualize this (which we'll use below in the proper 1e5 simulations) is to plot the standard deviation.
+It looks like the dispersion in estimates is shaped by number of SAFE bootstraps and improves considerably with 1,000 bootstraps, especially at low sample sizes. Another way to visualize this (which we'll use below in the proper 1e5 simulations) is to plot the standard deviation.
 
 ```{r, boots_results_sd}
 #| label: boots_results_sd
@@ -1334,13 +1334,12 @@ Now let's look at the full Monte Carlo simulation results for the influence of b
 sim_results <- readRDS("builds/all_scenarios_summarized.Rds")
 
 sim_results <- sim_results[calculation == "SD", ]
-head(sim_results)
 
 ```
 
 ### Speed
 
-Once again, here's our novel effect size 'speed', 1 / x. How do our SAFE estimates of speed and its sampling variance change as we change the number of bootstraps?
+Once again, here's our novel effect size 'speed', 1 / x. How do our SAFE estimates of speed and its sampling variance change as we changed the number of bootstraps?
 
 ```{r, speed_num_boots}
 #| label: speed_num_boots
