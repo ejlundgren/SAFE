@@ -134,7 +134,7 @@ guide[[i]] <- CJ(pr_a = c(0.3),
                  pr_c = c(0.8),
                  n1 = c(10, 20, 50, 100, 500),
                  n_ratio = c(1),
-                 boots = B) #' maybve this should be ratio between n1 and n2?
+                 boots = B) #' maybe this should be ratio between n1 and n2?
 
 guide[[i]][, n2 := n1 * n_ratio]
 
