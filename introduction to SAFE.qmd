@@ -376,97 +376,92 @@ Now we will run 100 simulations to showcase how this method works. The actual si
 #| eval: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
+  
+monte_carlo_N <- 100
 
-rerun <- F
-if(rerun){
-  
-  monte_carlo_N <- 100
-  
-  clust_out <- prepare_cluster(n = monte_carlo_N)
-  
-  res <- foreach(i = 1:monte_carlo_N, 
-         .options.snow = clust_out$options,
-         .errorhandling = "pass",
-         .packages = c("data.table", "MASS", "tmvtnorm")) %dopar% {
-           
-   # Calculate 'true' values from scenario:
-   true_point <- eff_size(x1 = guide$true_mean1, x2 = guide$true_mean2,
-                          sd1 = guide$true_sd1,  sd2 = guide$true_sd2,
-                          n1 = guide$sample_size1, n2 = guide$sample_size2, 
-                          effect_type = "lnRoM",
-                          SAFE = FALSE,
-                          verbose = FALSE,
-                          SAFE_boots = 1e6)
-   setnames(true_point,
-            c("yi_first", "vi_first", 
-              "yi_second", "vi_second"),
-            c("true_y_plugin_1st", "true_v_plugin_1st",
-              "true_y_plugin_2nd", "true_v_plugin_2nd"))
+clust_out <- prepare_cluster(n = monte_carlo_N)
+
+res <- foreach(i = 1:monte_carlo_N, 
+       .options.snow = clust_out$options,
+       .errorhandling = "pass",
+       .packages = c("data.table", "MASS", "tmvtnorm")) %dopar% {
+         
+ # Calculate 'true' values from scenario:
+ true_point <- eff_size(x1 = guide$true_mean1, x2 = guide$true_mean2,
+                        sd1 = guide$true_sd1,  sd2 = guide$true_sd2,
+                        n1 = guide$sample_size1, n2 = guide$sample_size2, 
+                        effect_type = "lnRoM",
+                        SAFE = FALSE,
+                        verbose = FALSE,
+                        SAFE_boots = 1e6)
+ setnames(true_point,
+          c("yi_first", "vi_first", 
+            "yi_second", "vi_second"),
+          c("true_y_plugin_1st", "true_v_plugin_1st",
+            "true_y_plugin_2nd", "true_v_plugin_2nd"))
+ 
+  # Simulate data for each scenario in an lapply: 
+ sim_dat <- lapply(1:nrow(guide), function(x){
    
-    # Simulate data for each scenario in an lapply: 
-   sim_dat <- lapply(1:nrow(guide), function(x){
-     
-     # Simulate data for guide
-     sig <- diag(c(guide$true_sd1[x]^2,
-                   guide$true_sd2[x]^2))
-     
-     means <- c(m1 = guide$true_mean1[x],
-                m2 = guide$true_mean2[x])
-     
-     y <- rtmvnorm(n = max(c(guide$sample_size1[x], guide$sample_size2[x])),
-                   mean = means,
-                   sigma = sig,
-                   lower = rep(0, length(means)),
-                   upper = rep(Inf, length(means)),
-                   algorithm = "gibbs") |>
-       as.data.frame() |>
-       setDT()
-     names(y) <- c("m1", "m2")
-     
-     # Filter to number of samples per treatment
-     sim_dat <- list(x1 = y[1:guide$sample_size1[x], ]$m1,
-                     x2 = y[1:guide$sample_size2[x], ]$m2)
-     
-     sim_dat <- data.table(sim_mean1 = mean(sim_dat$x1),
-                           sim_mean2 = mean(sim_dat$x2),
-                           sim_sd1 = sd(sim_dat$x1),
-                           sim_sd2 = sd(sim_dat$x2),
-                           sim_sample_size1 = length(sim_dat$x1),
-                           sim_sample_size2 = length(sim_dat$x2))
-     return(sim_dat)
-   }) |> rbindlist()
+   # Simulate data for guide
+   sig <- diag(c(guide$true_sd1[x]^2,
+                 guide$true_sd2[x]^2))
    
-  
-   out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
-                   sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
-                   n1 = guide$sample_size1, n2 = guide$sample_size2, 
-                   effect_type = "lnRoM",
-                   SAFE = TRUE,
-                   verbose = FALSE,
-                   parallelize = FALSE,
-                   SAFE_boots = 1e6)
-   setnames(out,
-            c("yi_first", "vi_first", 
-              "yi_second", "vi_second"),
-            c("sim_y_plugin_1st", "sim_v_plugin_1st",
-              "sim_y_plugin_2nd", "sim_v_plugin_2nd"))
+   means <- c(m1 = guide$true_mean1[x],
+              m2 = guide$true_mean2[x])
    
-   # Store results:
-   results <- data.table(guide,
-                         sim_dat,
-                         true_point,
-                         out)
+   y <- rtmvnorm(n = max(c(guide$sample_size1[x], guide$sample_size2[x])),
+                 mean = means,
+                 sigma = sig,
+                 lower = rep(0, length(means)),
+                 upper = rep(Inf, length(means)),
+                 algorithm = "gibbs") |>
+     as.data.frame() |>
+     setDT()
+   names(y) <- c("m1", "m2")
    
-   setTxtProgressBar(clust_out$progress, i)
+   # Filter to number of samples per treatment
+   sim_dat <- list(x1 = y[1:guide$sample_size1[x], ]$m1,
+                   x2 = y[1:guide$sample_size2[x], ]$m2)
    
-   return(results)
-  
-  }
-  stopCluster(clust_out$cluster)
-  
-  res <- rbindlist(res)  
-  head(res)
+   sim_dat <- data.table(sim_mean1 = mean(sim_dat$x1),
+                         sim_mean2 = mean(sim_dat$x2),
+                         sim_sd1 = sd(sim_dat$x1),
+                         sim_sd2 = sd(sim_dat$x2),
+                         sim_sample_size1 = length(sim_dat$x1),
+                         sim_sample_size2 = length(sim_dat$x2))
+   return(sim_dat)
+ }) |> rbindlist()
+ 
+
+ out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
+                 sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
+                 n1 = guide$sample_size1, n2 = guide$sample_size2, 
+                 effect_type = "lnRoM",
+                 SAFE = TRUE,
+                 verbose = FALSE,
+                 parallelize = FALSE,
+                 SAFE_boots = 1e6)
+ setnames(out,
+          c("yi_first", "vi_first", 
+            "yi_second", "vi_second"),
+          c("sim_y_plugin_1st", "sim_v_plugin_1st",
+            "sim_y_plugin_2nd", "sim_v_plugin_2nd"))
+ 
+ # Store results:
+ results <- data.table(guide,
+                       sim_dat,
+                       true_point,
+                       out)
+ 
+ setTxtProgressBar(clust_out$progress, i)
+ 
+ return(results)
+
 }
+stopCluster(clust_out$cluster)
+
+res <- rbindlist(res)  
 
 ```
 
@@ -1212,6 +1207,7 @@ res <- foreach(i = 1:N,
   return(rbindlist(out))
 }
 
+stopCluster(clust_out$clust)
 res.dt <- rbindlist(res)
 
 saveRDS(res.dt, "builds/dummy_bootstrap_simulation.Rds")
