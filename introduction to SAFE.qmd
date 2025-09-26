@@ -87,7 +87,7 @@ groundhog.library(pkg = c("data.table", "MASS", "crayon",
 
 # An introduction to SAFE bootstrapping
 
-SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes. SAFE bootstrapping is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plugin formulas for variance and point estimates.
+SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes for use in meta-analyses. SAFE bootstrapping is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plugin formulas for variance and point estimates.
 
 ## How does it work?
 
@@ -97,7 +97,7 @@ You can then calculate a bias-transformed point estimate by taking the mean of t
 
 Let's demonstrate.
 
-Imagine you're conducting a meta-analysis of animal responses to a stressor. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with three mean latency times and convert to our new 'speed' effect size
+Imagine you're conducting a meta-analysis of animal responses to a stressor. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with three mean latency times and convert to our new 'speed' effect size.
 
 ```{r, speed_example}
 #| label: speed_example
