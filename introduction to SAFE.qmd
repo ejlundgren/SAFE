@@ -676,7 +676,6 @@ facet_labs <- as_labeller(c("plugin_1st" = "1st order estimand",
                             "safe" = "SAFE estimand"))
 ```
 
-
 ```{r, rec_speed}
 #| label: rec_speed
 #| echo: false
@@ -723,7 +722,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias"), ],
   theme_SAFE+
   theme(legend.position = "bottom")
 
-p.point + p.variance + plot_layout(ncol = 1, heights = c(1/3, 2/3))
+p.point + p.variance + plot_layout(ncol = 1, heights = c(1/3, 2/3)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
@@ -785,7 +785,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   theme_SAFE+
   theme(legend.position = "bottom")
 
-p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
@@ -844,7 +845,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   theme_SAFE+
   theme(legend.position = "bottom")
 
-p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
@@ -900,7 +902,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   theme_SAFE+
   theme(legend.position = "bottom")
 
-p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
@@ -957,7 +960,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
   theme_SAFE+
   theme(legend.position = "bottom")
 
-p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
@@ -1012,7 +1016,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias"), ],
   theme_SAFE+
   theme(legend.position = "bottom")
 
-p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
@@ -1067,7 +1072,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias"), ],
   theme_SAFE+
   theme(legend.position = "bottom")
 
-p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
@@ -1124,7 +1130,8 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") &
   theme(legend.position = "bottom")
 
 
-p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
 
 ```
 
