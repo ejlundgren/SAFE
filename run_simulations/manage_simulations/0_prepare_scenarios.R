@@ -1,5 +1,3 @@
-
-# set.seed(2025)
 #
 #
 # Set up simulation scenarios for each effect size. 
@@ -13,25 +11,33 @@ groundhog.library(pkg = c("data.table",
                   date = "2025-04-15")
 source('run_simulations/remote_mirrors/remote_universal_SAFE.R')
 
+# The number of Monte Carlo simulations we want:
 n_reps <- 1e5
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ------------------------------------------
 guide <- list()
-i <- 1
-B <- c(1e1, 1e2, 1e3, 1e4, 
+i <- 1 # An index counter for our guide list
+B <- c(1e1, 1e2, 1e3, 1e4, # The number of bootstraps, for the bootstrap length simulations
        1e5, 1e6, 1e7)
 
 # >>> Reciprocal -----------------------
+# Create an expanded grid based on sample size and bootstrap length
 guide[[i]] <- CJ(true_mean = 10.5,
                  true_sd = 1.2,
                  sample_size = c(5, 10, 30, 100, 500),
                  boots = B)
-guide[[i]][, scenario_id := paste0("scenario_", seq(1:.N))]
 
+# Add a scenario ID:
+guide[[i]][, scenario_id := paste0("scenario_", seq(1:.N))]
 guide[[i]]
+
+# Drop some intermediate sample sizes from all but the 1e6 boostrap length
 guide[[i]] <- guide[[i]][!(sample_size %in% c(10, 100) & B != 1e6)]
+
+# How many unique bootstrap lengths per sample size?
 guide[[i]][, .(n_boots = uniqueN(boots)), by = sample_size]
 
+# Add a column identifying the effect type
 guide[[i]][, effect_type := "reciprocal"]
 
 i <- i + 1
@@ -245,15 +251,16 @@ master_guide[effect_type == "SMD_Wishart"]
 master_guide[, .(n_boots = uniqueN(boots)), by = .(scenario_id)][n_boots > 1, ]
 # Must be 0 rows.
 
-# These have to be run separately:
+# These have to be run separately because eff_size can only handle 1 bootstrap value
 master_guide[, batch_ID := paste0(effect_type, "_", boots)]
 master_guide
 
 #
 length(unique(master_guide$batch_ID))
 
-master_guide[, total_iterations_needed := 1e5]
+master_guide[, total_iterations_needed := n_reps]
 
+# We'll run a different length of iterations per core for the different boot-lengths
 master_guide[boots == 1e+01, iterations_per_core := 1e5/5]
 master_guide[boots == 1e+02, iterations_per_core := 1e5/5]
 master_guide[boots == 1e+03, iterations_per_core := 1e5/5]
@@ -272,16 +279,18 @@ unique(master_guide[, .(boots, iterations_per_core, number_of_cores_needed)])
 #
 expansion_guide <- unique(master_guide[, .(batch_ID, number_of_cores_needed)])
 sum(expansion_guide$number_of_cores_needed)
-# 3000 cores seems to be the limit.
+# 3000 cores seems to be the limit on ALLIANCE Canada
 
 expansion_guide
 
-rep(seq(1, nrow(expansion_guide)), expansion_guide$number_of_cores_needed)
-
+# Duplicate rows based on number of cores needed:
 expanded.guide <- expansion_guide[rep(seq(1, nrow(expansion_guide)), expansion_guide$number_of_cores_needed)]
+
+# Add a unique ID for each run (e.g., each core)
 expanded.guide[, run_ID := seq(1:.N)]
 expanded.guide
 
+# Merge scenarios into the expanded guide:
 expanded.guide.mrg <- merge(expanded.guide,
                             master_guide,
                             by = "batch_ID",
@@ -290,10 +299,13 @@ expanded.guide.mrg <- merge(expanded.guide,
                             allow.cartesian = T)
 expanded.guide.mrg[number_of_cores_needed.x != number_of_cores_needed.y]
 # Must be 0 rows
+
 expanded.guide.mrg$number_of_cores_needed.x <- NULL
 setnames(expanded.guide.mrg, "number_of_cores_needed.y", "number_of_cores_needed")
 
+# Add a unique seed based on run_ID
 expanded.guide.mrg[, seed := run_ID]
+
 expanded.guide.mrg[, run_ID := paste0(batch_ID, "_run", run_ID)]
 
 expanded.guide.mrg
@@ -308,7 +320,7 @@ expanded.guide.mrg
 
 setnames(expanded.guide.mrg, c("pr_a", "pr_c"), c("true_p_a", "true_p_c"))
 
-#
+# Add file and checkpoint paths
 expanded.guide.mrg[, file_path := paste0("outputs/", run_ID, ".Rds")]
 expanded.guide.mrg
 
@@ -321,12 +333,12 @@ expanded.guide.mrg
 unique(expanded.guide.mrg$effect_type)
 
 # >>> Add chunk -----------------------------------------------------------
+# The 'chunk' variable is a selector for each run_ID (but needs to be numeric)
+# This is updated on each run
 expanded.guide.mrg[, chunk := .GRP, by = .(run_ID)]
 expanded.guide.mrg
 
 # >>> Save ----------------------------------------------------------------
-# expanded.guide.mrg$key <- NULL
-
-saveRDS(expanded.guide.mrg, "run_simulations/remote_mirrors//data/scenarios.Rds")
+saveRDS(expanded.guide.mrg, "run_simulations/remote_mirrors/data/scenarios.Rds")
 
 expanded.guide.mrg

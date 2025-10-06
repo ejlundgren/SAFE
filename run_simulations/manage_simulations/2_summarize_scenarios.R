@@ -68,11 +68,6 @@ scenarios <- readRDS("run_simulations/remote_mirrors/data/scenarios.Rds")
 
 unique(scenarios[effect_type == "lnHWE_A", .(scenario_id, n)])
 
-# This includes paths to the chunks that were run (this will change in next run)
-# We will filter to a single row per scenario based on these id variables:
-# id_vars <- names(scenarios)[!names(scenarios) %in% c("key", "run_ID", "chunk",
-#                                                      "file_path")]
-# id_vars
 
 # Get the names that aren't related to the separate cluster runs
 id_names <- names(scenarios)[!names(scenarios) %in% c("key", "run_ID", "chunk",
@@ -87,6 +82,7 @@ files <- data.table(path = list.files("run_simulations/remote_mirrors/outputs/",
 files
 nrow(files)
 
+# Extract run_ID from file path:
 files[, run_ID := word(path, -1, sep = "/")]
 files 
 
@@ -145,16 +141,18 @@ results.clust <- foreach(i = 1:length(effects),
                            #' *sim == simulated values*
                            #' *y == point *
                            #' *v == variance *
-                           #' 
+                           #
                            if(!"sim_y_plugin_2nd" %in% names(sim)){
                              #' [If there's only 1 plugin:]
-                             # Calculate variance estimands:
+                             
+                             
+                             # Calculate variance estimands (`:=` adds columns)
                              sim[, `:=` (var_estimand_SAFE = var(yi_safe),
                                          var_estimand_1st = var(sim_y_plugin_1st)),
                                  by = .(effect_type, scenario_id, boots)]
                              
                              
-                             # Now summarize:
+                             # Now summarize (`.()` summarizes columns)
                              sim_summary <- sim[, .(
                                # MCSE:
                                MCSE.plugin_1st.NA.point = MC_standard_error_of_bias(sim_y_plugin_1st),
@@ -265,5 +263,3 @@ results.clust.dat
 unique(results.clust.dat$scenario_id)
 
 saveRDS(results.clust.dat, "run_simulations/remote_mirrors/summaries/all_scenarios_summarized.Rds")
-
-# results.clust.dat readRDS("remote_mirrors/all_effect_sizes_august_2025/summaries/all_scenarios_summarized.Rds")
