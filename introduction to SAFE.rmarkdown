@@ -51,6 +51,8 @@ execute:
 bibliography: references.bib
 ---
 
+
+
 ## Introduction
 
 If you have any questions, errors or bug reports, please feel free to contact Erick Lundgren (erick.lundgren\@gmail.com).
@@ -65,6 +67,8 @@ To run the code interactively (instead of just reading this lovely tutorial), do
 ## Load libraries
 
 The `groundhog` package ensures that the library versions you use are the same as ours. You will need R version 4.5.0. Be sure to install `groundhog` if it is not already installed with `install.packages()`.
+
+
 
 ```{r, load_libraries}
 #| label: load_libraries
@@ -86,6 +90,8 @@ groundhog.library(pkg = c("data.table", "MASS", "crayon",
 
 ```
 
+
+
 # An introduction to SAFE bootstrapping
 
 SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes for use in meta-analyses. SAFE bootstrapping is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plugin formulas for variance and point estimates.
@@ -100,6 +106,8 @@ Let's demonstrate.
 
 Imagine you're conducting a meta-analysis of animal responses to a stressor. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with three mean latency times and convert to our new 'speed' effect size.
 
+
+
 ```{r, speed_example}
 #| label: speed_example
 # The type of data summaries you might extract for a meta-analysis:
@@ -112,6 +120,8 @@ mean_latency <- c(15, 30, 21)
 
 ```
 
+
+
 The effect size is trivial to calculate. But what is the sampling variance of this effect size, given that each of these measurements was associated with measurement sample size and standard deviation?
 
 You could use calculus to derive a first-order sampling variance formula. Or you could use SAFE bootstrapping.
@@ -123,6 +133,8 @@ If the word 'hyperparameter' is scary, what we mean is a distribution associated
 This is different than drawing from a population based on mean and standard deviation, which will have a broad distribution, reflecting the underlying population. Instead, we're interested in drawing a distribution of the **means**—the hyperparameter of our effect size of interest. To do this, we draw from a normal distribution with **standard error of the mean** to describe dispersion.
 
 To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 1,000,000 samples of the mean latency hyperparameter from a normal distribution, with standard error as our `sd`. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size.
+
+
 
 ```{r, speed_cloud}
 #| label: speed_cloud
@@ -146,9 +158,13 @@ hist(cloud)
 
 ```
 
+
+
 ### Step 2: Transform hyperparameters to target effect size
 
 Now, let's transform this cloud of hyperparameters to 'speed' with our 'plugin' or definition formula `1/x`. These values are centered on our original effect size, which we'll overlay in red
+
+
 
 ```{r, speed_transform}
 #| label: speed_transform
@@ -167,9 +183,13 @@ abline(v = plugin_effect_size, col = "red")
 
 ```
 
+
+
 ### Step 3: Calculate sampling variance
 
 To calculate sampling variance, we'll simply calculate the variance of this transformed cloud.
+
+
 
 ```{r, speed_samplevar}
 #| label: speed_samplevar
@@ -178,6 +198,8 @@ safe_vi <- var(cloud_trans)
 
 safe_vi
 ```
+
+
 
 Voila! Sampling variance for a novel effect size. Pretty magical right?
 
@@ -206,6 +228,8 @@ $$
 
 You will notice that this is the same equation we use in the code chunk below.
 
+
+
 ```{r, speed_bias_correction}
 #| label: speed_bias_correction
 #| eval: true 
@@ -214,7 +238,11 @@ safe_yi <- (2 * plugin_effect_size) - mean(cloud_trans)
 safe_yi
 ```
 
+
+
 We can now compare our plugin effect size to our SAFE effect size:
+
+
 
 ```{r, speed_plugin_effect_size}
 #| label: speed_plugin_effect_size
@@ -222,6 +250,8 @@ We can now compare our plugin effect size to our SAFE effect size:
 plugin_effect_size
 
 ```
+
+
 
 So similar! And potentially less biased. We'll find out later, where we report the results of Monte Carlo simulations that compare the bias of estimates from SAFE to estimates from just plugging into formulas. But first, let's use SAFE to calculate variance for a more realistic custom effect size.
 
@@ -240,6 +270,8 @@ For example, @havird2020, conducted an influential meta-analysis using Q~10~ on 
 
 Let's see if we can use SAFE to calculate sampling variance for Q~10~ type data. We will use a fake dataset, reflecting what a meta-analyst might extract from the literature.
 
+
+
 ```{r, load_Q10_data}
 #| label: load_Q10_data
 #| eval: true
@@ -250,9 +282,13 @@ dat <- fread("data/Q10_fake_data.csv")
 dat
 ```
 
+
+
 This dataset has IDs for the references and observation IDs (`Reference_ID` and `Obs_ID`) as well as means, standard deviations, and sample sizes for R1 and R2 (`R1_mean`, `R2_mean`, `R1_SD`, `R2_SD`, `R1_N`, `R2_N`) and the two temperature treatments (`T1`, `T2`).
 
 First, let's encapsulate the Q~10~ plugin formula in a function and then calculate Q~10~ point estimates for each row of our fake data.
+
+
 
 ```{r, calculate_Q10}
 #| label: calculate_Q10
@@ -273,10 +309,14 @@ dat
 
 ```
 
+
+
 ### Calculate sampling variance for Q~10~
 Now, let's use SAFE to calculate a bias corrected point estimate and sampling variance. To do this, we will draw hyperparameter clouds for R1 and R2 based on the standard error (`SD/sqrt(N)`), transform these clouds with our Q10 function, calculate sampling variance of this transformed cloud, and then calculate our bias-corrected point estimates. 
 
 This has to be done separately for each row in our dataset. To make the code more readable, we'll do this in a for loop (though parallel approaches or lapply would likely be faster).
+
+
 
 ```{r, Q10_sampling_error}
 res <- list()
@@ -318,7 +358,11 @@ dat.final
 
 ```
 
+
+
 We have now calculated sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model, like any other sampling variance:
+
+
 
 ```{r, Q10_meta_analysis}
 #| label: Q10_meta_analysis
@@ -333,6 +377,8 @@ m <- rma.mv(yi_SAFE ~ 1,
 summary(m)
 
 ```
+
+
 
 Pretty pretty neat, right?
 
@@ -349,6 +395,8 @@ After making those decisions, simply follow the 4 steps to 'SAFEty'. 🙃
 ## Load encapsulated functions
 
 Before we go any further, and show how well SAFE works compared to plugin methods, let's look at a function we wrote to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. This function returns a data.table (basically a *fast* data.frame) with columns for plugin effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
+
+
 
 ```{r, safe_function_loRom}
 #| label: safe_function_loRom
@@ -372,7 +420,11 @@ eff_size(x1 = 14.5, x2 = 7.9,
 
 ```
 
+
+
 The function also works with a vector of raw data:
+
+
 
 ```{r, safe_function_loRom_raw}
 #| label: safe_function_loRom_raw
@@ -397,7 +449,11 @@ eff_size(x1 = c(14.5, 13, 15.8),
 
 ```
 
+
+
 For a full list of options that `eff_size` can calculate, run:
+
+
 
 ```{r, eff_sizes_lookup}
 #| label: eff_sizes_lookup
@@ -408,6 +464,8 @@ For a full list of options that `eff_size` can calculate, run:
 eff_size()
 
 ```
+
+
 
 To store results simply assign the output to an object in R. You will then be able to access the results as a data.table. The details of the function arguments are described below:
 
@@ -431,6 +489,8 @@ To store results simply assign the output to an object in R. You will then be ab
 
 We simulated the bias of SAFE calculations versus normal plugin calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps. The creation of these scenarios differed for each effect size (based on input variables). The scenarios can be loaded as follows. Let's look at the simulations for lnRoM:
 
+
+
 ```{r, scenarios}
 #| label: scenarios
 #| eval: true
@@ -451,6 +511,8 @@ guide[, .(effect_type, scenario_id, boots,
 
 ```
 
+
+
 To evaluate effect size performance, we conducted Monte Carlo simulations for each scenario. In these simulations, we created simulated datasets based on true values for each scenario. We then calculated effect sizes and sampling variances (both with plugin formulas and SAFE) for the 'true' values and based on the simulated dataset. We did this 1e5 times for each scenario.
 
 In these Monte Carlo simulations, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data. We'll explain the difference between estimands, estimators, and estimates below.
@@ -458,6 +520,8 @@ In these Monte Carlo simulations, we were interested in bias, or the difference 
 To illustrate, we'll do a dummy simulation for lnRoM. Note that the means/sd for each scenario are the same. The only variables that differ are sample sizes. To make this tractable, we'll only run 100 simulations.
 
 To speed things up we will do this in parallel. The function `prepare_cluster()` below can help set things up, including a progress bar so you don't lose your mind wondering what's going on in there.
+
+
 
 ```{r, prepare_cluster}
 #| label: prepare_cluster
@@ -493,7 +557,11 @@ prepare_cluster <- function(n){
 
 ```
 
+
+
 Now we will run 100 simulations to showcase how this method works. The actual simulations had a length of 1e5 and are loaded and visualized below. The first part of this code (inside the `lapply`) creates simulated data based on 'true' means and standard deviations. This data is then summarized to a simulation mean and standard deviation. We will then calculate effect sizes and sampling variances for the 'true' values and simulated values. Note that even with only 100 iterations, this can take a minute, so feel free to load the already run dummy dataset in the next code block.
+
+
 
 ```{r, monte_carlo}
 #| label: monte_carlo
@@ -589,7 +657,11 @@ res <- rbindlist(res)
 
 ```
 
+
+
 Or just load the full simulation (1e5) here:
+
+
 
 ```{r, monte_carlo_load}
 #| label: monte_carlo_load
@@ -602,6 +674,8 @@ res <- readRDS("builds/lnRoM_simulation.Rds")
 head(res, 3)
 
 ```
+
+
 
 ## Calculate bias
 
@@ -618,6 +692,8 @@ To interpret the simulation results, it is essential to understand the differenc
 In the case of our effect sizes, there are two estimands that we're interested in estimating: the 'true' effect size (based on the definition formula of the effect size type) and sampling variance. To calculate the bias of our various estimators in estimating effect sizes, we calculate the mean of the estimates from each simulated dataset and subtract the estimand value (the true effect size off the 'true' values).
 
 Here we will calculate bias in our estimates of effect sizes:
+
+
 
 ```{r, calc_bias}
 #| label: calc_bias
@@ -667,6 +743,8 @@ ggplot(data = point.bias.long[sample_size1 == sample_size2, ],
 
 ```
 
+
+
 This indicates that the least biased estimator is the first order definition formula (light blue). SAFE (red) and the 2nd order plugin (navy blue) perform similarly. These bias values are incredibly small, indicating that all options are fair, except for at low sample sizes, when the first-order definition formula is quite biased.
 
 ### Sampling variance bias
@@ -674,6 +752,8 @@ This indicates that the least biased estimator is the first order definition for
 Interestingly, there is no way to know the 'true' estimand for sampling variance because we typically only have one finite sample from a population. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 3 estimators, and thus 3 estimands, we'll thus end up with 9 calculations of bias.
 
 To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above but then dividing by the estimand and multiplying by 100.
+
+
 
 ```{r, calc_rel_bias}
 #| label: calc_rel_bias
@@ -746,11 +826,15 @@ ggplot(data = var.bias.long[sample_size1 == sample_size2, ],
 
 ```
 
+
+
 We see here that SAFE (red) is slightly more biased, but in a conservative direction, than the other estimators.
 
 ## Plot all simulations results
 
 Now let's look at the rest of the simulation results.
+
+
 
 ```{r, sim_all}
 #| label: sim_all
@@ -763,11 +847,15 @@ sim_results <- sim_results[boots == 1e6, ]
 
 ```
 
+
+
 ### Speed
 
 This was our dummy effect size in the beginning. How do the point and variance estimates calculated by SAFE compare to just calculating 1 / x for point estimates?
 
 We compared the variance estimates from SAFE to variance estimates produced by a 1st-order derivative sampling variance formula derived with the delta method (denoted as 1st order plugin here). Let's see which did better!
+
+
 
 ```{r, themes}
 #| label: themes
@@ -851,9 +939,13 @@ p.point + p.variance + plot_layout(ncol = 1, heights = c(1/3, 2/3)) +
 
 ```
 
+
+
 ### SMD 4 multivariate normal
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD, as both of these parameters are in the definition formula (Cohen's d) of SMD. Let's compare the bias of SAFE, Cohen's d, and Hedges' g.
+
+
 
 ```{r, SMD_mvnormal}
 #| label: SMD_mvnormal
@@ -913,9 +1005,13 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+
 ### SMD 2 multivariate normal and 2-Wishart
 
 With this estimator, the SAFE calculation used the normal distribution to simulate the two means but the Wishart distribution to estimate the SD.
+
+
 
 ```{r, SMD_Wishart}
 #| label: SMD_Wishart
@@ -973,9 +1069,13 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+
 ### lnCVR 4 multivariate normal
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD.
+
+
 
 ```{r, lnCVR_mvnormal}
 #| label: lnCVR_mvnormal
@@ -1030,9 +1130,13 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+
 ### lnCVR 2 multivariate normal and 2-Wishart
 
 The SAFE estimator for this effect size was calculated with 2 multivariate normal distributions for the means and 2 Wishart distributions for the SD.
+
+
 
 ```{r, lnCVR_Wishart}
 #| label: lnCVR_Wishart
@@ -1087,9 +1191,13 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+
 ### Log Odds Ratio (lnOR)
 
 In this effect size estimation, the SAFE calculation used a binomial distribution to draw random binomial samples for 'a' and 'c'.
+
+
 
 ```{r, lnOR}
 #| label: lnOR
@@ -1143,9 +1251,13 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+
 ### Log Risk Ratio (lnRR)
 
 In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a binomial distribution.
+
+
 
 ```{r, lnRR}
 #| label: lnRR
@@ -1199,9 +1311,13 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+
 ### Hardy Weinberg Disequilibrium
 
 In this effect size estimation, the SAFE calculation drew 'n_AA', 'n_Aa', and 'n_aa' from a binomial distribution.
+
+
 
 ```{r, lnHWE_A}
 #| label: lnHWE_A
@@ -1257,11 +1373,15 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+
 # How many SAFE bootstraps?
 
 The SAFE method relies on bootstrapping to calculate effect size point estimates and sampling variance. It's sort of magical how well it works! But, how many bootstraps are necessary? Let's find out by doing another Monte Carlo simulation, again of lnRoM. This time, instead of calculating bias, we'll look at the standard deviation of the point and sampling variance estimates as we change the number of bootstraps.
 
 Let's choose two bootstrap lengths: 100 and 1,000. We'll run a simulation 1,000 times just to make this easy. (See below for full 1e5 simulation results)
+
+
 
 ```{r, how_many_n_boots}
 #| label: how_many_n_boots
@@ -1277,7 +1397,11 @@ scenario
 
 ```
 
+
+
 Now let's run this in a foreach loop. If you'd rather not run this on your machine, if `run` == FALSE, the code will just load the already finished simulation. Note that in this simulation, we're evaluating SAFE estimates using only the 'true' values, instead of simulated data.
+
+
 
 ```{r, how_many_n_boots_run}
 #| label: how_many_n_boots_run
@@ -1353,7 +1477,11 @@ res.dt <- readRDS("builds/dummy_bootstrap_simulation.Rds")
 
 ```
 
+
+
 Let's look at the dispersion of the SAFE estimates as a function of sample size and bootstrap length.
+
+
 
 ```{r, boots_results}
 #| label: boots_results
@@ -1382,7 +1510,11 @@ ggplot(data = res.dt,
 
 ```
 
+
+
 Now let's look at the sampling variance estimates:
+
+
 
 ```{r, boots_results_var}
 #| label: boots_results_var
@@ -1409,7 +1541,11 @@ ggplot(data = res.dt,
 
 ```
 
+
+
 It looks like the dispersion in estimates is shaped by number of SAFE bootstraps and improves considerably with 1,000 bootstraps, especially at low sample sizes. Another way to visualize this (which we'll use below in the proper 1e5 simulations) is to plot the standard deviation.
+
+
 
 ```{r, boots_results_sd}
 #| label: boots_results_sd
@@ -1448,9 +1584,13 @@ ggplot(data = res.summary.mlt,
 
 ```
 
+
+
 ## Bootstrap scenario results
 
 Now let's look at the full Monte Carlo simulation results for the influence of bootstrap length.
+
+
 
 ```{r, read_all_bootstrap_sim}
 #| label: read_all_bootstrap_sim
@@ -1464,9 +1604,13 @@ sim_results <- sim_results[calculation == "SD", ]
 
 ```
 
+
+
 ### Speed
 
 Once again, here's our novel effect size 'speed', 1 / x. How do our SAFE estimates of speed and its sampling variance change as we changed the number of bootstraps?
+
+
 
 ```{r, speed_num_boots}
 #| label: speed_num_boots
@@ -1510,7 +1654,11 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 ### SMD 4-multivariate normal
+
+
 
 ```{r, SMD_mvnormal_num_boots}
 #| label: SMD_mvnormal_num_boots
@@ -1542,7 +1690,11 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 ### SMD 2-multivariate normal and 2-Wishart
+
+
 
 ```{r, SMD_Wishart_num_boots}
 #| label: SMD_Wishart_num_boots
@@ -1573,7 +1725,11 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 ### lnCVR 4-multivariate normal
+
+
 
 ```{r, lnCVR_mvnormal_num_boots}
 #| label: lnCVR_mvnormal_num_boots
@@ -1604,7 +1760,11 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 ### lnCVR 2-multivariate normal and 2-Wishart
+
+
 
 ```{r, lnCVR_Wishart_num_boots}
 #| label: lnCVR_Wishart_num_boots
@@ -1635,7 +1795,11 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 ### Log Odds Ratio (lnOR)
+
+
 
 ```{r, lnOR_num_boots}
 #| label: lnOR_num_boots
@@ -1666,7 +1830,11 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 ### Log Risk Ratio (lnRR)
+
+
 
 ```{r, lnRR_num_boots}
 #| label: lnRR_num_boots
@@ -1697,7 +1865,11 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 ### Hardy Weinberg Disequilibrium
+
+
 
 ```{r, lnHWE_A_num_boots}
 #| label: lnHWE_A_num_boots
@@ -1728,5 +1900,8 @@ ggplot(data = sub_dat,
 
 ```
 
+
+
 # Conclusion
 SAFE bootstrapping is a remarkably simple way to calculate bias-corrected point estimates and sampling variances for meta-analyses. Based on our simulations, this method performs similarly to plugin estimates and requires only 1e5 (though 1e6 is marginally better) bootstraps. SAFE allows researchers to calculate sampling variance for custom effect sizes with only minimal statistical knowledge (and without spooky derivatives).
+
