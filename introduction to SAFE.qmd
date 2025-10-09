@@ -60,8 +60,6 @@ To run the code interactively (instead of just reading this lovely tutorial), do
 1.  Clone the github repo: https://github.com/ejlundgren/SAFE.git
 2.  Run the code chunks in the SAFE simulations tutorial.qmd while in the R project session or just follow along here on the web
 
-**QUESTION: I prefer data.table() and I wrote everything in that function...I can convert to dplyr no problem though if people are that picky. Does anyone care?**
-
 ## Load libraries
 
 The `groundhog` package ensures that the library versions you use are the same as ours. You will need R version 4.5.0. Be sure to install `groundhog` if it is not already installed with `install.packages()`.
@@ -336,6 +334,7 @@ summary(m)
 
 Pretty neat, right?
 
+### Using SAFE for custom effect sizes
 If you want to use SAFE for other custom effect sizes, you'd follow a similar process:
 
 1. Determine which variables in your effect size formula need to be bootstrapped. Note that with Q~10~, the two variables that needed to be drawn were `R1` and `R2`, as these were associated with SD and N in the reporting studies. `T1` and `T2` were experimental constants and thus did not need to be drawn for SAFE calculations. 
@@ -346,9 +345,11 @@ If you want to use SAFE for other custom effect sizes, you'd follow a similar pr
 
 After making those decisions, simply follow the 4 steps to 'SAFEty'. 🙃
 
-## Load encapsulated functions
+## Load functions
 
-Before we go any further, and show how well SAFE works compared to plugin methods, let's look at a function we wrote to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. This function returns a data.table (basically a *fast* data.frame) with columns for plugin effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
+Before we go any further, and show how well SAFE works compared to plugin methods, let's look at a function we wrote to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. 
+
+This function returns a data.table (basically a *fast* data.frame) with columns for plugin effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
 
 ```{r, safe_function_loRom}
 #| label: safe_function_loRom
