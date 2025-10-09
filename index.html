@@ -395,7 +395,7 @@ Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
 <p>First, let’s encapsulate the Q<sub>10</sub> plugin formula in a function and then calculate Q<sub>10</sub> point estimates for each row of our fake data.</p>
 <div class="cell">
 <div class="sourceCode" id="cb18" style="font-size: 0.8em;"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Q10</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">R1</span>, <span class="va">R2</span>, <span class="va">T1</span>, <span class="va">T2</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">R2</span> <span class="op">/</span> <span class="va">R1</span><span class="op">)</span> <span class="op">^</span> <span class="fl">10</span> <span class="op">/</span> <span class="op">(</span><span class="va">T2</span> <span class="op">-</span> <span class="va">T1</span><span class="op">)</span></span>
+<span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">R2</span> <span class="op">/</span> <span class="va">R1</span><span class="op">)</span> <span class="op">^</span> <span class="op">(</span><span class="fl">10</span> <span class="op">/</span> <span class="op">(</span><span class="va">T2</span> <span class="op">-</span> <span class="va">T1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">dat</span><span class="op">$</span><span class="va">yi_plugin</span> <span class="op">&lt;-</span> <span class="fu">Q10</span><span class="op">(</span>R1 <span class="op">=</span> <span class="va">dat</span><span class="op">$</span><span class="va">R1_mean</span>,</span>
@@ -414,11 +414,11 @@ Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
 5:            2      5       5   0.4    25       7   0.3    25    15    25
    yi_plugin
        &lt;num&gt;
-1:  5.179902
-2: 21.990233
-3:  5.766504
-4:  5.766504
-5:  2.892547</code></pre>
+1:   1.91716
+2:   2.56000
+3:   1.50000
+4:   1.50000
+5:   1.40000</code></pre>
 </div>
 </div>
 <section id="calculate-sampling-variance-for-q10" class="level3"><h3 class="anchored" data-anchor-id="calculate-sampling-variance-for-q10">Calculate sampling variance for Q<sub>10</sub>
@@ -470,16 +470,16 @@ Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
 3:            2      3       4   0.3    25       6   0.7    25    15    25
 4:            2      4       8   0.5    25      12   0.6    25    15    25
 5:            2      5       5   0.4    25       7   0.3    25    15    25
-   yi_plugin   yi_SAFE     vi_SAFE
-       &lt;num&gt;     &lt;num&gt;       &lt;num&gt;
-1:  5.179902  4.125733  17.5193056
-2: 21.990233 18.289869 242.2968537
-3:  5.766504  5.551729   2.8301104
-4:  5.766504  5.688918   0.8861866
-5:  2.892547  2.841267   0.2923130</code></pre>
+   yi_plugin  yi_SAFE      vi_SAFE
+       &lt;num&gt;    &lt;num&gt;        &lt;num&gt;
+1:   1.91716 1.903277 0.0561076035
+2:   2.56000 2.544428 0.0836228831
+3:   1.50000 1.499689 0.0017311035
+4:   1.50000 1.499722 0.0005756666
+5:   1.40000 1.399622 0.0006474360</code></pre>
 </div>
 </div>
-<p>We have now calculated sampling variance for Q<sub>10</sub>! This sampling variance can then be used be in a meta-analytic model, like any other sampling variance:</p>
+<p>Sampling variance for Q<sub>10</sub>! This sampling variance can then be used be in a meta-analytic model, like usual:</p>
 <div class="cell">
 <div class="sourceCode" id="cb22" style="font-size: 0.8em;"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">rma.mv</span><span class="op">(</span><span class="va">yi_SAFE</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>            V <span class="op">=</span> <span class="va">vi_SAFE</span>,</span>
@@ -491,21 +491,21 @@ Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
 Multivariate Meta-Analysis Model (k = 5; method: REML)
 
   logLik  Deviance       AIC       BIC      AICc   
--10.2104   20.4208   26.4208   24.5796   50.4208   
+  0.6386   -1.2772    4.7228    2.8817   28.7228   
 
 Variance Components:
 
             estim    sqrt  nlvls  fixed               factor 
-sigma^2.1  0.0000  0.0002      2     no         Reference_ID 
-sigma^2.2  2.0840  1.4436      5     no  Reference_ID/Obs_ID 
+sigma^2.1  0.2264  0.4759      2     no         Reference_ID 
+sigma^2.2  0.0029  0.0538      5     no  Reference_ID/Obs_ID 
 
 Test for Heterogeneity:
-Q(df = 4) = 9.0866, p-val = 0.0590
+Q(df = 4) = 26.7484, p-val &lt; .0001
 
 Model Results:
 
 estimate      se    zval    pval   ci.lb   ci.ub      
-  4.4543  0.9920  4.4901  &lt;.0001  2.5100  6.3987  *** 
+  1.7893  0.3489  5.1287  &lt;.0001  1.1055  2.4732  *** 
 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
@@ -573,9 +573,9 @@ Running SAFE with 1e+06 bootstraps</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre style="font-size: 0.7em"><code>    yi_first yi_second  vi_first vi_second   yi_safe   vi_safe   SE_safe
        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;
-1:  3.912937  3.835196 0.3014615 0.2975274  3.821458 0.3648516 0.6040294
-2: -3.167230 -3.094698 0.2686568 0.2633745 -3.408727 0.2536913 0.5036777
-3: -1.545312 -1.512893 0.1387221 0.1343396 -1.541301 0.1402365 0.3744817</code></pre>
+1:  3.912937  3.835196 0.3014615 0.2975274  3.820725 0.3659302 0.6049217
+2: -3.167230 -3.094698 0.2686568 0.2633745 -3.409501 0.2528184 0.5028105
+3: -1.545312 -1.512893 0.1387221 0.1343396 -1.540874 0.1400756 0.3742668</code></pre>
 </div>
 </div>
 <p>For a full list of options that <code>eff_size</code> can calculate, run:</p>
@@ -2090,7 +2090,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-261"><a href="#cb60-261" aria-hidden="true" tabindex="-1"></a><span class="in">#| attr-output: "style='font-size: 0.7em'"</span></span>
 <span id="cb60-262"><a href="#cb60-262" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-263"><a href="#cb60-263" aria-hidden="true" tabindex="-1"></a><span class="in">Q10 &lt;- function(R1, R2, T1, T2){</span></span>
-<span id="cb60-264"><a href="#cb60-264" aria-hidden="true" tabindex="-1"></a><span class="in">  res &lt;- (R2 / R1) ^ 10 / (T2 - T1)</span></span>
+<span id="cb60-264"><a href="#cb60-264" aria-hidden="true" tabindex="-1"></a><span class="in">  res &lt;- (R2 / R1) ^ (10 / (T2 - T1))</span></span>
 <span id="cb60-265"><a href="#cb60-265" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
 <span id="cb60-266"><a href="#cb60-266" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-267"><a href="#cb60-267" aria-hidden="true" tabindex="-1"></a><span class="in">dat$yi_plugin &lt;- Q10(R1 = dat$R1_mean,</span></span>
@@ -2147,7 +2147,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-318"><a href="#cb60-318" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-319"><a href="#cb60-319" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-320"><a href="#cb60-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-321"><a href="#cb60-321" aria-hidden="true" tabindex="-1"></a>We have now calculated sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model, like any other sampling variance:</span>
+<span id="cb60-321"><a href="#cb60-321" aria-hidden="true" tabindex="-1"></a>Sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model, like usual:</span>
 <span id="cb60-322"><a href="#cb60-322" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-323"><a href="#cb60-323" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, Q10_meta_analysis}</span></span>
 <span id="cb60-324"><a href="#cb60-324" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: Q10_meta_analysis</span></span>

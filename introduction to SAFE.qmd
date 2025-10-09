@@ -261,7 +261,7 @@ First, let's encapsulate the Q~10~ plugin formula in a function and then calcula
 #| attr-output: "style='font-size: 0.7em'"
 
 Q10 <- function(R1, R2, T1, T2){
-  res <- (R2 / R1) ^ 10 / (T2 - T1)
+  res <- (R2 / R1) ^ (10 / (T2 - T1))
 }
 
 dat$yi_plugin <- Q10(R1 = dat$R1_mean,
@@ -318,7 +318,7 @@ dat.final
 
 ```
 
-We have now calculated sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model, like any other sampling variance:
+Sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model, like usual:
 
 ```{r, Q10_meta_analysis}
 #| label: Q10_meta_analysis
