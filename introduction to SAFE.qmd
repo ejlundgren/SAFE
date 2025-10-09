@@ -226,13 +226,13 @@ plugin_effect_size
 So similar! And potentially less biased. We'll find out later, where we report the results of Monte Carlo simulations that compare the bias of estimates from SAFE to estimates from just plugging into formulas. But first, let's use SAFE to calculate variance for a more realistic custom effect size.
 
 ## Q~10~ Temperature Coefficient
-Our speed example above is very simple. But how would one use SAFE to calculate bias-corrected point estimates and variance for a more scientifically interesting and challenging effect size? Let's take a look at the temperature coefficient Q~10~. Q~10~ is a widely used measure of temperature sensitivity of chemical reactions or biological processes. The formula for Q~10~ is:
+Our speed example above is very simple. How would one use SAFE to calculate bias-corrected point estimates and variance for a more scientifically interesting and challenging effect size? Let's take a look at the temperature coefficient Q~10~. Q~10~ is a widely used measure of temperature sensitivity of chemical reactions or biological processes that compares the rate of some process between 2 temperature treatment groups. The formula for Q~10~ is:
 
 $$
 Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
 $$ {#eq-Q10}
 
-Where `R` is the rate of some biological process for treatment groups 1 and 2 and `T` is the temperature of the experimental treatment for groups 1 and 2.
+Where `R` is the rate of some biological process for treatment groups 1 and 2 and `T` is the temperatures of groups 1 and 2.
 
 If one wanted to conduct a meta-analysis on studies reporting Q~10~ data, along with sample size and standard deviation for each mean `R`, how would you calculate sampling variance? One could derive sampling variance using the delta method but this exceeds many people's mathematical prowess and it's not clear how one would evaluate whether the derived sampling variance is accurate or not. 
 
@@ -334,11 +334,11 @@ summary(m)
 
 ```
 
-Pretty pretty neat, right?
+Pretty neat, right?
 
 If you want to use SAFE for other custom effect sizes, you'd follow a similar process:
 
-1. Determine which variables  in your effect size formula need to be bootstrapped. Note that with Q~10~, the two variables that needed to be drawn were `R1` and `R2`, as these were associated with SD and N in the reporting studies. `T1` and `T2` were experimental constants and thus did not need to be drawn for SAFE calculations. 
+1. Determine which variables in your effect size formula need to be bootstrapped. Note that with Q~10~, the two variables that needed to be drawn were `R1` and `R2`, as these were associated with SD and N in the reporting studies. `T1` and `T2` were experimental constants and thus did not need to be drawn for SAFE calculations. 
 
 2. Determine what the underlying distribution of these variables is. `R1` and `R2`, as rates, approximate the normal distribution. Other variables (e.g., counts) would need to be drawn from the binomial distribution.
 
