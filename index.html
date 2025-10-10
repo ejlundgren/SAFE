@@ -11,7 +11,7 @@
 <meta name="author" content="Alistair Senior">
 <meta name="author" content="Erick J Lundgren">
 <meta name="author" content="many others order TBD">
-<meta name="dcterms.date" content="2025-10-09">
+<meta name="dcterms.date" content="2025-10-10">
 <title>Introduction to SAFE</title>
 <style>
 code{white-space: pre-wrap;}
@@ -221,7 +221,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 9, 2025</p>
+      <p class="date">October 10, 2025</p>
     </div>
   </div>
   
@@ -254,7 +254,7 @@ window.Quarto = {
 </section><section id="an-introduction-to-safe-bootstrapping" class="level1"><h1>An introduction to SAFE bootstrapping</h1>
 <p>SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes for use in meta-analyses. SAFE bootstrapping is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plugin formulas for variance and point estimates.</p>
 <section id="how-does-it-work" class="level2"><h2 class="anchored" data-anchor-id="how-does-it-work">How does it work?</h2>
-<p>With SAFE bootstrapping, one draws a cloud of <em>hyperparameters</em> of all variables used in an effect size formula. You then apply your effect size formula to this cloud. The variance of this transformed cloud is the sampling variance of your effect size!</p>
+<p>With SAFE bootstrapping, one draws a vector (or cloud) of <em>hyperparameters</em> of all variables used in an effect size formula. You then apply your effect size formula to this vector The variance of this transformed cloud is the sampling variance of your effect size!</p>
 <p>You can then calculate a bias-transformed point estimate by taking the mean of this transformed cloud and subtracting it from 2 times the point estimate derived from the original variables.</p>
 <p>Let’s demonstrate.</p>
 <p>Imagine you’re conducting a meta-analysis of animal responses to a stressor. Many studies are reporting data as mean ‘latency time’ (e.g., time until an animal runs). However, you want to create an effect size of ‘speed’ from latency time. This is simple: take the inverse of latency (<code>1/latency</code>). Here let’s start with three mean latency times and convert to our new ‘speed’ effect size.</p>
@@ -285,7 +285,7 @@ window.Quarto = {
 <span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fl">4.6</span> <span class="co"># standard deviation of latency time</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">25</span>   <span class="co"># sample size, e.g., number of animals in the experiment</span></span>
 <span></span>
-<span><span class="co"># Simulate a cloud of hyperparameters</span></span>
+<span><span class="co"># Simulate a vector of hyperparameters (or cloud)</span></span>
 <span><span class="va">cloud</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">1e6</span>,                  <span class="co"># number of samples</span></span>
 <span>               mean <span class="op">=</span> <span class="va">x</span>,             <span class="co"># mean latency time</span></span>
 <span>               sd <span class="op">=</span> <span class="va">sd</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>    <span class="co"># standard error</span></span>
@@ -327,7 +327,7 @@ window.Quarto = {
 </div>
 </div>
 </section><section id="step-3-calculate-sampling-variance" class="level3"><h3 class="anchored" data-anchor-id="step-3-calculate-sampling-variance">Step 3: Calculate sampling variance</h3>
-<p>To calculate sampling variance, we’ll simply calculate the variance of this transformed cloud.</p>
+<p>To calculate sampling variance, we’ll simply calculate the variance of this transformed hyperparameter cloud.</p>
 <div class="cell">
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">safe_vi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="va">cloud_trans</span><span class="op">)</span></span>
 <span></span>
@@ -574,9 +574,9 @@ Running SAFE with 1e+06 bootstraps</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre style="font-size: 0.7em"><code>    yi_first yi_second  vi_first vi_second   yi_safe   vi_safe   SE_safe
        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;
-1:  3.912937  3.835196 0.3014615 0.2975274  3.820707 0.3662758 0.6052073
-2: -3.167230 -3.094698 0.2686568 0.2633745 -3.409626 0.2526137 0.5026069
-3: -1.545312 -1.512893 0.1387221 0.1343396 -1.540471 0.1406860 0.3750813</code></pre>
+1:  3.912937  3.835196 0.3014615 0.2975274  3.820807 0.3663665 0.6052822
+2: -3.167230 -3.094698 0.2686568 0.2633745 -3.409395 0.2525767 0.5025701
+3: -1.545312 -1.512893 0.1387221 0.1343396 -1.541243 0.1405890 0.3749521</code></pre>
 </div>
 </div>
 <p>For a full list of options that <code>eff_size</code> can calculate, run:</p>
@@ -1920,7 +1920,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-90"><a href="#cb60-90" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-91"><a href="#cb60-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## How does it work?</span></span>
 <span id="cb60-92"><a href="#cb60-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-93"><a href="#cb60-93" aria-hidden="true" tabindex="-1"></a>With SAFE bootstrapping, one draws a cloud of *hyperparameters* of all variables used in an effect size formula. You then apply your effect size formula to this cloud. The variance of this transformed cloud is the sampling variance of your effect size!</span>
+<span id="cb60-93"><a href="#cb60-93" aria-hidden="true" tabindex="-1"></a>With SAFE bootstrapping, one draws a vector (or cloud) of *hyperparameters* of all variables used in an effect size formula. You then apply your effect size formula to this vector The variance of this transformed cloud is the sampling variance of your effect size!</span>
 <span id="cb60-94"><a href="#cb60-94" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-95"><a href="#cb60-95" aria-hidden="true" tabindex="-1"></a>You can then calculate a bias-transformed point estimate by taking the mean of this transformed cloud and subtracting it from 2 times the point estimate derived from the original variables.</span>
 <span id="cb60-96"><a href="#cb60-96" aria-hidden="true" tabindex="-1"></a></span>
@@ -1963,7 +1963,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-133"><a href="#cb60-133" aria-hidden="true" tabindex="-1"></a><span class="in">sd &lt;- 4.6 # standard deviation of latency time</span></span>
 <span id="cb60-134"><a href="#cb60-134" aria-hidden="true" tabindex="-1"></a><span class="in">n &lt;- 25   # sample size, e.g., number of animals in the experiment</span></span>
 <span id="cb60-135"><a href="#cb60-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-136"><a href="#cb60-136" aria-hidden="true" tabindex="-1"></a><span class="in"># Simulate a cloud of hyperparameters</span></span>
+<span id="cb60-136"><a href="#cb60-136" aria-hidden="true" tabindex="-1"></a><span class="in"># Simulate a vector of hyperparameters (or cloud)</span></span>
 <span id="cb60-137"><a href="#cb60-137" aria-hidden="true" tabindex="-1"></a><span class="in">cloud &lt;- rnorm(1e6,                  # number of samples</span></span>
 <span id="cb60-138"><a href="#cb60-138" aria-hidden="true" tabindex="-1"></a><span class="in">               mean = x,             # mean latency time</span></span>
 <span id="cb60-139"><a href="#cb60-139" aria-hidden="true" tabindex="-1"></a><span class="in">               sd = sd / sqrt(n))    # standard error</span></span>
@@ -1997,7 +1997,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-167"><a href="#cb60-167" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-168"><a href="#cb60-168" aria-hidden="true" tabindex="-1"></a><span class="fu">### Step 3: Calculate sampling variance</span></span>
 <span id="cb60-169"><a href="#cb60-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-170"><a href="#cb60-170" aria-hidden="true" tabindex="-1"></a>To calculate sampling variance, we'll simply calculate the variance of this transformed cloud.</span>
+<span id="cb60-170"><a href="#cb60-170" aria-hidden="true" tabindex="-1"></a>To calculate sampling variance, we'll simply calculate the variance of this transformed hyperparameter cloud.</span>
 <span id="cb60-171"><a href="#cb60-171" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-172"><a href="#cb60-172" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, speed_samplevar}</span></span>
 <span id="cb60-173"><a href="#cb60-173" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: speed_samplevar</span></span>
