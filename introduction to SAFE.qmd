@@ -120,13 +120,13 @@ If the word 'hyperparameter' is scary, what we mean is a distribution associated
 
 This is different than drawing from a population based on mean and standard deviation, which will have a broad distribution, reflecting the underlying population. Instead, we're interested in drawing a distribution of the **means**—the hyperparameter of our effect size of interest. To do this, we draw from a normal distribution with **standard error of the mean** to describe dispersion.
 
-To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 1,000,000 samples of the mean latency hyperparameter from a normal distribution, with standard error as our `sd`. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size.
+To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 1,000,000 samples of the mean latency hyperparameter from a normal distribution, with standard error as our `sd`. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size. Note that we will do this for just one of our speed effect sizes (i.e., 1 mean, sd, and n)
 
 ```{r, speed_cloud}
 #| label: speed_cloud
 
 # Set seed for reproducibility
- set.seed(2025)
+set.seed(2025)
 
 # Define the variables
 x <- 15   # The mean latency time
@@ -146,7 +146,9 @@ hist(cloud)
 
 ### Step 2: Transform hyperparameters to target effect size
 
-Now, let's transform this cloud of hyperparameters to 'speed' with our 'plugin' or definition formula `1/x`. These values are centered on our original effect size, which we'll overlay in red
+Now, let's transform this cloud of hyperparameters to 'speed' with our 'plugin' or definition formula `1/x`. Note that when we write 'plugin', we mean using a formula to calculate effect sizes or sampling variance. 
+
+These transformed values are centered on our original effect size, which we'll overlay in red
 
 ```{r, speed_transform}
 #| label: speed_transform
@@ -352,9 +354,11 @@ After making those decisions, simply follow the 4 steps to 'SAFEty'. 🙃
 
 ## Load functions
 
-Before we go any further, and show how well SAFE works compared to plugin methods, let's look at a function we wrote to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. 
+Before we go any further, and show how well SAFE works compared to plugin methods, let's look at a function (`eff_size`) we wrote to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. 
 
 This function returns a data.table (basically a *fast* data.frame) with columns for plugin effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
+
+Here, we'll demonstrate with the effect size 'lnRoM' or log-transformed ratio of means, which is a commonly used effect size to compare control and experimental groups.
 
 ```{r, safe_function_loRom}
 #| label: safe_function_loRom
