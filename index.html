@@ -376,7 +376,7 @@ Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
 \tag{3}\]</span></span></p>
 <p>Where <code>R</code> is the rate of some biological or chemical process for treatment groups 1 and 2 and <code>T</code> is the temperatures of groups 1 and 2.</p>
 <p>If one wanted to conduct a meta-analysis on studies reporting Q<sub>10</sub> data, along with sample size and standard deviation for each mean <code>R</code>, how would you calculate sampling variance? One could derive sampling variance using the delta method but this is outside many people’s mathematical comfort zone and it’s not clear how one would evaluate whether the derived sampling variance is accurate or not.</p>
-<p>For example, <span class="citation" data-cites="havird2020">Havird et al. (<a href="#ref-havird2020" role="doc-biblioref">2020</a>)</span>, conducted an influential meta-analysis using Q<sub>10</sub> on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa. However, they did not calculate sampling variance and thus used unweighted meta-analytic models—which can bias model estimates.</p>
+<p>For example, <span class="citation" data-cites="havird2020">Havird et al. (<a href="#ref-havird2020" role="doc-biblioref">2020</a>)</span>, conducted an influential meta-analysis using Q<sub>10</sub> on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa and used the delta method to derive sampling variance.</p>
 <p>Let’s see if we can use SAFE to calculate sampling variance for Q<sub>10</sub> type data. We will use a fake dataset, reflecting what a meta-analyst might extract from the literature.</p>
 <div class="cell">
 <div class="sourceCode" id="cb16" style="font-size: 0.8em;"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">fread</span><span class="op">(</span><span class="st">"data/Q10_fake_data.csv"</span><span class="op">)</span></span>
@@ -576,9 +576,9 @@ Running SAFE with 1e+06 bootstraps</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre style="font-size: 0.7em"><code>    yi_first yi_second  vi_first vi_second   yi_safe   vi_safe   SE_safe
        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;
-1:  3.912937  3.835196 0.3014615 0.2975274  3.820860 0.3653841 0.6044701
-2: -3.167230 -3.094698 0.2686568 0.2633745 -3.409358 0.2526355 0.5026286
-3: -1.545312 -1.512893 0.1387221 0.1343396 -1.542025 0.1399685 0.3741237</code></pre>
+1:  3.912937  3.835196 0.3014615 0.2975274  3.821532 0.3648602 0.6040366
+2: -3.167230 -3.094698 0.2686568 0.2633745 -3.409408 0.2522932 0.5022880
+3: -1.545312 -1.512893 0.1387221 0.1343396 -1.540835 0.1406374 0.3750166</code></pre>
 </div>
 </div>
 <p>For a full list of options that <code>eff_size</code> can calculate, run:</p>
@@ -2069,7 +2069,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-236"><a href="#cb60-236" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-237"><a href="#cb60-237" aria-hidden="true" tabindex="-1"></a>If one wanted to conduct a meta-analysis on studies reporting Q~10~ data, along with sample size and standard deviation for each mean <span class="in">`R`</span>, how would you calculate sampling variance? One could derive sampling variance using the delta method but this is outside many people's mathematical comfort zone and it's not clear how one would evaluate whether the derived sampling variance is accurate or not. </span>
 <span id="cb60-238"><a href="#cb60-238" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-239"><a href="#cb60-239" aria-hidden="true" tabindex="-1"></a>For example, @havird2020, conducted an influential meta-analysis using Q~10~ on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa. However, they did not calculate sampling variance and thus used unweighted meta-analytic models---which can bias model estimates. </span>
+<span id="cb60-239"><a href="#cb60-239" aria-hidden="true" tabindex="-1"></a>For example, @havird2020, conducted an influential meta-analysis using Q~10~ on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa and used the delta method to derive sampling variance. </span>
 <span id="cb60-240"><a href="#cb60-240" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-241"><a href="#cb60-241" aria-hidden="true" tabindex="-1"></a>Let's see if we can use SAFE to calculate sampling variance for Q~10~ type data. We will use a fake dataset, reflecting what a meta-analyst might extract from the literature.</span>
 <span id="cb60-242"><a href="#cb60-242" aria-hidden="true" tabindex="-1"></a></span>

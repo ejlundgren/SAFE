@@ -236,7 +236,7 @@ Where `R` is the rate of some biological or chemical process for treatment group
 
 If one wanted to conduct a meta-analysis on studies reporting Q~10~ data, along with sample size and standard deviation for each mean `R`, how would you calculate sampling variance? One could derive sampling variance using the delta method but this is outside many people's mathematical comfort zone and it's not clear how one would evaluate whether the derived sampling variance is accurate or not. 
 
-For example, @havird2020, conducted an influential meta-analysis using Q~10~ on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa. However, they did not calculate sampling variance and thus used unweighted meta-analytic models---which can bias model estimates. 
+For example, @havird2020, conducted an influential meta-analysis using Q~10~ on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa and used the delta method to derive sampling variance. 
 
 Let's see if we can use SAFE to calculate sampling variance for Q~10~ type data. We will use a fake dataset, reflecting what a meta-analyst might extract from the literature.
 
