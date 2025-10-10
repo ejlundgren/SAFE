@@ -329,7 +329,7 @@ effect_formulas[name == "lnCVR", ]
 unique(effect_formulas$sim_family)
 
 addendum <- copy(effect_formulas[name %in% c("lnOR", "lnRR")])
-#' [Can potentially treat these as same sim_family lnROM but for now going to treat separately]
+
 addendum[name == "lnOR", sim_family := "2_multinomial_as_normal"]
 addendum[name == "lnRR", sim_family := "2_multinomial_as_normal"]
 addendum$default_safe_family
@@ -359,7 +359,6 @@ for(i in 1:nrow(effect_formulas)){
 effect_formulas
 
 effect_formulas[grepl("paired", name) & grepl("sqrt", exec_formula)]
-
 
 # >>> Add an alternative to cloud filtering rules -------------------------
 
@@ -405,9 +404,9 @@ effect_formulas[sim_family == "4_multivariate_normal_wishart" &
 
 effect_formulas
 effect_formulas[name == "lnCVR"]
-
+effect_formulas[name == "reciprocal"]
 
 # >>> Save table ----------------------------------------------------------
 
 fwrite(effect_formulas, "data/effect_size_formulas.csv", na = "NA")
-fwrite(effect_formulas, "scripts/run_simulations/remote_mirrors/final_simulations/data/effect_size_formulas.csv", na = "NA")
+fwrite(effect_formulas, "run_simulations/remote_mirrors/data/effect_size_formulas.csv", na = "NA")

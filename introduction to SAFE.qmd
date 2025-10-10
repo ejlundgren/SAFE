@@ -321,7 +321,7 @@ dat.final
 
 ```
 
-Sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model:
+Sampling variance for Q~10~! This sampling variance can then be used in a meta-analytic model:
 
 ```{r, Q10_meta_analysis}
 #| label: Q10_meta_analysis
@@ -331,7 +331,7 @@ Sampling variance for Q~10~! This sampling variance can then be used be in a met
 
 m <- rma.mv(yi_SAFE ~ 1,
             V = vi_SAFE,
-            random = ~1|Reference_ID/Obs_ID,
+            random = ~ 1 | Reference_ID/Obs_ID,
             data = dat.final)
 summary(m)
 

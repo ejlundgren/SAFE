@@ -493,13 +493,18 @@ if(debugging){
            SAFE_boots = 1e6)
   
   
-  input_vars <- list(a = 5*10, b = 15*10, c = 10*10, d = 15*10)
-  effect_type = "SMD"
-  SAFE_distribution = "4_normal"
-  verbose = F
+  
+  eff_size(x=15, sd=4.6, n=25, effect_type="reciprocal")
+  input_vars <- list(x=15, sd=4.6, n=25)
+  effect_type = "reciprocal"
+  
+  verbose = T
   SAFE_boots = 1e6
   sigma_matrix <- NULL
-  
+  SAFE = TRUE
+  SAFE_distribution = NULL
+  parallelize = TRUE
+  verbose = T
   
   
 }
