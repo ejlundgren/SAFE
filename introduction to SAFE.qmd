@@ -224,17 +224,17 @@ plugin_effect_size
 So similar! And potentially less biased. We'll find out later, where we report the results of Monte Carlo simulations that compare the bias of estimates from SAFE to estimates from just plugging into formulas. But first, let's use SAFE to calculate variance for a more realistic custom effect size.
 
 ## Q~10~ Temperature Coefficient
-Our speed example above is very simple. How would one use SAFE to calculate bias-corrected point estimates and variance for a more scientifically interesting and challenging effect size? Let's take a look at the temperature coefficient Q~10~. Q~10~ is a widely used measure of temperature sensitivity of chemical reactions or biological processes that compares the rate of some process between 2 temperature treatment groups. The formula for Q~10~ is:
+Our speed example above is very simple. How would one use SAFE to calculate bias-corrected point estimates and variance for a more scientifically interesting and challenging effect size? Let's take a look at the temperature coefficient Q~10~. Q~10~ is a widely used measure of temperature sensitivity of chemical reactions or biological processes. Q~10~ compares the rate of a process between 2 temperature treatment groups. The formula for Q~10~ is:
 
 $$
 Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
 $$ {#eq-Q10}
 
-Where `R` is the rate of some biological process for treatment groups 1 and 2 and `T` is the temperatures of groups 1 and 2.
+Where `R` is the rate of some biological or chemical process for treatment groups 1 and 2 and `T` is the temperatures of groups 1 and 2.
 
-If one wanted to conduct a meta-analysis on studies reporting Q~10~ data, along with sample size and standard deviation for each mean `R`, how would you calculate sampling variance? One could derive sampling variance using the delta method but this exceeds many people's mathematical prowess and it's not clear how one would evaluate whether the derived sampling variance is accurate or not. 
+If one wanted to conduct a meta-analysis on studies reporting Q~10~ data, along with sample size and standard deviation for each mean `R`, how would you calculate sampling variance? One could derive sampling variance using the delta method but this is outside many people's mathematical comfort zone and it's not clear how one would evaluate whether the derived sampling variance is accurate or not. 
 
-For example, @havird2020, conducted an influential meta-analysis using Q~10~ on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa. However, they did not calculate sampling variance and thus used unweighted meta-analytic models—which can bias model estimates. 
+For example, @havird2020, conducted an influential meta-analysis using Q~10~ on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa. However, they did not calculate sampling variance and thus used unweighted meta-analytic models---which can bias model estimates. 
 
 Let's see if we can use SAFE to calculate sampling variance for Q~10~ type data. We will use a fake dataset, reflecting what a meta-analyst might extract from the literature.
 
@@ -250,7 +250,7 @@ dat
 
 This dataset has IDs for the references and observation IDs (`Reference_ID` and `Obs_ID`) as well as means, standard deviations, and sample sizes for R1 and R2 (`R1_mean`, `R2_mean`, `R1_SD`, `R2_SD`, `R1_N`, `R2_N`) and the two temperature treatments (`T1`, `T2`).
 
-First, let's encapsulate the Q~10~ plugin formula in a function and then calculate Q~10~ point estimates for each row of our fake data.
+First, let's encapsulate the Q~10~ plugin formula in a function and then calculate Q~10~ point estimates (effect sizes) for each row of our fake data.
 
 ```{r, calculate_Q10}
 #| label: calculate_Q10
@@ -272,11 +272,16 @@ dat
 ```
 
 ### Calculate sampling variance for Q~10~
-Now, let's use SAFE to calculate a bias corrected point estimate and sampling variance. To do this, we will draw hyperparameter clouds for R1 and R2 based on the standard error (`SD/sqrt(N)`), transform these clouds with our Q10 function, calculate sampling variance of this transformed cloud, and then calculate our bias-corrected point estimates. 
+Now, let's use SAFE to calculate bias corrected point estimates and sampling variances. To do this, we will draw hyperparameter clouds for R1 and R2 based on mean `R` and standard error (`SD/sqrt(N)`), transform these clouds with our `Q10` function, calculate sampling variance of this transformed cloud, and then calculate our bias-corrected point estimates. 
 
 This has to be done separately for each row in our dataset. To make the code more readable, we'll do this in a for loop (though parallel approaches or lapply would likely be faster).
 
-```{r, Q10_sampling_error}
+```{r, Q10_SAFE}
+#| label: Q10_SAFE
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
 res <- list()
 
 for(i in 1:nrow(dat)){
@@ -316,7 +321,7 @@ dat.final
 
 ```
 
-Sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model, like usual:
+Sampling variance for Q~10~! This sampling variance can then be used be in a meta-analytic model:
 
 ```{r, Q10_meta_analysis}
 #| label: Q10_meta_analysis
