@@ -5,11 +5,14 @@ date: "`r Sys.Date()`"
 author:
   - name: Shinichi Nakagawa
   - name: Ayumi Mizuno
+  - name: Coralie Williams
   - name: Santiago Ortega
-  - name: Daniel Noble
-  - name: Alistair Senior
+  - name: Szymon M. Drobniak
+  - name: Malgorzata Lagisz
+  - name: Yefeng Yang
+  - name: Alistair M. Senior
+  - name: Daniel W. A. Noble
   - name: Erick J Lundgren
-  - name: many others order TBD
 format: 
   html:
     toc: true
@@ -86,7 +89,7 @@ groundhog.library(pkg = c("data.table", "MASS", "crayon",
 
 # An introduction to SAFE bootstrapping
 
-SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes for use in meta-analyses. SAFE bootstrapping is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plugin formulas for variance and point estimates.
+SAFE bootstrapping is an incredible, seemingly magical, technique to calculate bias-corrected point estimates and sampling variance for effect sizes for use in meta-analyses. SAFE bootstrapping is particularly useful for novel effect sizes for which sampling variance formulas may not be known. In some cases, it is also more unbiased than traditional plug-in formulas for variance and point estimates.
 
 ## How does it work?
 
@@ -120,7 +123,7 @@ If the word 'hyperparameter' is scary, what we mean is a distribution associated
 
 This is different than drawing from a population based on mean and standard deviation, which will have a broad distribution, reflecting the underlying population. Instead, we're interested in drawing a distribution of the **means**—the hyperparameter of our effect size of interest. To do this, we draw from a normal distribution with **standard error of the mean** to describe dispersion.
 
-To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 1,000,000 samples of the mean latency hyperparameter from a normal distribution, with standard error as our `sd`. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size. Note that we will do this for just one of our speed effect sizes (i.e., 1 mean, sd, and n)
+To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 1,000,000 samples of the mean latency hyperparameter from a normal distribution, with standard error as our `sd`. To avoid using `lapply` or loops, we'll just do this on a single latency time and associated standard deviation and sample size. Note that we will do this for just one of our speed effect sizes (i.e., 1 mean, sd, and n).
 
 ```{r, speed_cloud}
 #| label: speed_cloud
@@ -146,7 +149,7 @@ hist(cloud)
 
 ### Step 2: Transform hyperparameters to target effect size
 
-Now, let's transform this cloud of hyperparameters to 'speed' with our 'plugin' or definition formula `1/x`. Note that when we write 'plugin', we mean using a formula to calculate effect sizes or sampling variance. 
+Now, let's transform this cloud of hyperparameters to 'speed' with our 'plug-in' or definition formula `1/x`. Note that when we write 'plug-in', we mean using a formula to calculate effect sizes or sampling variance. 
 
 These transformed values are centered on our original effect size, which we'll overlay in red
 
@@ -156,12 +159,12 @@ These transformed values are centered on our original effect size, which we'll o
 # Transform the cloud to our effect size
 cloud_trans <- 1/cloud
 
-# Calculate the 'plugin' effect size from the definition formula
+# Calculate the 'plug-in' effect size from the definition formula
 x <- 15
 plugin_effect_size <- 1/x
 plugin_effect_size
 
-# Compare plugin effect size to transformed cloud of hyperparameters:
+# Compare plug-in effect size to transformed cloud of hyperparameters:
 hist(cloud_trans, main = "Transformed hyperparameter cloud")
 abline(v = plugin_effect_size, col = "red")
 
@@ -179,23 +182,23 @@ safe_vi <- var(cloud_trans)
 safe_vi
 ```
 
-Voila! Sampling variance for a novel effect size. Pretty magical right?
+Voilà! Sampling variance for a novel effect size. Pretty magical right?
 
 ### Step 4: Calculate the bias-corrected effect size
 
 Given small sample sizes for some measurements, and the knowledge that point estimates can be biased at low N, let's also calculate a bias-corrected point estimate from this cloud of hyperparameters. We'll introduce the formulas again here to build some of the logic about how we arrive at the `2*plugin - mean(cloud)` formula you see in the code chunk below.
 
-Recall that bias is measuring how different the bootstrapped estimate is from the plugin estimate. Essentially, we know the bootstrap sample is biased with small sample sizes, so what we want to do is measure how different the plugin effect size is from the bootstrap sample mean (@eqn-bias):
+Recall that bias is measuring how different the bootstrapped estimate is from the plug-in estimate. Essentially, we know the bootstrap sample is biased with small sample sizes, so what we want to do is measure how different the plug-in effect size is from the bootstrap sample mean (@eq-bias):
 
 $$
 \widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{plugin}}
 $$ {#eq-bias}
 
-Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{plugin}}$ is the plugin value. If the bootstrapped estimate is larger than the plugin estimate, then the plugin estimate is biased low, and we need to push it up. If the bootstrapped estimate is smaller than the plugin estimate, then the plugin estimate is biased high, and we need to push it down. Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate (@eqn-bc):
+Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{plugin}}$ is the plug-in value. If the bootstrapped estimate is larger than the plug-in estimate, then the plug-in estimate is biased low, and we need to push it up. If the bootstrapped estimate is smaller than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it down. Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate (@eq-bc):
 
 $$
 \hat{\theta}_{\text{bc}} = \hat{\theta}_{\text{plugin}} - \widehat{\text{bias}}
-= \hat{\theta}_{\text{plugin}} - \big(\bar{\theta}^* - \hat{\theta}_{\text{plugin}}\big).
+= \hat{\theta}_{\text{plugin}} - \big(\bar{\theta}^* - \hat{\theta}_{\text{plugin}}\big)
 $$ {#eq-bc}
 
 Rearranging this gives us:
@@ -214,7 +217,7 @@ safe_yi <- (2 * plugin_effect_size) - mean(cloud_trans)
 safe_yi
 ```
 
-We can now compare our plugin effect size to our SAFE effect size:
+We can now compare our plug-in effect size to our SAFE effect size:
 
 ```{r, speed_plugin_effect_size}
 #| label: speed_plugin_effect_size
@@ -252,7 +255,7 @@ dat
 
 This dataset has IDs for the references and observation IDs (`Reference_ID` and `Obs_ID`) as well as means, standard deviations, and sample sizes for R1 and R2 (`R1_mean`, `R2_mean`, `R1_SD`, `R2_SD`, `R1_N`, `R2_N`) and the two temperature treatments (`T1`, `T2`).
 
-First, let's encapsulate the Q~10~ plugin formula in a function and then calculate Q~10~ point estimates (effect sizes) for each row of our fake data.
+First, let's encapsulate the Q~10~ plug-in formula in a function and then calculate Q~10~ point estimates (effect sizes) for each row of our fake data.
 
 ```{r, calculate_Q10}
 #| label: calculate_Q10
@@ -354,11 +357,11 @@ After making those decisions, simply follow the 4 steps to 'SAFEty'. 🙃
 
 ## Load functions
 
-Before we go any further, and show how well SAFE works compared to plugin methods, let's look at a function (`eff_size`) we wrote to calculate effect sizes both with plugin estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. 
+Before we go any further, and show how well SAFE works compared to plug-in methods, let's look at a function (`eff_size`) we wrote to calculate effect sizes both with plug-in estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. 
 
-This function returns a data.table (basically a *fast* data.frame) with columns for plugin effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
+This function returns a data.table (basically a *fast* data.frame) with columns for plug-in effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
 
-Here, we'll demonstrate with the effect size 'lnRoM' or log-transformed ratio of means, which is a commonly used effect size to compare control and experimental groups.
+Here, we'll demonstrate with the effect size 'lnRoM', or log-transformed ratio of means, which is a commonly used effect size to compare control and experimental groups.
 
 ```{r, safe_function_loRom}
 #| label: safe_function_loRom
@@ -369,7 +372,7 @@ Here, we'll demonstrate with the effect size 'lnRoM' or log-transformed ratio of
 source("scripts/SAFE_function.R")
 
 # Set seed for reproducibility
- set.seed(2025)
+set.seed(2025)
 
 # For a single effect size and sampling variance:
 eff_size(x1 = 14.5, x2 = 7.9, 
@@ -389,9 +392,6 @@ The function also works with a vector of raw data:
 #| eval: true
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
-
-# Set seed for reproducibility
- set.seed(2025)
 
 eff_size(x1 = c(14.5, 13, 15.8), 
          x2 = c(7.9, 21, 18.4), 
@@ -419,13 +419,16 @@ eff_size()
 
 ```
 
-To store results simply assign the output to an object in R. You will then be able to access the results as a data.table. The details of the function arguments are described below:
+To store results simply assign the output to an object in R. You will then be able to access the results as a data.table. 
 
--   `...`: Named vectors (numeric) of the variables required by the selected effect size formula (see `eff_size()`). All supplied vectors must have identical lengths. The required variable names depend on `effect_type` and must match the `vars_required` field for that effect in `data/effect_size_formulas.csv` (see `eff_size()`). If a paired design is requested and `r` is not supplied, it defaults to 0.5; for non-paired designs, `r` defaults to 0.
+::: {.callout-tip}
+## eff_size() function arguments
+
+-   `...`: Named vectors (numeric) of the variables required by the selected effect size (run `eff_size()` for a list of accepted effect sizes). All supplied vectors must have identical lengths. The required variable names depend on `effect_type` and must match the `vars_required` field for that effect in `data/effect_size_formulas.csv` (see `eff_size()`). If a paired design is requested and `r` is not supplied, it defaults to 0.5; for non-paired designs, `r` defaults to 0.
 
 -   `effect_type`: Character (scalar). Name of the effect size to compute, matching a `name` value in `data/effect_size_formulas.csv` (run `eff_size()` for accepted effect size names). If no effect size name is provided, the function returns a lookup table of available effect sizes and their required variables and exits.
 
--   `SAFE`: Logical. If `TRUE` (default), perform SAFE bias correction using parametric bootstrap draws specified by `SAFE_boots`. If `FALSE`, only the plugin effect(s) are returned.
+-   `SAFE`: Logical. If `TRUE` (default), perform SAFE bias correction using parametric bootstrap draws specified by `SAFE_boots`. If `FALSE`, only the plug-in effect(s) are returned.
 
 -   `SAFE_boots`: Integer. Number of bootstrap samples used by SAFE (10\^6 by default). Larger values improve precision but increase run time. Used only when `SAFE = TRUE`.
 
@@ -437,9 +440,11 @@ To store results simply assign the output to an object in R. You will then be ab
 
 -   `sigma_matrix`: List or `NULL.` Optional list of per-observation variance–covariance matrices used by SAFE (length equal to the number of rows implied by `...`). Each element should be a symmetric, positive definite matrix conformable with the simulated parameter vector required by the chosen effect formula. If `NULL`, internal defaults are used.
 
+:::
+
 # How good is SAFE?
 
-We simulated the bias of SAFE calculations versus normal plugin calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps. The creation of these scenarios differed for each effect size (based on input variables). The scenarios can be loaded as follows. Let's look at the simulations for lnRoM:
+We simulated the bias of SAFE calculations versus normal plug-in calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps. The creation of these scenarios differed for each effect size (based on input variables). The scenarios can be loaded as follows. Let's look at the simulations for lnRoM:
 
 ```{r, scenarios}
 #| label: scenarios
@@ -461,7 +466,7 @@ guide[, .(effect_type, scenario_id, boots,
 
 ```
 
-To evaluate effect size performance, we conducted Monte Carlo simulations for each scenario. In these simulations, we created simulated datasets based on true values for each scenario. We then calculated effect sizes and sampling variances (both with plugin formulas and SAFE) for the 'true' values and based on the simulated dataset. We did this 1e5 times for each scenario.
+To evaluate effect size performance, we conducted Monte Carlo simulations for each scenario. In these simulations, we created simulated datasets based on true values for each scenario. We then calculated effect sizes and sampling variances (both with plug-in formulas and SAFE) for the 'true' values and based on the simulated dataset. We did this 1e5 times for each scenario.
 
 In these Monte Carlo simulations, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data. We'll explain the difference between estimands, estimators, and estimates below.
 
@@ -677,7 +682,7 @@ ggplot(data = point.bias.long[sample_size1 == sample_size2, ],
 
 ```
 
-This indicates that the least biased estimator is the first order definition formula (light blue). SAFE (red) and the 2nd order plugin (navy blue) perform similarly. These bias values are incredibly small, indicating that all options are fair, except for at low sample sizes, when the first-order definition formula is quite biased.
+This indicates that the least biased estimator is the first order definition formula (light blue). SAFE (red) and the 2nd order plug-in (navy blue) perform similarly. These bias values are incredibly small, indicating that all options are fair, except for at low sample sizes, when the first-order definition formula is quite biased.
 
 ### Sampling variance bias
 
@@ -1492,6 +1497,8 @@ theme_SAFE <- theme_bw()+
         plot.subtitle = element_text(hjust = 0.5),
         panel.grid = element_blank(),
         strip.background = element_blank())
+
+pt_size <- 2
 
 facet_labs <- as_labeller(c("point" = "Point estimate",
                             "variance" = "Variance estimate"))
