@@ -149,7 +149,7 @@ hist(cloud)
 
 ### Step 2: Transform hyperparameters to target effect size
 
-Now, let's transform this cloud of hyperparameters to 'speed' with our 'plug-in' or definition formula `1/x`. Note that when we write 'plug-in', we mean using a formula to calculate effect sizes or sampling variance. 
+Now, let's transform this cloud of hyperparameters to 'speed' with our 'plug-in' or definition formula `1/x`. Note that when we write 'plug-in', we mean using a formula to calculate effect sizes or sampling variance.
 
 These transformed values are centered on our original effect size, which we'll overlay in red
 
@@ -188,13 +188,15 @@ Voilà! Sampling variance for a novel effect size. Pretty magical right?
 
 Given small sample sizes for some measurements, and the knowledge that point estimates can be biased at low N, let's also calculate a bias-corrected point estimate from this cloud of hyperparameters. We'll introduce the formulas again here to build some of the logic about how we arrive at the `2*plugin - mean(cloud)` formula you see in the code chunk below.
 
-Recall that bias is measuring how different the bootstrapped estimate is from the plug-in estimate. Essentially, we know the bootstrap sample is biased with small sample sizes, so what we want to do is measure how different the plug-in effect size is from the bootstrap sample mean (@eq-bias):
+Recall that bias is measuring how different the bootstrapped estimate is from the true value. In this case, not knowing the true value, we use the plug-in estimate as surrogate for 'truth' (@eq-bias).
 
 $$
-\widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{plugin}}
+\widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{truth}}
 $$ {#eq-bias}
 
-Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{plugin}}$ is the plug-in value. If the bootstrapped estimate is larger than the plug-in estimate, then the plug-in estimate is biased low, and we need to push it up. If the bootstrapped estimate is smaller than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it down. Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate (@eq-bc):
+Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{truth}}$ is the true value. However, since the true value is unknown, we here use the plug-in value as a surrogate. If the bootstrapped estimate is larger than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it up. If the bootstrapped estimate is smaller than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it down. Note that this is very confusing because we are treating the plug-in as both 'truth' and as an estimate that needs to be corrected.
+
+Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate (@eq-bc):
 
 $$
 \hat{\theta}_{\text{bc}} = \hat{\theta}_{\text{plugin}} - \widehat{\text{bias}}
@@ -229,6 +231,7 @@ plugin_effect_size
 So similar! And potentially less biased. We'll find out later, where we report the results of Monte Carlo simulations that compare the bias of estimates from SAFE to estimates from just plugging into formulas. But first, let's use SAFE to calculate variance for a more realistic custom effect size.
 
 ## Q~10~ Temperature Coefficient
+
 Our speed example above is very simple. How would one use SAFE to calculate bias-corrected point estimates and variance for a more scientifically interesting and challenging effect size? Let's take a look at the temperature coefficient Q~10~. Q~10~ is a widely used measure of temperature sensitivity of chemical reactions or biological processes. Q~10~ compares the rate of a process between 2 temperature treatment groups. The formula for Q~10~ is:
 
 $$
@@ -237,7 +240,7 @@ $$ {#eq-Q10}
 
 Where `R` is the rate of some biological or chemical process for treatment groups 1 and 2 and `T` is the temperatures of groups 1 and 2.
 
-If one wanted to conduct a meta-analysis on studies reporting Q~10~ data, along with sample size and standard deviation for each mean `R`, how would you calculate sampling variance? One could derive sampling variance using the delta method but this is outside many people's mathematical comfort zone and it's not clear how one would evaluate whether the derived sampling variance is accurate or not. 
+If one wanted to conduct a meta-analysis on studies reporting Q~10~ data, along with sample size and standard deviation for each mean `R`, how would you calculate sampling variance? One could derive sampling variance using the delta method but this is outside many people's mathematical comfort zone and it's not clear how one would evaluate whether the derived sampling variance is accurate or not.
 
 For example, @havird2020, conducted an influential meta-analysis using Q~10~ on passive versus active thermal acclimation among a diversity of aquatic and terrestrial taxa. At the time there was no sampling variance for Q~10~ effect sizes and so the authors derived it using the Delta method. However, SAFE could have saved the day!
 
@@ -277,7 +280,8 @@ dat
 ```
 
 ### Calculate sampling variance for Q~10~
-Now, let's use SAFE to calculate bias corrected point estimates and sampling variances. To do this, we will draw hyperparameter clouds for R1 and R2 based on mean `R` and standard error (`SD/sqrt(N)`), transform these clouds with our `Q10` function, calculate sampling variance of this transformed cloud, and then calculate our bias-corrected point estimates. 
+
+Now, let's use SAFE to calculate bias corrected point estimates and sampling variances. To do this, we will draw hyperparameter clouds for R1 and R2 based on mean `R` and standard error (`SD/sqrt(N)`), transform these clouds with our `Q10` function, calculate sampling variance of this transformed cloud, and then calculate our bias-corrected point estimates.
 
 This has to be done separately for each row in our dataset. To make the code more readable, we'll do this in a for loop (though parallel approaches or lapply would likely be faster).
 
@@ -345,19 +349,20 @@ summary(m)
 Pretty neat, right?
 
 ### Using SAFE for custom effect sizes
+
 If you want to use SAFE for other custom effect sizes, you'd follow a similar process:
 
-1. Determine which variables in your effect size formula need to be bootstrapped. Note that with Q~10~, the two variables that needed to be drawn were `R1` and `R2`, as these were associated with SD and N in the reporting studies. `T1` and `T2` were experimental constants and thus did not need to be drawn for SAFE calculations. 
+1.  Determine which variables in your effect size formula need to be bootstrapped. Note that with Q~10~, the two variables that needed to be drawn were `R1` and `R2`, as these were associated with SD and N in the reporting studies. `T1` and `T2` were experimental constants and thus did not need to be drawn for SAFE calculations.
 
-2. Determine what the underlying distribution of these variables is. `R1` and `R2`, as rates, approximate the normal distribution. Other variables (e.g., counts) would need to be drawn from the binomial distribution.
+2.  Determine what the underlying distribution of these variables is. `R1` and `R2`, as rates, approximate the normal distribution. Other variables (e.g., counts) would need to be drawn from the binomial distribution.
 
-3. As long as your data consists of independent groups, you can draw your variables of interest in separate `rnorm` (or `rbinom`) calls as we did above. However, if there is dependency between groups (i.e., paired designs), you'll need to use slightly more complicated methods with multivariate draws and sigma-matrices as described in the manuscript (Nakagawa et al. 2025).
+3.  As long as your data consists of independent groups, you can draw your variables of interest in separate `rnorm` (or `rbinom`) calls as we did above. However, if there is dependency between groups (i.e., paired designs), you'll need to use slightly more complicated methods with multivariate draws and sigma-matrices as described in the manuscript (Nakagawa et al. 2025).
 
 After making those decisions, simply follow the 4 steps to 'SAFEty'. 🙃
 
 ## Load functions
 
-Before we go any further, and show how well SAFE works compared to plug-in methods, let's look at a function (`eff_size`) we wrote to calculate effect sizes both with plug-in estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R. 
+Before we go any further, and show how well SAFE works compared to plug-in methods, let's look at a function (`eff_size`) we wrote to calculate effect sizes both with plug-in estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R.
 
 This function returns a data.table (basically a *fast* data.frame) with columns for plug-in effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
 
@@ -419,9 +424,9 @@ eff_size()
 
 ```
 
-To store results simply assign the output to an object in R. You will then be able to access the results as a data.table. 
+To store results simply assign the output to an object in R. You will then be able to access the results as a data.table.
 
-::: {.callout-tip}
+::: callout-tip
 ## eff_size() function arguments
 
 -   `...`: Named vectors (numeric) of the variables required by the selected effect size (run `eff_size()` for a list of accepted effect sizes). All supplied vectors must have identical lengths. The required variable names depend on `effect_type` and must match the `vars_required` field for that effect in `data/effect_size_formulas.csv` (see `eff_size()`). If a paired design is requested and `r` is not supplied, it defaults to 0.5; for non-paired designs, `r` defaults to 0.
@@ -439,7 +444,6 @@ To store results simply assign the output to an object in R. You will then be ab
 -   `SAFE_distribution`: Character or `NULL.` Simulation family to use for SAFE. Must match a `sim_family` value in the formulas table. If `NULL` and the chosen `effect_type` has a default simulation family (`default_safe_family == "yes"`), that default is used. If no default is defined, the function does not alter the filtered formulas.
 
 -   `sigma_matrix`: List or `NULL.` Optional list of per-observation variance–covariance matrices used by SAFE (length equal to the number of rows implied by `...`). Each element should be a symmetric, positive definite matrix conformable with the simulated parameter vector required by the chosen effect formula. If `NULL`, internal defaults are used.
-
 :::
 
 # How good is SAFE?
@@ -1746,4 +1750,5 @@ ggplot(data = sub_dat,
 ```
 
 # Conclusion
+
 SAFE bootstrapping is a remarkably simple way to calculate bias-corrected point estimates and sampling variances for meta-analyses. Based on our simulations, this method performs similarly to plugin estimates and requires only 1e5 (though 1e6 is marginally better) bootstraps. SAFE allows researchers to calculate sampling variance for custom effect sizes with only minimal statistical knowledge (and without spooky derivatives).
