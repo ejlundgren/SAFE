@@ -145,7 +145,7 @@ set.seed(2025)
 
 # Define the variables
 x <- 15   # The mean latency time
-sd <- 4.6 # standard deviation of latency time
+sd <- 1.6 # standard deviation of latency time
 n <- 25   # sample size, e.g., number of animals in the experiment
 
 # Simulate a vector of hyperparameters (or cloud)
@@ -217,13 +217,15 @@ We'll compare these results below (@compare-results) to see whether SAFE provide
 
 ### Step 4: Calculate the bias-corrected effect size
 
-It may seem that we could just take the mean of this transformed cloud of hyperparameters to obtain an unbiased estimate of our effect size. However, due to Jensen's inequality, we cannot. Jensen's inequality states that applying any function (such as `1/x`) to the mean of a distribution does not equal taking the mean of that same function applied to the  distribution (@eq-inequality).
+It may seem that we could just take the mean of this transformed cloud of hyperparameters to obtain an unbiased estimate of our effect size. However, due to Jensen's inequality, we cannot. Jensen's inequality states that applying any function (such as `1/x`) to the *mean* of a distribution does not equal taking the *mean* of that same function **applied** to the distribution.
 
 $$
 f(\bar{x}) \neq \bar{f(x)}
 $$ {#eq-inequality}
 
 We can demonstrate in `R` as follows. Here we'll compare the transformed hyperparameter cloud (`cloud_trans`) to our plug-in estimate (`1/x`) and to the mean of our hyperparameter cloud (`mean(cloud_trans)`):
+
+*Can people double check that I'm thinking about this correctly?*
 
 ```{r}
 #| label: compare-estimates
@@ -246,7 +248,7 @@ $$
 \widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{truth}}
 $$ {#eq-bias}
 
-Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{truth}}$ is the true value. However, we do not know what the 'true' value is, given that our mean is a sample mean and the underlying population mean is unknowable. We thus use the plug-in estimate as surrogate for 'truth' (@eq-bias).
+Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{truth}}$ is the true value. However, we do not know what the 'true' value is, given that our mean is a sample mean and the underlying population mean is unknowable. We thus use the plug-in estimate as surrogate for 'truth'.
 
 $$
 \widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{plugin}}
@@ -258,7 +260,7 @@ We now use this estimate of bias to correct our plug-in estimate. Note that this
 
 If the bootstrapped estimate is larger than the plug-in estimate, then the plug-in estimate is biased low, and we need to push it up. If the bootstrapped estimate is smaller than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it down.
 
-Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate (@eq-bc):
+Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate:
 
 $$
 \hat{\theta}_{\text{bc}} = \hat{\theta}_{\text{plugin}} - \widehat{\text{bias}}
@@ -348,8 +350,8 @@ To begin, let's imagine that a population has a true population mean latency tim
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-guide <- data.table(true_mean = 15,
-                    true_sd = 4.6,
+guide <- data.table(true_mean = 10.5,
+                    true_sd = 1.2,
                     sample_n = c(5, 15, 100),
                     scenario_id = paste0("scenario_", seq(1:3)))
 guide
@@ -381,6 +383,7 @@ res <- foreach(i = 1:monte_carlo_N,
   # This lapply will cycle through each scenario:
  results  <- lapply(1:nrow(guide), function(x){
    
+   # Draw sample data with standard deviation and sample_n:
    sample <- rnorm(guide$sample_n[x],               # number of samples
                      mean = guide$true_mean[x],     # true mean latency time
                      sd = guide$true_sd[x])         # standard deviation
@@ -508,7 +511,7 @@ ggplot(data = point.bias.long,
   geom_point(size = 2)+
   xlab("Sample size")+
   ylab("Point estimate bias")+
-  coord_cartesian(ylim = c(-0.003, 0.003))+
+  coord_cartesian(ylim = c(-0.001, 0.001))+
   scale_color_manual("Estimator",
                        labels = c("plugin_bias" = "Plug-in bias",
                                   "bias_corrected_safe_bias" = "SAFE\n(bias-corrected)",
@@ -570,9 +573,9 @@ setorder(var.bias.long, sample_n)
 # Plot
 ggplot(data = var.bias.long, 
        aes(x = sample_n, y = value, color = Estimator))+
+  geom_hline(yintercept = 0)+
   geom_path(linewidth = 1)+
   geom_point(size = 2)+
-  # geom_hline(yintercept = 0)+
   xlab("Sample size")+
   ylab("Relative bias (%) in variance estimates")+
   scale_color_manual("Estimator",
@@ -590,23 +593,15 @@ ggplot(data = var.bias.long,
         strip.background = element_blank(),
         legend.position = "bottom")
 
-
-
-range(res$vi_safe)
-#' [CRAZY HIGH VALUES]
-range(round(res[vi_safe > 10, ]$vi_safe))
-#' [HOW DID THIS HAPPEN???]
-
-
 ```
 
-We see here that SAFE (red) is slightly more biased, but in a conservative direction, than the other estimators.
+We see here that SAFE (red) is slightly more biased than the plug-in variance formula we derived. However, the difference is marginal and more conservative, given that higher sampling variance means lower weights in the meta-analytic model.
 
-We've conducted full Monte Carlo simulations for a variety of effect sizes @Monte-Carlo-results. These are below. However, first, we'll show how an analyst might use SAFE to calculate custom effect sizes and sampling variances.
+We've conducted full Monte Carlo simulations for a variety of effect sizes @Monte-Carlo-results. These are below (@Monte-Carlo-results). However, first, we'll demonstrate how a meta-analyst might use SAFE to calculate point estimates and sampling variances for custom effect sizes.
 
 ## Creating custom effect sizes {#custom-effect-sizes}
 
-The greatest draw of the SAFE method is its applicability to a variety of custom effect sizes that researchers may want to use for particular meta-analyses. After all, in order to conduct a meta-analysis one requires a measure of sampling variance. Deriving this sampling variance is non-trivial for many researchers as it requires using the Delta method and is difficult to confirm or validate. Let's try using SAFE for the temperature coefficient Q~10~.
+The greatest draw of the SAFE method is its applicability to a variety of custom effect sizes that researchers may want to use for particular meta-analyses. After all, in order to conduct a meta-analysis, one requires a measure of sampling variance to use as a model weight. Deriving this sampling variance is non-trivial as it requires using the Delta method and is difficult to confirm or validate. Let's try using SAFE for the temperature coefficient Q~10~.
 
 ### The Q~10~ Temperature Coefficient
 
