@@ -533,7 +533,6 @@ Now, let's calculate the bias of our sampling variance estimates. Interestingly,
 
 To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above but then dividing by the estimand and multiplying by 100. 
 
-*THESE RESULTS ARE NOW WAYYY OFF COMPARED TO THE FULL SIMULATIONS. THERE ARE SOME CRAZY HIGH VALUES in SAFE_VI THAT ARE CAUSING IT)
 ```{r, calc_rel_bias}
 #| label: calc_rel_bias
 #| eval: true
