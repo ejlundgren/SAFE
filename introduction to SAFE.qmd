@@ -224,8 +224,6 @@ $$ {#eq-inequality}
 
 We can demonstrate in `R` as follows. Here we'll compare the transformed hyperparameter cloud (`cloud_trans`) to our plug-in estimate (`1/x`) and to the mean of our hyperparameter cloud (`mean(cloud_trans)`):
 
-*Can people double check that I'm thinking about this correctly?*
-
 ```{r}
 #| label: compare-estimates
 #| eval: true
@@ -234,13 +232,13 @@ We can demonstrate in `R` as follows. Here we'll compare the transformed hyperpa
 
 ggplot()+
   geom_density(aes(x = cloud_trans), fill = "grey80")+
-  geom_vline(xintercept = plugin_effect_size, color = "green")+
+  geom_vline(xintercept = plugin_effect_size, color = "red")+
   geom_vline(xintercept = mean(cloud_trans), color = "blue")+
   theme_SAFE
 
 ```
 
-As you can see, the mean of transformed parameter cloud (blue vertical line) is slightly higher than our plug-in effect size (green line) because the transformed cloud's distribution is somewhat skewed. The difference between these two estimates is the bias that we need to correct for to arrive at a bias-corrected point estimate.
+As you can see, the mean of transformed parameter cloud (blue vertical line) is slightly higher than our plug-in effect size (red line) because the transformed cloud's distribution is somewhat skewed. The difference between these two estimates is the bias that we need to correct for to arrive at a bias-corrected point estimate.
 
 We must therefore calculate an estimate of this bias and use this to correct our estimate. Bias measures how different the bootstrapped estimate is from the 'true value' and is calculated with the following formula:
 
