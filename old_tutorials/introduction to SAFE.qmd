@@ -85,15 +85,6 @@ groundhog.library(pkg = c("data.table", "MASS", "crayon",
                           "ggplot2", "patchwork", "scico"),
                   date = "2025-04-15")
 
-# Also, we'll create a theme object for ggplots to make code more readable:
-theme_SAFE <- theme_bw()+
-  theme(panel.border = element_blank(),
-        plot.title = element_text(hjust = 0.5),
-        plot.subtitle = element_text(hjust = 0.5),
-        panel.grid = element_blank(),
-        strip.background = element_blank())
-
-
 ```
 
 # An introduction to SAFE bootstrapping
@@ -102,22 +93,20 @@ SAFE bootstrapping is an incredible, seemingly magical, technique to calculate b
 
 ## How does it work?
 
-With SAFE bootstrapping, one draws a cloud (or vector) of *hyperparameters* of all variables used in an effect size formula. You then apply your effect size formula to this cloud. The variance of this transformed cloud is the sampling variance of your effect size!
+With SAFE bootstrapping, one draws a vector (or cloud) of *hyperparameters* of all variables used in an effect size formula. You then apply your effect size formula to this vector The variance of this transformed cloud is the sampling variance of your effect size!
 
 You can then calculate a bias-transformed point estimate by taking the mean of this transformed cloud and subtracting it from 2 times the point estimate derived from the original variables.
 
 Let's demonstrate.
 
-Imagine you're conducting a meta-analysis of animal responses to a stressor. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with a single mean latency time, and associated standard deviation and sample size, and convert it to our new 'speed' effect size.
+Imagine you're conducting a meta-analysis of animal responses to a stressor. Many studies are reporting data as mean 'latency time' (e.g., time until an animal runs). However, you want to create an effect size of 'speed' from latency time. This is simple: take the inverse of latency (`1/latency`). Here let's start with three mean latency times and convert to our new 'speed' effect size.
 
 ```{r, speed_example}
 #| label: speed_example
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
 # The type of data summaries you might extract for a meta-analysis:
-mean_latency <- 15
-n <- 25
-sd <- 4.6
+mean_latency <- c(15, 30, 21)
+           n <- c(25, 31, 50)
+          sd <- c(4.6, 3.1, 2.5)
 
 # New effect size:
 1/mean_latency
@@ -126,7 +115,7 @@ sd <- 4.6
 
 The effect size is trivial to calculate. But what is the sampling variance of this effect size, given that each of these measurements was associated with measurement sample size and standard deviation?
 
-You could use calculus to derive a first-order sampling variance formula. Or you could use SAFE.
+You could use calculus to derive a first-order sampling variance formula. Or you could use SAFE bootstrapping.
 
 ### Step 1: Draw hyperparameters.
 
@@ -138,14 +127,13 @@ To convert our 'latency' time to our 'speed' effect size with SAFE, let's draw 1
 
 ```{r, speed_cloud}
 #| label: speed_cloud
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
+
 # Set seed for reproducibility
 set.seed(2025)
 
 # Define the variables
 x <- 15   # The mean latency time
-sd <- 1.6 # standard deviation of latency time
+sd <- 4.6 # standard deviation of latency time
 n <- 25   # sample size, e.g., number of animals in the experiment
 
 # Simulate a vector of hyperparameters (or cloud)
@@ -167,8 +155,7 @@ These transformed values are centered on our original effect size, which we'll o
 
 ```{r, speed_transform}
 #| label: speed_transform
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
+
 # Transform the cloud to our effect size
 cloud_trans <- 1/cloud
 
@@ -178,10 +165,8 @@ plugin_effect_size <- 1/x
 plugin_effect_size
 
 # Compare plug-in effect size to transformed cloud of hyperparameters:
-ggplot()+
-  geom_density(aes(x = cloud_trans), fill = "grey80")+
-  geom_vline(xintercept = plugin_effect_size, color = "red")+
-  theme_SAFE
+hist(cloud_trans, main = "Transformed hyperparameter cloud")
+abline(v = plugin_effect_size, col = "red")
 
 ```
 
@@ -192,75 +177,26 @@ To calculate sampling variance, we'll simply calculate the variance of this tran
 ```{r, speed_samplevar}
 #| label: speed_samplevar
 #| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
 safe_vi <- var(cloud_trans)
 
+safe_vi
 ```
 
 Voilà! Sampling variance for a novel effect size. Pretty magical right?
 
-We can compare this to sampling variance calculated using the Delta method on our `1/x` effect size:
-
-```{r, delta_method}
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-# Delta method sampling variance:
-(sd^2 / n) * (-1 * x ^ -2)^2
-
-# SAFE method:
-safe_vi
-```
-We'll compare these results below (@compare-results) to see whether SAFE provides as good of an estimate as this 'plug-in' estimate of sampling variance.
-
 ### Step 4: Calculate the bias-corrected effect size
 
-It may seem that we could just take the mean of this transformed cloud of hyperparameters to obtain an unbiased estimate of our effect size. However, due to Jensen's inequality, we cannot. Jensen's inequality states that applying any function (such as `1/x`) to the *mean* of a distribution does not equal taking the *mean* of that same function **applied** to the distribution.
+Given small sample sizes for some measurements, and the knowledge that point estimates can be biased at low N, let's also calculate a bias-corrected point estimate from this cloud of hyperparameters. We'll introduce the formulas again here to build some of the logic about how we arrive at the `2*plugin - mean(cloud)` formula you see in the code chunk below.
 
-$$
-f(\bar{x}) \neq \bar{f(x)}
-$$ {#eq-inequality}
-
-We can demonstrate in `R` as follows. Here we'll compare the transformed hyperparameter cloud (`cloud_trans`) to our plug-in estimate (`1/x`) and to the mean of our hyperparameter cloud (`mean(cloud_trans)`):
-
-*Can people double check that I'm thinking about this correctly?*
-
-```{r}
-#| label: compare-estimates
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-ggplot()+
-  geom_density(aes(x = cloud_trans), fill = "grey80")+
-  geom_vline(xintercept = plugin_effect_size, color = "green")+
-  geom_vline(xintercept = mean(cloud_trans), color = "blue")+
-  theme_SAFE
-
-```
-As you can see, the mean of transformed parameter cloud (blue vertical line) is slightly higher than our plug-in effect size (green line) because the transformed cloud's distribution is somewhat skewed. The difference between these two estimates is the bias that we need to correct for to arrive at a bias-corrected point estimate.
-
-We must therefore calculate an estimate of this bias and use this to correct our estimate. Bias measures how different the bootstrapped estimate is from the 'true value' and is calculated with the following formula: 
+Recall that bias is measuring how different the bootstrapped estimate is from the true value. In this case, not knowing the true value, we use the plug-in estimate as surrogate for 'truth' (@eq-bias).
 
 $$
 \widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{truth}}
 $$ {#eq-bias}
 
-Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{truth}}$ is the true value. However, we do not know what the 'true' value is, given that our mean is a sample mean and the underlying population mean is unknowable. We thus use the plug-in estimate as surrogate for 'truth'.
+Where, $\bar{\theta}^*$ is the average of the bootstrapped estimates and $\hat{\theta}_{\text{truth}}$ is the true value. However, since the true value is unknown, we here use the plug-in value as a surrogate. If the bootstrapped estimate is larger than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it up. If the bootstrapped estimate is smaller than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it down. Note that this is very confusing because we are treating the plug-in as both 'truth' and as an estimate that needs to be corrected.
 
-$$
-\widehat{\text{bias}} = \bar{\theta}^* - \hat{\theta}_{\text{plugin}}
-$$
-
-This estimate of bias captures the difference between the mean of our transformed cloud of hyperparameters and the plug-in estimate, which we treat as 'truth' (also known as the 'estimand', which we will explain in more detail below).
-
-We now use this estimate of bias to correct our plug-in estimate. Note that this is very confusing because we are treating the plug-in as both 'truth' and as an estimate that needs to be corrected.
-
-If the bootstrapped estimate is larger than the plug-in estimate, then the plug-in estimate is biased low, and we need to push it up. If the bootstrapped estimate is smaller than the plug-in estimate, then the plug-in estimate is biased high, and we need to push it down.
-
-Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate:
+Bias corrected estimates just subtract this bias to correct the point estimate. In other words, the adjustment needed depends on the magnitude of difference and sign of the bias. We can substitute the bias into the following formula for bias-corrected estimate (@eq-bc):
 
 $$
 \hat{\theta}_{\text{bc}} = \hat{\theta}_{\text{plugin}} - \widehat{\text{bias}}
@@ -283,7 +219,7 @@ safe_yi <- (2 * plugin_effect_size) - mean(cloud_trans)
 safe_yi
 ```
 
-We can now compare our plug-in effect size to our bias-corrected SAFE effect size:
+We can now compare our plug-in effect size to our SAFE effect size:
 
 ```{r, speed_plugin_effect_size}
 #| label: speed_plugin_effect_size
@@ -292,319 +228,11 @@ plugin_effect_size
 
 ```
 
-So similar! And potentially less biased. Let's find out using Monte Carlo simulations where we compare the bias of estimates from SAFE to plug-in estimates. We'll also demonstrate that the SAFE bias correction works by looking at the bias of the uncorrected mean of our SAFE bootstraps estimates. Note, that after these simulations we provide a guide (@custom-effect-sizes) on how to use SAFE for custom effect sizes for which there may be no documented variance formula. 
+So similar! And potentially less biased. We'll find out later, where we report the results of Monte Carlo simulations that compare the bias of estimates from SAFE to estimates from just plugging into formulas. But first, let's use SAFE to calculate variance for a more realistic custom effect size.
 
-# How good is SAFE? {#compare-results}
+## Q~10~ Temperature Coefficient
 
-We simulated the bias of SAFE calculations versus normal plug-in calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps. 
-
-In these simulations, we created simulated datasets based on true values for each scenario. These true values are the *population means*, of which each *sample mean* is drawn from based on the scenario sample size. We then calculated effect sizes and sampling variances (both with plug-in formulas and SAFE) for the true values and based on the simulated datasets. We did this 1e5 times for each scenario.
-
-In these Monte Carlo simulations, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data. We'll explain the difference between estimands, estimators, and estimates below.
-
-To illustrate, we'll do a simulation for our 'speed' effect size `1/x`. Note that we'll do this for only 1 effect size (e.g., mean, SD combination) but across several sample sizes, to illustrate how bias decreases with sample size.
-
-To speed things up we will do this in parallel. The function `prepare_cluster()` below can help set things up, including a progress bar so you don't lose your mind wondering what's going on in there.
-
-```{r, prepare_cluster}
-#| label: prepare_cluster
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-set.seed(2025)
-
-# Prepare cluster:
-prepare_cluster <- function(n){
-    require("parallel")
-    require("foreach")
-    require("doSNOW")
-    
-    nCores <- parallel::detectCores() -1 
-    cl <- makeCluster(nCores)
-    registerDoSNOW(cl)
-    
-    # Progress bar
-    pb <- txtProgressBar(max = n, style = 3)
-    progress <- function(n) setTxtProgressBar(pb, n)
-    opts <- list(progress = progress)
-    ret <- list(opts, pb, cl)
-    names(ret) <- c("options", "progress", "cluster")
-    
-    return(ret)
-    
-    cat("Pass 'x$options' to .opts in foreach;
-      'x$progress' to setTxtProgressBar(x$progress, i);
-      'x$cluster' to stopCluster(x$cluster) after foreach")
-}
-
-```
-
-Now we will run 10,000 simulations to showcase how this method works. The actual simulations had a length of 1e5 and are loaded and visualized below (@Monte-Carlo-results). 
-
-To begin, let's imagine that a population has a true population mean latency time of 15 and a true standard deviation of 4.6. This population was sampled with varying degrees of effort, and thus sample sizes of 5, 15, and 100. These sample sizes will be used to create our simulated dataset.
-
-```{r}
-#| label: scenario
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-guide <- data.table(true_mean = 10.5,
-                    true_sd = 1.2,
-                    sample_n = c(5, 15, 100),
-                    scenario_id = paste0("scenario_", seq(1:3)))
-guide
-
-```
-
-### Monte Carlo simulation
-We'll run this Monte Carlo simulation in a foreach loop for 1e5 iterations. Note that since we're doing this simulation for 3 different sample sizes, we need to do the simulation in an `lapply` inside our foreach loop. In this lapply, we'll create simulated datasets sampled 5, 15, and 100 based on the 'true' mean and standard deviation. Given that sample sizes vary between our scenarios, each simulated dataset will be of a different length (and more different than our 'true' mean).
-
-This data is then summarized to a sample mean and standard deviation from which we will calculate effect sizes and sampling variances for the simulated values with both plug-in and SAFE methods. This is approximating reality, wherein researchers are estimating a 'true' value in the world by taking samples of it, and the job of the meta-analyst is to compare their results while accounting for differences in sampling variance. 
-
-Note that if you're running this code interactively, this can take a minute. Feel free to load the already run dummy dataset in the next code block.
-
-```{r, monte_carlo}
-#| label: monte_carlo
-#| eval: false
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-  
-monte_carlo_N <- 1e5
-
-clust_out <- prepare_cluster(n = monte_carlo_N)
-
-res <- foreach(i = 1:monte_carlo_N, 
-       .options.snow = clust_out$options,
-       .errorhandling = "pass",
-       .packages = c("data.table", "MASS", "tmvtnorm")) %dopar% {
-         
-  # This lapply will cycle through each scenario:
- results  <- lapply(1:nrow(guide), function(x){
-   
-   # Draw sample data with standard deviation and sample_n:
-   sample <- rnorm(guide$sample_n[x],               # number of samples
-                     mean = guide$true_mean[x],     # true mean latency time
-                     sd = guide$true_sd[x])         # standard deviation
-
-   # Calculate sample mean/sd
-   sim_dat <- data.table(sim_mean = mean(sample),
-                         sim_sd = sd(sample),
-                         sample_n = length(sample),
-                         true_mean = guide$true_mean[x],
-                         true_sd = guide$true_sd[x],
-                         scenario_id = guide$scenario_id[x])
-   
-    # Now calculate plug-in effect sizes and sampling variances for each simulation sample:
-   sim_dat[, yi_plugin := 1/sim_mean]
-   sim_dat[, vi_plugin := (sim_sd^2 / sample_n) * (-1 * sim_mean ^ -2)^2]
-
-   # Now, calculate SAFE effect sizes and sampling variances. 
-   # First, create cloud of hyperparameters:
-   cloud <- rnorm(1e5,
-                  mean = sim_dat$sim_mean,    
-                  sd = sim_dat$sim_sd / sqrt(sim_dat$sample_n))
-   
-   # Transform cloud:
-   cloud_trans <- 1/cloud
-   
-   # Calculate SAFE sample variance and add to our 'sim_dat'
-   sim_dat[, vi_safe := var(cloud_trans)]
-   
-   # Calculate bias corrected SAFE point estimate and add to our 'sim_dat'
-   sim_dat[, yi_safe := (2 * yi_plugin) - mean(cloud_trans)]
-   
-   # And, for demonstration purposes, let's also record the uncorrected mean of our 'cloud_trans'
-   sim_dat[, mean_safe := mean(cloud_trans)]
-
-   # Return the results:
-   return(sim_dat)
- }) |> rbindlist()
- 
- setTxtProgressBar(clust_out$progress, i)
- 
- return(results)
-
-}
-stopCluster(clust_out$cluster)
-
-res <- rbindlist(res)  
-
-saveRDS(res, "builds/speed_simulation.Rds")
-
-```
-
-Or just load the simulation here:
-
-```{r, monte_carlo_load}
-#| label: monte_carlo_load
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-res <- readRDS("builds/speed_simulation.Rds")
-
-head(res, 3)
-
-```
-
-Now, let's add the 'true' effect size, based on the underlying *population mean* and *SD* to this dataset:
-
-```{r, true_values}
-#| label: true_values
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-res[, true_yi := 1/true_mean]
-
-```
-
-### Calculate bias
-
-To interpret the simulation results, it is essential to understand the difference between *estimands*, *estimators*, and *estimates*.
-
-**Estimands** are the 'true' values.
-
-**Estimators** are the methods used to estimate the estimand. What a tongue twister! In our case, the estimators are the 1st order effect size (e.g., definition formula), the 2nd order effect size that has been adjusted (usually using the delta method, except for Hedges' g) to reduce bias, and the SAFE method.
-
-**Estimates** are the estimates of the estimands produced by the estimators 🤠
-
-### Effect size (point estimate) bias
-
-In the case of our effect sizes, there are two estimands that we're interested in estimating: the 'true' effect size (based on the definition formula of the effect size type) and sampling variance. To calculate the bias of our various estimators in estimating effect sizes, we calculate the mean of the estimates from each simulated dataset and subtract the estimand value (the true effect size off the 'true' values).
-
-Here we will calculate the bias of 3 estimators: the plug-in (`yi_plugin`), the bias-corrected SAFE estimate (`yi_safe`), and the uncorrected SAFE mean (`mean_safe`):
-
-```{r, calc_bias}
-#| label: calc_bias
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-bias <- function(estimates, estimand){
-  return(mean(estimates) - unique(estimand))
-}
-
-point.bias <- res[, .(plugin_bias = bias(yi_plugin, true_yi),
-                      bias_corrected_safe_bias = bias(yi_safe, true_yi),
-                      uncorrected_safe_bias = bias(mean_safe, true_yi)),
-                  by = .(scenario_id, sample_n)] |> unique()
-head(point.bias)
-
-# Melt this to make it plottable:
-point.bias.long <- melt(point.bias,
-                        id.vars = c("scenario_id", "sample_n"),
-                        value.name = "bias",
-                        variable.name = "estimator")
-
-head(point.bias.long)
-
-# Sort by sample size 
-setorder(point.bias.long, sample_n)
-
-ggplot(data = point.bias.long,
-       aes(x = sample_n, y = bias, color = estimator))+
-  geom_hline(yintercept = 0)+
-  geom_path(linewidth = 1)+
-  geom_point(size = 2)+
-  xlab("Sample size")+
-  ylab("Point estimate bias")+
-  coord_cartesian(ylim = c(-0.001, 0.001))+
-  scale_color_manual("Estimator",
-                       labels = c("plugin_bias" = "Plug-in bias",
-                                  "bias_corrected_safe_bias" = "SAFE\n(bias-corrected)",
-                                  "uncorrected_safe_bias" = "mean SAFE\n(uncorrected)"),
-                       values = c("plugin_bias" = "#A8DADC",
-                                   "bias_corrected_safe_bias" = "#E63946",
-                                   "uncorrected_safe_bias" = "#1D3557"))+
-  theme_bw()+
-  theme(panel.border = element_blank(),
-        panel.grid = element_blank(),
-        legend.position = "bottom")
-
-```
-
-Wow! It looks like the bias-corrected SAFE estimate is the least biased estimator of our true effect size. 
-
-### Sampling variance bias
-Now, let's calculate the bias of our sampling variance estimates. Interestingly, there is no way to know the 'true' estimand for sampling variance because sampling variance itself is a product of sampling (e.g., there is no true value). To estimate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 2 estimators and thus 2 estimands, we'll thus end up with 4 calculations of bias.
-
-To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above but then dividing by the estimand and multiplying by 100. 
-
-```{r, calc_rel_bias}
-#| label: calc_rel_bias
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-# First, calculate variance in point estimates as our 'estimand' by scenario_id
-res[, var_estimand_plugin := var(yi_plugin), 
-    by = .(scenario_id, sample_n)]
-res[, var_estimand_SAFE := var(yi_safe), 
-    by = .(scenario_id, sample_n)]
-
-# To make this easier to read, we'll encapsulate the relative bias in a function:
-relative_bias <- function(estimates,
-                          estimand){
-  ((mean(estimates) - estimand ) / estimand) * 100
-}
-
-# Now summarize by calculating relative bias per scenario ID and sample size
-var.bias <- res[, .(SAFE_estimate.plugin_estimand = relative_bias(vi_safe, unique(var_estimand_plugin)),
-                    SAFE_estimate.SAFE_estimand = relative_bias(vi_safe, unique(var_estimand_SAFE)),
-                    plugin_estimate.plugin_estimand = relative_bias(vi_plugin, unique(var_estimand_plugin)),
-                    plugin_estimate.SAFE_estimand = relative_bias(vi_plugin, unique(var_estimand_SAFE))),
-    by = .(scenario_id, sample_n)] |> unique()
-
-# Now melt:
-var.bias.long <- melt(var.bias,
-                      id.vars = c("scenario_id", "sample_n"))
-head(var.bias.long)
-
-# Split the 'variable' into estimator and estimand for plotting
-var.bias.long[, c("Estimator", "Estimand") := tstrsplit(variable, ".", fixed = TRUE)]
-
-# Sort the dataset by sample size
-setorder(var.bias.long, sample_n)
-
-# Plot
-ggplot(data = var.bias.long, 
-       aes(x = sample_n, y = value, color = Estimator))+
-  geom_hline(yintercept = 0)+
-  geom_path(linewidth = 1)+
-  geom_point(size = 2)+
-  xlab("Sample size")+
-  ylab("Relative bias (%) in variance estimates")+
-  scale_color_manual("Estimator",
-                     labels = c("plugin_estimate" = "Plug-in\n(definition formula)",
-                                "SAFE_estimate" = "SAFE bootstrapping"),
-                     values = c("plugin_estimate" = "#A8DADC",
-                                "SAFE_estimate" = "#E63946"))+
-  facet_wrap(~Estimand,
-             ncol = 1,
-             labeller = as_labeller(c("plugin_estimand" = "Plug-in estimand\n(definition formula)",
-                                      "SAFE_estimand" = "SAFE estimand")))+
-  theme_bw()+
-  theme(panel.border = element_blank(),
-        panel.grid = element_blank(),
-        strip.background = element_blank(),
-        legend.position = "bottom")
-
-```
-
-We see here that SAFE (red) is slightly more biased than the plug-in variance formula we derived. However, the difference is marginal and more conservative, given that higher sampling variance means lower weights in the meta-analytic model.
-
-We've conducted full Monte Carlo simulations for a variety of effect sizes @Monte-Carlo-results. These are below (@Monte-Carlo-results). However, first, we'll demonstrate how a meta-analyst might use SAFE to calculate point estimates and sampling variances for custom effect sizes.
-
-## Creating custom effect sizes {#custom-effect-sizes}
-
-The greatest draw of the SAFE method is its applicability to a variety of custom effect sizes that researchers may want to use for particular meta-analyses. After all, in order to conduct a meta-analysis, one requires a measure of sampling variance to use as a model weight. Deriving this sampling variance is non-trivial as it requires using the Delta method and is difficult to confirm or validate. Let's try using SAFE for the temperature coefficient Q~10~.
-
-### The Q~10~ Temperature Coefficient
-
-Q~10~ is a widely used measure of temperature sensitivity of chemical reactions or biological processes. Q~10~ compares the rate of a process between 2 temperature treatment groups. The formula for Q~10~ is:
+Our speed example above is very simple. How would one use SAFE to calculate bias-corrected point estimates and variance for a more scientifically interesting and challenging effect size? Let's take a look at the temperature coefficient Q~10~. Q~10~ is a widely used measure of temperature sensitivity of chemical reactions or biological processes. Q~10~ compares the rate of a process between 2 temperature treatment groups. The formula for Q~10~ is:
 
 $$
 Q_{\text10} = (R_{\text2} / R_{\text{1}})^{10/(T_{\text2}-T_{\text1})}
@@ -732,9 +360,416 @@ If you want to use SAFE for other custom effect sizes, you'd follow a similar pr
 
 After making those decisions, simply follow the 4 steps to 'SAFEty'. 🙃
 
-## Full Monte Carlo results {#Monte-Carlo-results}
+## Load functions
 
-Now let's look at the rest of the simulation results for a variety of effect sizes.
+Before we go any further, and show how well SAFE works compared to plug-in methods, let's look at a function (`eff_size`) we wrote to calculate effect sizes both with plug-in estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R.
+
+This function returns a data.table (basically a *fast* data.frame) with columns for plug-in effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
+
+Here, we'll demonstrate with the effect size 'lnRoM', or log-transformed ratio of means, which is a commonly used effect size to compare control and experimental groups.
+
+```{r, safe_function_loRom}
+#| label: safe_function_loRom
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+source("scripts/SAFE_function.R")
+
+# Set seed for reproducibility
+set.seed(2025)
+
+# For a single effect size and sampling variance:
+eff_size(x1 = 14.5, x2 = 7.9, 
+         sd1 = 1.3, sd2 = 2,
+         n1 = 20, n2 = 20, 
+         effect_type = "lnRoM",
+         SAFE = TRUE,
+         verbose = TRUE,
+         SAFE_boots = 1e6)
+
+```
+
+The function also works with a vector of raw data:
+
+```{r, safe_function_loRom_raw}
+#| label: safe_function_loRom_raw
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+eff_size(x1 = c(14.5, 13, 15.8), 
+         x2 = c(7.9, 21, 18.4), 
+         sd1 = c(1.3, 2, 1.9), 
+         sd2 = c(2, 3.1, 1.4),
+         n1 = c(20, 20, 20), 
+         n2 = c(20, 15, 18), 
+         effect_type = "SMD",
+         SAFE = TRUE,
+         verbose = FALSE,
+         parallelize = TRUE,
+         SAFE_boots = 1e6)
+
+```
+
+For a full list of options that `eff_size` can calculate, run:
+
+```{r, eff_sizes_lookup}
+#| label: eff_sizes_lookup
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+eff_size()
+
+```
+
+To store results simply assign the output to an object in R. You will then be able to access the results as a data.table.
+
+::: callout-tip
+## eff_size() function arguments
+
+-   `...`: Named vectors (numeric) of the variables required by the selected effect size (run `eff_size()` for a list of accepted effect sizes). All supplied vectors must have identical lengths. The required variable names depend on `effect_type` and must match the `vars_required` field for that effect in `data/effect_size_formulas.csv` (see `eff_size()`). If a paired design is requested and `r` is not supplied, it defaults to 0.5; for non-paired designs, `r` defaults to 0.
+
+-   `effect_type`: Character (scalar). Name of the effect size to compute, matching a `name` value in `data/effect_size_formulas.csv` (run `eff_size()` for accepted effect size names). If no effect size name is provided, the function returns a lookup table of available effect sizes and their required variables and exits.
+
+-   `SAFE`: Logical. If `TRUE` (default), perform SAFE bias correction using parametric bootstrap draws specified by `SAFE_boots`. If `FALSE`, only the plug-in effect(s) are returned.
+
+-   `SAFE_boots`: Integer. Number of bootstrap samples used by SAFE (10\^6 by default). Larger values improve precision but increase run time. Used only when `SAFE = TRUE`.
+
+-   `parallelize`: Logical. If `TRUE` (default), SAFE calculations are parallelized over observations via `parallel::mclapply`, using `detectCores() - 1` workers. Set to `FALSE` to run SAFE serially. Note: `mclapply` uses forking (Unix/macOS); on Windows this may fall back to single-core behavior.
+
+-   `verbose`: Logical. If `TRUE` (default), prints the selected formulas, special warnings attached to the effect type (e.g., handling of zeros or negatives), and SAFE progress messages.
+
+-   `SAFE_distribution`: Character or `NULL.` Simulation family to use for SAFE. Must match a `sim_family` value in the formulas table. If `NULL` and the chosen `effect_type` has a default simulation family (`default_safe_family == "yes"`), that default is used. If no default is defined, the function does not alter the filtered formulas.
+
+-   `sigma_matrix`: List or `NULL.` Optional list of per-observation variance–covariance matrices used by SAFE (length equal to the number of rows implied by `...`). Each element should be a symmetric, positive definite matrix conformable with the simulated parameter vector required by the chosen effect formula. If `NULL`, internal defaults are used.
+:::
+
+# How good is SAFE?
+
+We simulated the bias of SAFE calculations versus normal plug-in calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps. The creation of these scenarios differed for each effect size (based on input variables). The scenarios can be loaded as follows. Let's look at the simulations for lnRoM:
+
+```{r, scenarios}
+#| label: scenarios
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+scenarios <- readRDS("builds/scenarios.Rds")
+
+# Subset scenarios:
+guide <- scenarios[effect_type == "lnRoM" &
+                     boots == 1e6, ]
+
+# Select some columns to preview:
+guide[, .(effect_type, scenario_id, boots,
+                   true_mean1, true_mean2, 
+                   true_sd1, true_sd2,
+                   sample_size1, sample_size2)]
+
+```
+
+To evaluate effect size performance, we conducted Monte Carlo simulations for each scenario. In these simulations, we created simulated datasets based on true values for each scenario. We then calculated effect sizes and sampling variances (both with plug-in formulas and SAFE) for the 'true' values and based on the simulated dataset. We did this 1e5 times for each scenario.
+
+In these Monte Carlo simulations, we were interested in bias, or the difference between the 'true' estimands (i.e., sampling variance and effect sizes) and the estimates (of sampling variance and effect sizes) produced from various methods and applied to the simulated data. We'll explain the difference between estimands, estimators, and estimates below.
+
+To illustrate, we'll do a dummy simulation for lnRoM. Note that the means/sd for each scenario are the same. The only variables that differ are sample sizes. To make this tractable, we'll only run 100 simulations.
+
+To speed things up we will do this in parallel. The function `prepare_cluster()` below can help set things up, including a progress bar so you don't lose your mind wondering what's going on in there.
+
+```{r, prepare_cluster}
+#| label: prepare_cluster
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+set.seed(2025)
+
+# Prepare cluster:
+prepare_cluster <- function(n){
+    require("parallel")
+    require("foreach")
+    require("doSNOW")
+    
+    nCores <- parallel::detectCores() -1 
+    cl <- makeCluster(nCores)
+    registerDoSNOW(cl)
+    
+    # Progress bar
+    pb <- txtProgressBar(max = n, style = 3)
+    progress <- function(n) setTxtProgressBar(pb, n)
+    opts <- list(progress = progress)
+    ret <- list(opts, pb, cl)
+    names(ret) <- c("options", "progress", "cluster")
+    
+    return(ret)
+    
+    cat("Pass 'x$options' to .opts in foreach;
+      'x$progress' to setTxtProgressBar(x$progress, i);
+      'x$cluster' to stopCluster(x$cluster) after foreach")
+}
+
+```
+
+Now we will run 100 simulations to showcase how this method works. The actual simulations had a length of 1e5 and are loaded and visualized below. The first part of this code (inside the `lapply`) creates simulated data based on 'true' means and standard deviations. This data is then summarized to a simulation mean and standard deviation. We will then calculate effect sizes and sampling variances for the 'true' values and simulated values. Note that even with only 100 iterations, this can take a minute, so feel free to load the already run dummy dataset in the next code block.
+
+```{r, monte_carlo}
+#| label: monte_carlo
+#| eval: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+  
+monte_carlo_N <- 100
+
+clust_out <- prepare_cluster(n = monte_carlo_N)
+
+res <- foreach(i = 1:monte_carlo_N, 
+       .options.snow = clust_out$options,
+       .errorhandling = "pass",
+       .packages = c("data.table", "MASS", "tmvtnorm")) %dopar% {
+         
+ # Calculate 'true' values from scenario:
+ true_point <- eff_size(x1 = guide$true_mean1, x2 = guide$true_mean2,
+                        sd1 = guide$true_sd1,  sd2 = guide$true_sd2,
+                        n1 = guide$sample_size1, n2 = guide$sample_size2, 
+                        effect_type = "lnRoM",
+                        SAFE = FALSE,
+                        verbose = FALSE,
+                        SAFE_boots = 1e6)
+ setnames(true_point,
+          c("yi_first", "vi_first", 
+            "yi_second", "vi_second"),
+          c("true_y_plugin_1st", "true_v_plugin_1st",
+            "true_y_plugin_2nd", "true_v_plugin_2nd"))
+ 
+  # Simulate data for each scenario in an lapply: 
+ sim_dat <- lapply(1:nrow(guide), function(x){
+   
+   # Simulate data for guide
+   sig <- diag(c(guide$true_sd1[x]^2,
+                 guide$true_sd2[x]^2))
+   
+   means <- c(m1 = guide$true_mean1[x],
+              m2 = guide$true_mean2[x])
+   
+   y <- rtmvnorm(n = max(c(guide$sample_size1[x], guide$sample_size2[x])),
+                 mean = means,
+                 sigma = sig,
+                 lower = rep(0, length(means)),
+                 upper = rep(Inf, length(means)),
+                 algorithm = "gibbs") |>
+     as.data.frame() |>
+     setDT()
+   names(y) <- c("m1", "m2")
+   
+   # Filter to number of samples per treatment
+   sim_dat <- list(x1 = y[1:guide$sample_size1[x], ]$m1,
+                   x2 = y[1:guide$sample_size2[x], ]$m2)
+   
+   sim_dat <- data.table(sim_mean1 = mean(sim_dat$x1),
+                         sim_mean2 = mean(sim_dat$x2),
+                         sim_sd1 = sd(sim_dat$x1),
+                         sim_sd2 = sd(sim_dat$x2),
+                         sim_sample_size1 = length(sim_dat$x1),
+                         sim_sample_size2 = length(sim_dat$x2))
+   return(sim_dat)
+ }) |> rbindlist()
+ 
+
+ out <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
+                 sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
+                 n1 = guide$sample_size1, n2 = guide$sample_size2, 
+                 effect_type = "lnRoM",
+                 SAFE = TRUE,
+                 verbose = FALSE,
+                 parallelize = FALSE,
+                 SAFE_boots = 1e6)
+ setnames(out,
+          c("yi_first", "vi_first", 
+            "yi_second", "vi_second"),
+          c("sim_y_plugin_1st", "sim_v_plugin_1st",
+            "sim_y_plugin_2nd", "sim_v_plugin_2nd"))
+ 
+ # Store results:
+ results <- data.table(guide,
+                       sim_dat,
+                       true_point,
+                       out)
+ 
+ setTxtProgressBar(clust_out$progress, i)
+ 
+ return(results)
+
+}
+stopCluster(clust_out$cluster)
+
+res <- rbindlist(res)  
+
+```
+
+Or just load the full simulation (1e5) here:
+
+```{r, monte_carlo_load}
+#| label: monte_carlo_load
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+res <- readRDS("builds/lnRoM_simulation.Rds")
+
+head(res, 3)
+
+```
+
+## Calculate bias
+
+To interpret the simulation results, it is essential to understand the difference between *estimands*, *estimators*, and *estimates*.
+
+**Estimands** are the 'true' values.
+
+**Estimators** are the methods used to estimate the estimand. What a tongue twister! In our case, the estimators are the 1st order effect size (e.g., definition formula), the 2nd order effect size that has been adjusted (usually using the delta method, except for Hedges' g) to reduce bias, and the SAFE method.
+
+**Estimates** are the estimates of the estimands produced by the estimators 🤠
+
+### Effect size (point estimate) bias
+
+In the case of our effect sizes, there are two estimands that we're interested in estimating: the 'true' effect size (based on the definition formula of the effect size type) and sampling variance. To calculate the bias of our various estimators in estimating effect sizes, we calculate the mean of the estimates from each simulated dataset and subtract the estimand value (the true effect size off the 'true' values).
+
+Here we will calculate bias in our estimates of effect sizes:
+
+```{r, calc_bias}
+#| label: calc_bias
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+bias <- function(estimates, estimand){
+  return(mean(estimates) - unique(estimand))
+}
+
+point.bias <- res[, .(plugin_1st = bias(sim_y_plugin_1st, true_y_plugin_1st),
+                      plugin_2nd = bias(sim_y_plugin_2nd, true_y_plugin_1st),
+                      safe = bias(yi_safe, true_y_plugin_1st)),
+                  by = .(scenario_id, sample_size1, sample_size2)] |> unique()
+head(point.bias)
+
+# Melt this to make it plottable:
+point.bias.long <- melt(point.bias,
+                        id.vars = c("scenario_id", "sample_size1", "sample_size2"),
+                        value.name = "bias",
+                        variable.name = "estimator")
+
+head(point.bias.long)
+
+# Sort by sample size 
+setorder(point.bias.long, sample_size1)
+
+ggplot(data = point.bias.long[sample_size1 == sample_size2, ],
+       aes(x = sample_size1, y = bias, color = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(linewidth = 1)+
+  xlab("Sample size")+
+  ylab("Bias")+
+  coord_cartesian(ylim = c(-0.01, 0.01))+
+  scale_color_manual("Estimator",
+                       labels = c("plugin_1st" = "1st order plugin\n(definition formula)",
+                                  "plugin_2nd" = "2nd order plugin\n(bias-corrected formula)",
+                                  "safe" = "SAFE bootstrapping"),
+                       values = c("plugin_1st" = "#A8DADC",
+                                   "plugin_2nd" = "#1D3557",
+                                   "safe" = "#E63946"))+
+  theme_bw()+
+  theme(panel.border = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "bottom")
+
+```
+
+This indicates that the least biased estimator is the first order definition formula (light blue). SAFE (red) and the 2nd order plug-in (navy blue) perform similarly. These bias values are incredibly small, indicating that all options are fair, except for at low sample sizes, when the first-order definition formula is quite biased.
+
+### Sampling variance bias
+
+Interestingly, there is no way to know the 'true' estimand for sampling variance because we typically only have one finite sample from a population. To calculate bias for our sampling variance estimates, we actually calculate the variance in point estimates for each estimator and use *each* of these as the estimand. With 3 estimators, and thus 3 estimands, we'll thus end up with 9 calculations of bias.
+
+To understand how well our approximation is performing for sampling variance, we typically calculate *relative bias* by calculating bias as above but then dividing by the estimand and multiplying by 100.
+
+```{r, calc_rel_bias}
+#| label: calc_rel_bias
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+# First, calculate variance in point estimates as our 'estimand'
+res[, var_estimand_1st := var(sim_y_plugin_1st), 
+    by = .(scenario_id)]
+res[, var_estimand_2nd := var(sim_y_plugin_2nd), 
+    by = .(scenario_id)]
+res[, var_estimand_SAFE := var(yi_safe), 
+    by = .(scenario_id)]
+
+# To make this easier to read, we'll encapsulate the relative bias in a function:
+relative_bias <- function(estimates,
+                          estimand){
+  return(((mean(estimates) - unique(estimand)) / estimand) * 100)
+}
+
+# Now summarize and calculate relative bias per scenario ID
+var.bias <- res[, .(SAFE_estimate.1st_estimand = relative_bias(vi_safe, var_estimand_1st),
+                    SAFE_estimate.2nd_estimand = relative_bias(vi_safe, var_estimand_2nd),
+                    SAFE_estimate.SAFE_estimand = relative_bias(vi_safe, var_estimand_SAFE),
+                    plugin_1st_estimate.1st_estimand = relative_bias(sim_v_plugin_1st, var_estimand_1st),
+                    plugin_1st_estimate.2nd_estimand = relative_bias(sim_v_plugin_1st, var_estimand_2nd),
+                    plugin_1st_estimate.SAFE_estimand = relative_bias(sim_v_plugin_1st, var_estimand_SAFE),
+                    plugin_2nd_estimate.1st_estimand = relative_bias(sim_v_plugin_2nd, var_estimand_1st),
+                    plugin_2nd_estimate.2nd_estimand = relative_bias(sim_v_plugin_2nd, var_estimand_2nd),
+                    plugin_2nd_estimate.SAFE_estimand = relative_bias(sim_v_plugin_2nd, var_estimand_SAFE)),
+    by = .(scenario_id, sample_size1, sample_size2)] |> unique()
+
+
+# Now melt:
+var.bias.long <- melt(var.bias,
+                      id.vars = c("scenario_id", "sample_size1", "sample_size2"))
+head(var.bias.long)
+
+# Split the 'variable' into estimator and estimand for plotting
+var.bias.long[, c("Estimator", "Estimand") := tstrsplit(variable, ".", fixed = TRUE)]
+
+# Sort the dataset by sample size
+setorder(var.bias.long, sample_size1)
+
+# Plot
+ggplot(data = var.bias.long[sample_size1 == sample_size2, ], 
+       aes(x = sample_size1, y = value, color = Estimator))+
+    geom_path(linewidth = 1)+
+  geom_hline(yintercept = 0)+
+  xlab("Sample size")+
+  ylab("Relative bias (%)")+
+  scale_color_manual("Estimator",
+                     labels = c("plugin_1st_estimate" = "1st order plugin\n(definition formula)",
+                                  "plugin_2nd_estimate" = "2nd order plugin\n(bias-corrected formula)",
+                                  "SAFE_estimate" = "SAFE bootstrapping"),
+                     values = c("plugin_1st_estimate" = "#A8DADC",
+                               "plugin_2nd_estimate" = "#1D3557",
+                               "SAFE_estimate" = "#E63946"))+
+  facet_wrap(~Estimand,
+             ncol = 1,
+             labeller = as_labeller(c("1st_estimand" = "1st order plugin estimand\n(definition formula)",
+                                    "2nd_estimand" = "2nd order plugin estimand",
+                                    "SAFE_estimand" = "SAFE estimand")))+
+  theme_bw()+
+  theme(panel.border = element_blank(),
+        panel.grid = element_blank(),
+        strip.background = element_blank(),
+        legend.position = "bottom")
+
+```
+
+We see here that SAFE (red) is slightly more biased, but in a conservative direction, than the other estimators.
+
+## Plot all simulations results
+
+Now let's look at the rest of the simulation results.
 
 ```{r, sim_all}
 #| label: sim_all
@@ -749,7 +784,9 @@ sim_results <- sim_results[boots == 1e6, ]
 
 ### Speed
 
-These are the full results of our 'speed' (`1/x`) effect size Monte Carlo simulation.
+This was our dummy effect size in the beginning. How do the point and variance estimates calculated by SAFE compare to just calculating 1 / x for point estimates?
+
+We compared the variance estimates from SAFE to variance estimates produced by a 1st-order derivative sampling variance formula derived with the delta method (denoted as 1st order plugin here). Let's see which did better!
 
 ```{r, themes}
 #| label: themes
@@ -1239,101 +1276,11 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
-
 # How many SAFE bootstraps?
 
-The SAFE method relies on bootstrapping to calculate effect size point estimates and sampling variance. It's sort of magical how well it works! But, how many bootstraps are necessary? Let's find out by doing another Monte Carlo simulation, this time of lnRoM---the log-transformed ratio of means, which is one of the most widely used effect sizes in ecology. This time, instead of calculating bias, we'll look at the standard deviation of the point and sampling variance estimates as we change the number of bootstraps.
+The SAFE method relies on bootstrapping to calculate effect size point estimates and sampling variance. It's sort of magical how well it works! But, how many bootstraps are necessary? Let's find out by doing another Monte Carlo simulation, again of lnRoM. This time, instead of calculating bias, we'll look at the standard deviation of the point and sampling variance estimates as we change the number of bootstraps.
 
-However, before we go any further, we'll load a function (`eff_size`) we wrote to calculate effect sizes both with plug-in estimators and with SAFE. This function can be sourced into the local environment. Let's load the function and then calculate effect sizes, with SAFE, for several examples from the main text. The function is located in the github repo at scripts/SAFE_function.R.
-
-### Load functions
-
-This function returns a data.table (basically a *fast* data.frame) with columns for plug-in effect sizes and sampling variances (denoted with `_first` or `_second` based on derivative order) and SAFE effect sizes and sampling variances (denoted with `_safe`). Point estimates (effect sizes) are denoted with `yi_` while sampling variances are denoted with `vi_`.
-
-Here, we'll demonstrate with the effect size 'lnRoM', or log-transformed ratio of means, which is a commonly used effect size to compare control and experimental groups.
-
-```{r, safe_function_loRom}
-#| label: safe_function_loRom
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-source("scripts/SAFE_function.R")
-
-# Set seed for reproducibility
-set.seed(2025)
-
-# For a single effect size and sampling variance:
-eff_size(x1 = 14.5, x2 = 7.9, 
-         sd1 = 1.3, sd2 = 2,
-         n1 = 20, n2 = 20, 
-         effect_type = "lnRoM",
-         SAFE = TRUE,
-         verbose = TRUE,
-         SAFE_boots = 1e6)
-
-```
-
-The function also works with a vector of raw data:
-
-```{r, safe_function_loRom_raw}
-#| label: safe_function_loRom_raw
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-eff_size(x1 = c(14.5, 13, 15.8), 
-         x2 = c(7.9, 21, 18.4), 
-         sd1 = c(1.3, 2, 1.9), 
-         sd2 = c(2, 3.1, 1.4),
-         n1 = c(20, 20, 20), 
-         n2 = c(20, 15, 18), 
-         effect_type = "SMD",
-         SAFE = TRUE,
-         verbose = FALSE,
-         parallelize = TRUE,
-         SAFE_boots = 1e6)
-
-```
-
-For a full list of options that `eff_size` can calculate, run:
-
-```{r, eff_sizes_lookup}
-#| label: eff_sizes_lookup
-#| eval: true
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-
-eff_size()
-
-```
-
-To store results simply assign the output to an object in R. You will then be able to access the results as a data.table.
-
-::: callout-tip
-### eff_size() function arguments
-
--   `...`: Named vectors (numeric) of the variables required by the selected effect size (run `eff_size()` for a list of accepted effect sizes). All supplied vectors must have identical lengths. The required variable names depend on `effect_type` and must match the `vars_required` field for that effect in `data/effect_size_formulas.csv` (see `eff_size()`). If a paired design is requested and `r` is not supplied, it defaults to 0.5; for non-paired designs, `r` defaults to 0.
-
--   `effect_type`: Character (scalar). Name of the effect size to compute, matching a `name` value in `data/effect_size_formulas.csv` (run `eff_size()` for accepted effect size names). If no effect size name is provided, the function returns a lookup table of available effect sizes and their required variables and exits.
-
--   `SAFE`: Logical. If `TRUE` (default), perform SAFE bias correction using parametric bootstrap draws specified by `SAFE_boots`. If `FALSE`, only the plug-in effect(s) are returned.
-
--   `SAFE_boots`: Integer. Number of bootstrap samples used by SAFE (10\^6 by default). Larger values improve precision but increase run time. Used only when `SAFE = TRUE`.
-
--   `parallelize`: Logical. If `TRUE` (default), SAFE calculations are parallelized over observations via `parallel::mclapply`, using `detectCores() - 1` workers. Set to `FALSE` to run SAFE serially. Note: `mclapply` uses forking (Unix/macOS); on Windows this may fall back to single-core behavior.
-
--   `verbose`: Logical. If `TRUE` (default), prints the selected formulas, special warnings attached to the effect type (e.g., handling of zeros or negatives), and SAFE progress messages.
-
--   `SAFE_distribution`: Character or `NULL.` Simulation family to use for SAFE. Must match a `sim_family` value in the formulas table. If `NULL` and the chosen `effect_type` has a default simulation family (`default_safe_family == "yes"`), that default is used. If no default is defined, the function does not alter the filtered formulas.
-
--   `sigma_matrix`: List or `NULL.` Optional list of per-observation variance–covariance matrices used by SAFE (length equal to the number of rows implied by `...`). Each element should be a symmetric, positive definite matrix conformable with the simulated parameter vector required by the chosen effect formula. If `NULL`, internal defaults are used.
-:::
-
-### SAFE bootstrap length
-We'll use this function to evaluate two bootstrap lengths: 100 and 1,000. 
-
-We'll run a Monte Carlo simulation 1,000 times just to make this easy. (See below for full 1e5 simulation results)
+Let's choose two bootstrap lengths: 100 and 1,000. We'll run a simulation 1,000 times just to make this easy. (See below for full 1e5 simulation results)
 
 ```{r, how_many_n_boots}
 #| label: how_many_n_boots
@@ -1802,7 +1749,6 @@ ggplot(data = sub_dat,
 
 ```
 
-
 # Conclusion
 
-SAFE bootstrapping is a remarkably simple and effective way to calculate bias-corrected point estimates and sampling variances for meta-analyses. Based on our simulations, this method performs similarly to plugin estimates and requires only 1e5 (though 1e6 is marginally better) bootstraps. SAFE allows researchers to calculate sampling variance for custom effect sizes with only minimal statistical knowledge (and without spooky Calculus).
+SAFE bootstrapping is a remarkably simple way to calculate bias-corrected point estimates and sampling variances for meta-analyses. Based on our simulations, this method performs similarly to plugin estimates and requires only 1e5 (though 1e6 is marginally better) bootstraps. SAFE allows researchers to calculate sampling variance for custom effect sizes with only minimal statistical knowledge (and without spooky derivatives).
