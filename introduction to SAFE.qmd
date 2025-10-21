@@ -212,7 +212,7 @@ We can compare this to sampling variance calculated using the Delta method on ou
 safe_vi
 ```
 
-We'll compare these results below (@compare-results) to see whether SAFE provides as good of an estimate as this 'plug-in' estimate of sampling variance.
+We'll compare these results below (@sec-compare-results) to see whether SAFE provides as good of an estimate as this 'plug-in' estimate of sampling variance.
 
 ### Step 4: Calculate the bias-corrected effect size
 
@@ -290,9 +290,9 @@ plugin_effect_size
 
 ```
 
-So similar! And potentially less biased. Let's find out using Monte Carlo simulations where we compare the bias of estimates from SAFE to plug-in estimates. We'll also demonstrate that the SAFE bias correction works by looking at the bias of the uncorrected mean of our SAFE bootstraps estimates. Note, that after these simulations we provide a guide (@custom-effect-sizes) on how to use SAFE for custom effect sizes for which there may be no documented variance formula.
+So similar! And potentially less biased. Let's find out using Monte Carlo simulations where we compare the bias of estimates from SAFE to plug-in estimates. We'll also demonstrate that the SAFE bias correction works by looking at the bias of the uncorrected mean of our SAFE bootstraps estimates. Note, that after these simulations we provide a guide (@sec-custom-effect-sizes) on how to use SAFE for custom effect sizes for which there may be no documented variance formula.
 
-# How good is SAFE? {#compare-results}
+# How good is SAFE? {#sec-compare-results}
 
 We simulated the bias of SAFE calculations versus normal plug-in calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps.
 
@@ -338,7 +338,7 @@ prepare_cluster <- function(n){
 
 ```
 
-Now we will run 100,000 simulations to demonstrate how this method works. Simulation results for the other effect sizes are reported below (@Monte-Carlo-results).
+Now we will run 100,000 simulations to demonstrate how this method works. Simulation results for the other effect sizes are reported below (@sec-Monte-Carlo-results).
 
 To begin, let's imagine that a population has a true *population mean* latency time of 15 and a true standard deviation of 1.2. This population was sampled with varying degrees of effort, and thus has sample sizes of 5, 15, and 100. These sample sizes will be used to create our simulated datasets.
 
@@ -596,9 +596,9 @@ ggplot(data = var.bias.long,
 
 We see here that SAFE (red) is slightly more biased than the plug-in variance formula we derived. However, the difference is marginal and more conservative, given that higher sampling variance means lower weights in the meta-analytic model.
 
-We've conducted full Monte Carlo simulations for a variety of effect sizes, which are below (@Monte-Carlo-results). However, first, we'll demonstrate how a meta-analyst might use SAFE to calculate point estimates and sampling variances for a custom effect size.
+We've conducted full Monte Carlo simulations for a variety of effect sizes, which are below (@sec-Monte-Carlo-results). However, first, we'll demonstrate how a meta-analyst might use SAFE to calculate point estimates and sampling variances for a custom effect size.
 
-## Creating custom effect sizes {#custom-effect-sizes}
+## Creating custom effect sizes {#sec-custom-effect-sizes}
 
 The greatest draw of the SAFE method is its applicability to a variety of custom effect sizes that researchers may want to use for particular meta-analyses. After all, in order to fit a meta-analytic model, one requires a measure of sampling variance to use as a model weight. Deriving this sampling variance numerically is non-trivial as it requires using the Delta method and is difficult to confirm or validate. Let's try using SAFE for the temperature coefficient Q~10~.
 
@@ -732,13 +732,168 @@ If you want to use SAFE for other custom effect sizes, you'd follow a similar pr
 
 2.  Determine what the underlying distribution of these variables is. `R1` and `R2`, as rates, approximate the normal distribution. Other variables (e.g., counts) would need to be drawn from the binomial distribution.
 
-3.  As long as your data consists of independent groups, you can draw your bootstrapped variables in separate `rnorm` (or `rbinom`) calls as we did above. If your data is truncated (e.g., bounded by 0 or between 0 and 1), you can draw your bootstrapped samples with the `tmvtnorm` package, where you can specify boundaries. If there is dependency between groups (i.e., paired designs), you'll need to use slightly more complicated methods with multivariate draws and sigma-matrices as described in the manuscript (Nakagawa et al. 2025). Note that multivariate draws (i.e., with `MASS::mvrnorm()`) often take variance instead of SD.
+3.  As long as your data consists of independent groups, you can draw your bootstrapped variables in separate `rnorm` (or `rbinom`) calls as we did above. If your data is truncated (e.g., bounded by 0 or between 0 and 1), you can draw your bootstrapped samples with the `tmvtnorm` package, where you can specify boundaries. If there is dependency between groups (i.e., paired designs), you'll need to use slightly more complicated methods with multivariate draws and sigma-matrices as described in the manuscript (Nakagawa et al. 2025). Note that multivariate draws (i.e., with `MASS::mvrnorm()`) often take variance instead of SD. In the next section, we'll share some sample code of how to use SAFE with these alternative bootstrapping functions.
 
 After making those decisions, simply follow the 4 steps to 'SAFEty'. 🙃
 
-## Full Monte Carlo results {#Monte-Carlo-results}
+## Beyond `rnorm`
 
-Now let's look at the rest of the simulation results for a variety of effect sizes.
+While the function `rnorm` can be used for a wide variety of effect sizes, some problems may occur. For example, some effect sizes account for paired designs (e.g., before-after) and thus require multivariate bootstrapping, where the two distributions are drawn based on a covariate matrix. Others, such as the log-transformed ratio of means (also known as the response ratio), are bounded between 0 and infinity. Finally, some effect sizes, such as the log odds ratio and log risk ratio, require discrete binomial distributions. Let's work through a few examples of how to draw SAFE bootstraps for these effect sizes.
+
+### Multivariate draws
+
+Paired designs offer greater statistical precision and thus have lower standard error and sampling variance. Modifications of common effect sizes account for this. For example, the log-transformed ratio means (here lnRoM), one of the most widely used effect sizes in ecology, is defined as:
+
+$$
+lnRoM = log(x_{\text{1}} / x_{\text{2}})
+$$ This effect size compares the means of two groups, $x_{\text{1}}$ and {x\_{\text{2}}}. There are delta method derived plug-in formulas for lnRoM that account for paired designs by accepting the variable `r`, or the correlation between the two groups, which is often set at 0.5. These formulas are complicated and difficult to derive for the non-statistician. To use SAFE bootstrapping for a multivariate effect size, one can ignore them and instead draw from a multivariate normal distribution after specifying a covariance matrix. The covariance matrix for a paired lnRoM design is as follows. Note that the multivariate normal distribution function `mvrnorm` in the package `MASS` (or truncated normal, see below) uses variance instead of standard deviation—thus we'll use `sd / n` instead of `sd / sqrt(n)` in the sigma matrix construction.
+
+Also note that the sample sizes of groups 1 and 2 must be equal (unlike the unpaired version of lnRoM).
+
+```{r}
+#| label: paired_sigma_matrix
+#| echo: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+x1 <- 13.4
+x2 <- 16.1
+r <- 0.5
+sd1 <- 4.6
+sd2 <- 3.9
+n <- 25
+
+sigma_matrix <- matrix(data = c((sd1^2 / n),        (r*sd1*sd2)/n, #  / n add this to sd1^2
+                                (r*sd1*sd2)/n,      (sd2^2 / n)), #  / n add this to sd2^2
+                             nrow = 2, ncol = 2)
+sigma_matrix
+
+```
+
+One then uses this covariance matrix in their SAFE bootstrap draw:
+
+```{r}
+#| label: paired_bootstrap
+#| echo: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+cloud <- MASS::mvrnorm(n = 1e6,
+                 mu = c(x1, x2),
+                 Sigma = sigma_matrix)
+cloud <- as.data.frame(cloud)
+names(cloud) <- c("x1", "x2")
+head(cloud)
+
+```
+
+We can then apply our definition formula to this parameter cloud (step 2 of SAFE) and calculate sampling variance and our bias-corrected point estimates.
+
+```{r}
+#| label: paired_SAFE_calculation
+#| echo: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+cloud_trans <- log(cloud$x1 / cloud$x2)
+
+# SAFE sampling variance:
+SAFE_vi <- var(cloud_trans)
+SAFE_vi
+
+# Plugin estimate from original values:
+plugin_effect_size <- log(x1, x2)
+
+SAFE_yi <- (2 * plugin_effect_size) - mean(cloud_trans)
+
+print(c("SAFE bias-corrected point estimate" = SAFE_yi, "SAFE sampling variance" = SAFE_vi))
+
+```
+
+### Truncated normal distribution
+
+Some of the statistics required in effect sizes are bounded, either between 0 and 1, or between 0 and infinity. lnRoM, in our example above, one such effect size. A 0 in the denominator leads Infinity while a zero in the numerator leads to $log(0)$ and -Infinity. To do a SAFE bootstrapping calculation of lnRoM, especially if the mean of a group is near 0, one can nest `rnorm()` inside a `while` loop and filter out any simulated means that are ≤0. Doing this can be computationally expensive though. Alternatively, one can use the much faster `rtmvnorm` function in the `tmvtnorm` package. Simply specify the lower and upper bounds. Note that these must length 2, to match the vector of means (x1 and x2)
+
+```{r}
+#| label: truncated_normal
+#| echo: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+cloud <- tmvtnorm::rtmvnorm(n = 1e6,
+                 mean = c(x1, x2),
+                 sigma = sigma_matrix,
+                 lower = c(0, 0),
+                 upper = c(Inf, Inf))
+
+```
+
+One can then use the same code as above to calculate SAFE point and sampling variance estimates.
+
+### Binomial distributions
+
+Many effect sizes have discrete outcome variables, e.g., number of patients with some outcome. The log odds ratio (lnOR) is a commonly used effect size for these types of data. The formula is:
+
+$$
+lnOR = log((a * d) / (b * c))
+$$
+Where groups a, b, c, d each reflect a different combination of treatments and outcomes. For example, groups 'a' and 'b' are grasshoppers exposed to a pesticide, while groups 'c' and 'd' were given a placebo. 'b' and 'd' are the number of grasshoppers that died, while groups 'a' and 'c' are the number of grasshoppers who lived.
+
+|           | living | dead | total          |
+|-----------|--------|------|----------------|
+| pesticide | $a$    | $b$  | $n_{\text{1}}$ |
+| control   | $c$    | $d$  | $n_{\text{2}}$ |
+
+To conduct SAFE on a binomial distribution like these, one uses 'rbinom()' to draw 'a' and 'c' based on the probability of 'a' and 'c' (e.g., $a / n_{\text{1}}$ and $c / n_{\text{2}}$).
+
+```{r}
+#| label: binomial_draw
+#| echo: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+a <- 3
+c <- 8
+b <- 7
+d <- 2
+
+# Row totals:
+n1 <- a + b
+n2 <- c + d
+
+# Probability of a and c:
+pr_a <- a/n1
+pr_c <- c/n2
+
+a_cloud <- rbinom(1e6, n1, pr_a)
+c_cloud <- rbinom(1e6, n2, pr_c)
+
+b_cloud <- n1 - a_cloud
+d_cloud <- n2 - c_cloud
+
+cloud_trans = log((a_cloud * d_cloud) / (b_cloud * c_cloud))
+
+```
+
+One can then estimate sampling variance and bias-corrected point estimates as with all other effect sizes:
+
+```{r}
+#| label: lnOR_SAFE
+#| echo: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+vi_SAFE <- var(cloud_trans)
+
+plugin_effect_size <- log((a * d) / (b * c))
+
+SAFE_yi <- (2 * plugin_effect_size) - mean(cloud_trans)
+
+print(c("SAFE bias-corrected point estimate" = SAFE_yi, "SAFE sampling variance" = SAFE_vi))
+
+```
+
+## Full Monte Carlo results {#sec-Monte-Carlo-results}
+
+Now let's look at the simulation results for a variety of effect sizes.
 
 ```{r, sim_all}
 #| label: sim_all
