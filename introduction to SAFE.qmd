@@ -216,7 +216,7 @@ We'll compare these results below (@sec-compare-results) to see whether SAFE pro
 
 ### Step 4: Calculate the bias-corrected effect size
 
-It may seem that we could just take the mean of this transformed cloud of hyperparameters to obtain an unbiased estimate of our effect size. However, due to Jensen's inequality, we cannot. Jensen's inequality states that applying any function (such as `1/x`) to the *mean* of a distribution does not equal taking the *mean* of that same function **applied** to the distribution.
+It may seem that we could just take the mean of this transformed cloud of hyperparameters to obtain an unbiased estimate of our effect size. However, due to Jensen's inequality, we cannot. Jensen's inequality states that applyingOK any function (such as `1/x`) to the *mean* of a distribution does not equal taking the *mean* of that same function **applied** to the distribution.
 
 $$
 f(\bar{x}) \neq \bar{f(x)}
