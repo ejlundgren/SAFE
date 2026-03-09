@@ -992,6 +992,40 @@ p.point + p.variance + plot_layout(ncol = 1, heights = c(1/3, 2/3)) +
 
 ```
 
+It looks like the SAFE point estimate is *less* biased than the plugin estimate! It also looks like the SAFE variance estimate is more conservative than the plugin variance estimate, which means that meta-analytic data won't have more weight than it should in a meta-analytic model.
+
+An additional dimension to check is **coverage**, which describes whether the SAFE estimate ± CIs includes the 'true' point estimand. We'll plot the proportion of Monte Carlo simulations where the true point estimand was inside the SAFE and plugin estimates ± CIs:
+
+```{r}
+#| label: coverage_speed
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = sample_size, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs)+
+  coord_cartesian(ylim = c(.85, 1))+
+  ggtitle("Speed (1 / x)")+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+
+Coverage appears virtually identically for SAFE and the plugin at moderate sample sizes, but note that SAFE has better coverage at low sample sizes. That's pretty cool.
+
 ### SMD 4 multivariate normal
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD, as both of these parameters are in the definition formula (Cohen's d) of SMD. Let's compare the bias of SAFE, Cohen's d, and Hedges' g.
@@ -1007,7 +1041,7 @@ sub_dat <- sim_results[effect_type == "SMD_normal", ]
 
 setorder(sub_dat, sample_size1)
 
-p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio == 1, ], 
+p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio == 1,],
                   aes(x = sample_size1, y = value, color = estimator,
                       group = estimator))+
   geom_hline(yintercept = 0)+
@@ -1053,6 +1087,36 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
   plot_annotation(tag_levels = "A")
 
 ```
+
+And coverage:
+```{r}
+#| label: coverage_smd_normal
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = sample_size1, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.95, 1))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+Slightly better coverage than the plugin estimates! Neat 🙂
 
 ### SMD 2 multivariate normal and 2-Wishart
 
@@ -1114,6 +1178,37 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+
+And coverage:
+```{r}
+#| label: coverage_smd_wishart
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = sample_size1, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.95, 1))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+😎
+
 ### lnCVR 4 multivariate normal
 
 The SAFE estimator for this effect size was calculated with 4 multivariate normal distributions for both mean and SD.
@@ -1168,6 +1263,35 @@ p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample
 
 p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
   plot_annotation(tag_levels = "A")
+
+```
+
+And coverage:
+```{r}
+#| label: coverage_lncvr_normal
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = sample_size1, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.95, 1))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
 
 ```
 
@@ -1228,6 +1352,36 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+And coverage:
+```{r}
+#| label: coverage_lnCVR_wishart
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = sample_size1, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.95, 1))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+
+
 ### Log Odds Ratio (lnOR)
 
 In this effect size estimation, the SAFE calculation used a binomial distribution to draw random binomial samples for 'a' and 'c'.
@@ -1284,6 +1438,36 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
 
 ```
 
+And coverage:
+```{r}
+#| label: coverage_lnOR
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = n1, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.95, 1))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+
+
 ### Log Risk Ratio (lnRR)
 
 In this effect size estimation, the SAFE calculation drew 'a' and 'c' from a binomial distribution.
@@ -1339,6 +1523,37 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
   plot_annotation(tag_levels = "A")
 
 ```
+
+And coverage:
+```{r}
+#| label: coverage_lnRR
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = n1, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.95, 1))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+Wowza!
+
 
 ### Hardy Weinberg Disequilibrium
 
@@ -1397,6 +1612,37 @@ p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4))
   plot_annotation(tag_levels = "A")
 
 ```
+
+
+And coverage:
+```{r}
+#| label: coverage_hwe
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = n, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.92, 1))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+Well, you can't win 'em all can ya?
 
 # How many SAFE bootstraps?
 
