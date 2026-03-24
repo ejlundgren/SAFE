@@ -176,10 +176,10 @@ results.clust <- foreach(i = 1:length(effects),
                                # SD of SAFE (to evaluate bootstrapping) on true values
                                SD.safe.NA.point = sd(true_yi_safe),
                                SD.safe.NA.variance = sd(true_vi_safe),
-
+                               
                                # Coverage:
-                               coverage.safe.plugin_1st = nrow(.SD[coverage.safe.estimand_1st == TRUE]) / number_simulations,
-                               coverage.plugin_1st.plugin_1st = nrow(.SD[coverage.plugin_1st.estimand_1st == TRUE]) / number_simulations,
+                               coverage.safe.plugin_1st = nrow(.SD[coverage.safe.estimand_1st == TRUE]),
+                               coverage.plugin_1st.plugin_1st = nrow(.SD[coverage.plugin_1st.estimand_1st == TRUE]),
                                
                                # Bias of point estimates:
                                bias.plugin_1st.plugin_1st.point = bias(sim_y_plugin_1st,
@@ -191,7 +191,11 @@ results.clust <- foreach(i = 1:length(effects),
                                relative_bias.safe.safe.variance = relative_bias(vi_safe, var_estimand_SAFE),
                                relative_bias.plugin_1st.plugin_1st.variance = relative_bias(sim_v_plugin_1st, var_estimand_1st),
                                relative_bias.plugin_1st.safe.variance = relative_bias(sim_v_plugin_1st, var_estimand_SAFE)),
-                               by = .(scenario_id, effect_type, boots)] |> unique()
+                               by = .(scenario_id, effect_type, boots, number_simulations)] |> unique()
+                             
+                             
+                             sim_summary[, `:=` (coverage.safe.plugin_1st = coverage.safe.plugin_1st / number_simulations,
+                                                 coverage.plugin_1st.plugin_1st = coverage.plugin_1st.plugin_1st / number_simulations)]
                              
                            }else{
                              #' [If there's a second order plugin formula:]
@@ -203,15 +207,15 @@ results.clust <- foreach(i = 1:length(effects),
                              
                              # Calculate coverage:
                              sim[, `:=` (coverage.safe.estimand_1st = coverage(point_estimate = yi_safe,
-                                                                      se_estimate = SE_safe,
-                                                                      point_estimand = true_y_plugin_1st),
+                                                                               se_estimate = SE_safe,
+                                                                               point_estimand = true_y_plugin_1st),
                                          coverage.safe.estimand_2nd = coverage(point_estimate = yi_safe,
-                                                                      se_estimate = SE_safe,
-                                                                      point_estimand = true_y_plugin_2nd),
+                                                                               se_estimate = SE_safe,
+                                                                               point_estimand = true_y_plugin_2nd),
                                          #
                                          coverage.plugin_1st.estimand_1st = coverage(point_estimate = sim_y_plugin_1st,
-                                                                                    se_estimate = sqrt(sim_v_plugin_1st),
-                                                                                    point_estimand = true_y_plugin_1st),
+                                                                                     se_estimate = sqrt(sim_v_plugin_1st),
+                                                                                     point_estimand = true_y_plugin_1st),
                                          coverage.plugin_1st.estimand_2nd = coverage(point_estimate = sim_y_plugin_1st,
                                                                                      se_estimate = sqrt(sim_v_plugin_1st),
                                                                                      point_estimand = true_y_plugin_2nd),
@@ -221,7 +225,7 @@ results.clust <- foreach(i = 1:length(effects),
                                          coverage.plugin_2nd.estimand_2nd = coverage(point_estimate = sim_y_plugin_2nd,
                                                                                      se_estimate = sqrt(sim_v_plugin_2nd),
                                                                                      point_estimand = true_y_plugin_2nd)
-                                         )]
+                             )]
                              
                              sim_summary <- sim[, .(
                                # MCSE:
@@ -232,20 +236,18 @@ results.clust <- foreach(i = 1:length(effects),
                                MCSE.plugin_2nd.NA.point = MC_standard_error_of_bias(sim_y_plugin_2nd),
                                MCSE.plugin_2nd.NA.variance = MC_standard_error_of_bias(sim_v_plugin_2nd),
                                
+                               # Coverage
+                               coverage.safe.plugin_1st.NA = nrow(.SD[coverage.safe.estimand_1st == TRUE]),
+                               coverage.safe.plugin_2nd.NA = nrow(.SD[coverage.safe.estimand_2nd == TRUE]),
+                               
+                               coverage.plugin_1st.plugin_1st.NA = nrow(.SD[coverage.plugin_1st.estimand_1st == TRUE]),
+                               coverage.plugin_1st.plugin_2nd.NA = nrow(.SD[coverage.plugin_1st.estimand_2nd == TRUE]),
+                               coverage.plugin_2nd.plugin_1st.NA = nrow(.SD[coverage.plugin_2nd.estimand_1st == TRUE]),
+                               coverage.plugin_2nd.plugin_2nd.NA = nrow(.SD[coverage.plugin_2nd.estimand_2nd == TRUE]),
+                               
                                # SD of SAFE (to evaluate bootstrapping) on true values
                                SD.safe.NA.point = sd(true_yi_safe),
                                SD.safe.NA.variance = sd(true_vi_safe),
-                               
-                               # Coverage
-                               coverage.safe.plugin_1st = nrow(.SD[coverage.safe.estimand_1st == TRUE]) / number_simulations,
-                               coverage.safe.plugin_1st = nrow(.SD[coverage.safe.estimand_2nd == TRUE]) / number_simulations,
-                               
-                               coverage.plugin_1st.plugin_1st = nrow(.SD[coverage.plugin_1st.estimand_1st == TRUE]) / number_simulations,
-                               coverage.plugin_1st.plugin_2nd = nrow(.SD[coverage.plugin_1st.estimand_2nd == TRUE]) / number_simulations,
-                               coverage.plugin_2nd.plugin_1st = nrow(.SD[coverage.plugin_2nd.estimand_1st == TRUE]) / number_simulations,
-                               coverage.plugin_2nd.plugin_2nd = nrow(.SD[coverage.plugin_2nd.estimand_2nd == TRUE]) / number_simulations,
-                               
-                               
                                # Bias of point estimates:
                                bias.plugin_1st.plugin_1st.point = bias(sim_y_plugin_1st,
                                                                        true_y_plugin_1st),
@@ -263,7 +265,15 @@ results.clust <- foreach(i = 1:length(effects),
                                relative_bias.plugin_2nd.plugin_1st.variance = relative_bias(sim_v_plugin_2nd, var_estimand_1st),
                                relative_bias.plugin_2nd.plugin_2nd.variance = relative_bias(sim_v_plugin_2nd, var_estimand_2nd),
                                relative_bias.plugin_2nd.safe.variance = relative_bias(sim_v_plugin_2nd, var_estimand_SAFE)),
-                               by = .(scenario_id, effect_type, boots)] |> unique()
+                               by = .(scenario_id, effect_type, boots, number_simulations)] |> unique()
+                             
+                             sim_summary[, `:=` (coverage.safe.plugin_1st.NA = coverage.safe.plugin_1st.NA / number_simulations,
+                                                 coverage.safe.plugin_2nd.NA = coverage.safe.plugin_1st.NA / number_simulations,
+                                                 
+                                                 coverage.plugin_1st.plugin_1st.NA = coverage.plugin_1st.plugin_1st.NA / number_simulations,
+                                                 coverage.plugin_1st.plugin_2nd.NA = coverage.plugin_1st.plugin_2nd.NA / number_simulations,
+                                                 coverage.plugin_2nd.plugin_1st.NA = coverage.plugin_2nd.plugin_1st.NA / number_simulations,
+                                                 coverage.plugin_2nd.plugin_2nd.NA = coverage.plugin_2nd.plugin_2nd.NA / number_simulations)]
                              
                            }
                            

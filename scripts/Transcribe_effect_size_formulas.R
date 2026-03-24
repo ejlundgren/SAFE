@@ -8,11 +8,7 @@
 
 rm(list = ls())
 
-library("groundhog")
-groundhog.library(pkg = c("data.table", 
-                          "crayon", #"pryr",
-                          "MASS", "metafor"),
-                  date = "2025-04-15")
+library("data.table")
 
 
 # 1. Create effect size table ---------------------------------------------
@@ -81,29 +77,30 @@ effect_formulas <- data.table(name = c("reciprocal",
                               ),
                               effect_size = c("1 / x",# reciprocal
                                               "log(x1 / x2)",#lnRox first
-                                              "log(x1 / x2) + 0.5 * (sd1^2/(n1 * x1^2) - sd2^2/(n2 * x2^2))", # lnRox second
+                                              "log(x1 / x2) + 0.5 * (sd1^2/(n1 * x1^2) - sd2^2/(n2 * x2^2))", # lnRoM second
                                               "(x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) )", # Cohen's d
                                               "(1 - 3 / (4 * (n1 + n2 - 2) - 1) ) * ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ) )", # Hedges' g
-                                              "(x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) )", # Cohen's d PAIRED
-                                              "(1 - 3 / (4 * (n1 + n2 - 2) - 1) ) * ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ) )", # Hedges' g PAIRED
+                                              "(x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )", # Cohen's d PAIRED
+                                              "(1 - 3 / (4 * (2 * n - 2) - 1) ) * ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) ) )", # Hedges' g PAIRED
                                               #' [WISHART:]
                                               "(x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) )", # Cohen's d
                                               "(1 - 3 / (4 * (n1 + n2 - 2) - 1) ) * ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ) )", # Hedges' g
-                                              "(x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) )", # Cohen's d PAIRED
-                                              "(1 - 3 / (4 * (n1 + n2 - 2) - 1) ) * ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ) )", # Hedges' g PAIRED
+                                              "(x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )", # Cohen's d PAIRED
+                                              "(1 - 3 / (4 * (2 * n - 2) - 1) ) * ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) ) )", # Hedges' g PAIRED
                                               #
-                                              "log(x1 / x2)", # lnRox_paired
+                                              "log(x1 / x2)", # lnRoM_paired
+                                              
                                               "log(((a) * (d)) / ((b) * (c)))", # lnOR
                                               "log( ((a) / n1) / ((c)/ n2) )", # lnRR
                                               "log(sd1 / x1) - log(sd2 / x2)", # lnCVR first order
                                               "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n1 - 1) - 1 / (n2 - 1)) + 1/2 * ((sd2^2/(n2 * x2^2)) - (sd1^2 / (n1 * x1^2)))", # lnCVR second order
                                               "log(sd1 / x1) - log(sd2 / x2)", # lnCVR paired first order
-                                              "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n1 - 1) - 1 / (n2 - 1)) + 1/2 * ((sd2^2/(n2 * x2^2)) - (sd1^2 / (n1 * x1^2)))", #lnCVR paired second order
+                                              "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n - 1) - 1 / (n - 1)) + 1/2 * ((sd2^2/(n * x2^2)) - (sd1^2 / (n * x1^2)))", #lnCVR paired second order
                                               # WISHART:
                                               "log(sd1 / x1) - log(sd2 / x2)", # lnCVR first order
                                               "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n1 - 1) - 1 / (n2 - 1)) + 1/2 * ((sd2^2/(n2 * x2^2)) - (sd1^2 / (n1 * x1^2)))", # lnCVR second order
                                               "log(sd1 / x1) - log(sd2 / x2)", # lnCVR paired first order
-                                              "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n1 - 1) - 1 / (n2 - 1)) + 1/2 * ((sd2^2/(n2 * x2^2)) - (sd1^2 / (n1 * x1^2)))", #lnCVR paired second order
+                                              "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n - 1) - 1 / (n - 1)) + 1/2 * ((sd2^2/(n * x2^2)) - (sd1^2 / (n * x1^2)))", #lnCVR paired second order
                                               #
                                               "log((n_Aa/(n_AA + n_Aa + n_aa)) / (2*sqrt((n_AA/(n_AA + n_Aa + n_aa)) * (n_aa/(n_AA + n_Aa + n_aa)))))", # lnHWE_A
                                               "log(sqrt(((((n1 * n2) / (n1 + n2)) * (x1 - x2)^2) - (((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))) / ((2 * n1 * n2) / (n1 + n2)))) - log(sqrt((((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))))", #lnM
@@ -114,26 +111,27 @@ effect_formulas <- data.table(name = c("reciprocal",
                                                     "sd1^2 / (n1 * x1^2) + sd2^2 / (n2 * x2^2) + 0.5 * ( (sd1^4 / (n1^2 * x1^4)) + (sd2^4 / (n2^2 * x2^4)))", # lnRoM second
                                                     "((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Cohen's d
                                                     "(1 - 3 / (4 * (n1 + n2 - 2) - 1) )^2 * ((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Hedges' g
-                                                    "((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Cohen's d paired
-                                                    "(1 - 3 / (4 * (n1 + n2 - 2) - 1) )^2 * ((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Hedges' g paired
+                                                    "((2*n) / (n^2)) + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2*n - 2) ))^2 / (2 * (2*n - 2))", # Cohen's d paired
+                                                    "(1 - 3 / (4 * (2*n - 2) - 1) )^2 * ((2*n) / (n^2)) + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2*n - 2) ))^2 / (2 * (2*n - 2))", # Hedges' g paired
                                                     #' *WISHART:*
                                                     "((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Cohen's d
                                                     "(1 - 3 / (4 * (n1 + n2 - 2) - 1) )^2 * ((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Hedges' g
-                                                    "((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Cohen's d paired
-                                                    "(1 - 3 / (4 * (n1 + n2 - 2) - 1) )^2 * ((n1 + n2) / (n1 * n2)) + ((x1 - x2) / sqrt( ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2) ))^2 / (2 * (n1 + n2 - 2))", # Hedges' g paired
+                                                    "((2*n) / (n^2)) + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2*n - 2) ))^2 / (2 * (2*n - 2))", # Cohen's d paired
+                                                    "(1 - 3 / (4 * (2*n - 2) - 1) )^2 * ((2*n) / (n^2)) + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2*n - 2) ))^2 / (2 * (2*n - 2))", # Hedges' g paired
                                                     #
-                                                    "(sd1^2 / (n1 * x1^2)) + (sd2^2 / (n2 * x2^2)) - ((2 * r * sd1 * sd2) / (x1 * x2 * sqrt(n1 * n2)))", # lnRox_paired
+                                                    "(sd1^2 / (n * x1^2)) + (sd2^2 / (n * x2^2)) - ((2 * r * sd1 * sd2) / (x1 * x2 * sqrt(n^2)))", # lnRoM_paired
+                                                    
                                                     "(1 / (a)) + (1 / (b)) + (1 / (c)) + (1 / (d))", # lnOR
                                                     "(1 - (a / n1)) / a + (1 - (c / n2)) / c",# lnRR
                                                     "sd1^2/(n1 * x1^2) + sd2^2/(n2 * x2^2) + 1/(2*(n1 - 1)) + 1/(2*(n2 - 1))", # lnCVR first order 
                                                     "sd1^2/(n1 * x1^2) + sd1^4/(2 * n1^2 * x1^4) + n1/(2*(n1 - 1)^2) + sd2^2/(n2 * x2^2) + sd2^4/(2 * n2^2 * x2^4) + n2/(2*(n2 - 1)^2)", # lnCVR second order
-                                                    "sd1^2/(n1 * x1^2) + sd2^2/(n1 * x2^2) - 2*r*sd1*sd2/(n1 * x1 * x2) + 1/(n1 - 1) - r^2/(n1 - 1)", # lnCVR_paired first order
-                                                    "sd1^2/(n1 * x1^2) + sd1^4/(2 * n1^2 * x1^4) + sd2^2/(n1 * x2^2) + sd2^4/(2 * n1^2 * x2^4) - 2*r*sd1*sd2/(n1 * x1 * x2) + r^2 * sd1^2 * sd2^2 * (x1^4 + x2^4) / (2 * n1^2 * x1^4 * x2^4) + n1/(n1 - 1)^2 - r^2/(n1 - 1) + r^4 * (sd1^8 + sd2^8) / (2 * (n1 - 1)^2 * sd1^4 * sd2^4)", # lnCVR paired second order
+                                                    "sd1^2/(n * x1^2) + sd2^2/(n * x2^2) - 2*r*sd1*sd2/(n * x1 * x2) + 1/(n - 1) - r^2/(n - 1)", # lnCVR_paired first order
+                                                    "sd1^2/(n * x1^2) + sd1^4/(2 * n^2 * x1^4) + sd2^2/(n * x2^2) + sd2^4/(2 * n^2 * x2^4) - 2*r*sd1*sd2/(n * x1 * x2) + r^2 * sd1^2 * sd2^2 * (x1^4 + x2^4) / (2 * n^2 * x1^4 * x2^4) + n/(n - 1)^2 - r^2/(n - 1) + r^4 * (sd1^8 + sd2^8) / (2 * (n - 1)^2 * sd1^4 * sd2^4)", # lnCVR paired second order
                                                     # WISHART:
                                                     "sd1^2/(n1 * x1^2) + sd2^2/(n2 * x2^2) + 1/(2*(n1 - 1)) + 1/(2*(n2 - 1))", # lnCVR first order 
                                                     "sd1^2/(n1 * x1^2) + sd1^4/(2 * n1^2 * x1^4) + n1/(2*(n1 - 1)^2) + sd2^2/(n2 * x2^2) + sd2^4/(2 * n2^2 * x2^4) + n2/(2*(n2 - 1)^2)", # lnCVR second order
-                                                    "sd1^2/(n1 * x1^2) + sd2^2/(n1 * x2^2) - 2*r*sd1*sd2/(n1 * x1 * x2) + 1/(n1 - 1) - r^2/(n1 - 1)", # lnCVR_paired first order
-                                                    "sd1^2/(n1 * x1^2) + sd1^4/(2 * n1^2 * x1^4) + sd2^2/(n1 * x2^2) + sd2^4/(2 * n1^2 * x2^4) - 2*r*sd1*sd2/(n1 * x1 * x2) + r^2 * sd1^2 * sd2^2 * (x1^4 + x2^4) / (2 * n1^2 * x1^4 * x2^4) + n1/(n1 - 1)^2 - r^2/(n1 - 1) + r^4 * (sd1^8 + sd2^8) / (2 * (n1 - 1)^2 * sd1^4 * sd2^4)", # lnCVR paired second order
+                                                    "sd1^2/(n * x1^2) + sd2^2/(n * x2^2) - 2*r*sd1*sd2/(n * x1 * x2) + 1/(n - 1) - r^2/(n - 1)", # lnCVR_paired first order
+                                                    "sd1^2/(n * x1^2) + sd1^4/(2 * n^2 * x1^4) + sd2^2/(n * x2^2) + sd2^4/(2 * n^2 * x2^4) - 2*r*sd1*sd2/(n * x1 * x2) + r^2 * sd1^2 * sd2^2 * (x1^4 + x2^4) / (2 * n^2 * x1^4 * x2^4) + n/(n - 1)^2 - r^2/(n - 1) + r^4 * (sd1^8 + sd2^8) / (2 * (n - 1)^2 * sd1^4 * sd2^4)", # lnCVR paired second order
                                                     #
                                                     "(1/(n_AA + n_Aa + n_aa)) * ((1/(n_Aa / (n_AA + n_Aa + n_aa))) + (1-(n_Aa / (n_AA + n_Aa + n_aa)))/(4*(n_AA / (n_AA + n_Aa + n_aa))*(n_aa / (n_AA + n_Aa + n_aa))))", # lnHWE_A
                                                     "(1 / 4 * ((((n1 * n2) / (n1 + n2)) * (x1 - x2)^2) - (((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2)))^2) * ( (n0/2)^2 * (2 * (sd1^2 / n1 + sd2^2 / n2)^4 + 4 * (sd1^2 / n1 + sd2^2 / n2)^2 * (x1 - x2)^2) + ((((n1 * n2) / (n1 + n2)) * (x1 - x2)^2)^2 / (((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))^2) * ((2 * (((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))^2) / n1 + n2 - 2) )", #lnM
@@ -177,26 +175,26 @@ effect_formulas <- data.table(name = c("reciprocal",
                                 "x1, x2, sd1, sd2, n1, n2",# "lnRoM",
                                 "x1, x2, sd1, sd2, n1, n2",# "Cohens_d",
                                 "x1, x2, sd1, sd2, n1, n2",# "Hedges_g", 
-                                "x1, x2, sd1, sd2, r, n1, n2",# "Cohens_d_paired",
-                                "x1, x2, sd1, sd2, r, n1, n2",# "Hedges_g_paired", 
+                                "x1, x2, sd1, sd2, r, n",# "Cohens_d_paired",
+                                "x1, x2, sd1, sd2, r, n",# "Hedges_g_paired", 
                                 # WISHART:
                                 "x1, x2, sd1, sd2, n1, n2",# "Cohens_d",
                                 "x1, x2, sd1, sd2, n1, n2",# "Hedges_g", 
-                                "x1, x2, sd1, sd2, r, n1, n2",# "Cohens_d_paired",
-                                "x1, x2, sd1, sd2, r, n1, n2",# "Hedges_g_paired", 
+                                "x1, x2, sd1, sd2, r, n",# "Cohens_d_paired",
+                                "x1, x2, sd1, sd2, r, n",# "Hedges_g_paired", 
                                 #
-                                "x1, x2, sd1, sd2, r, n1, n2",# "lnRoM_paired",
+                                "x1, x2, sd1, sd2, r, n",# "lnRoM_paired",
                                 "a, b, c, d",# "lnOR",
                                 "a, c, n1, n2",# "lnRR",
                                 "x1, x2, sd1, sd2, n1, n2",# "lnCVR",
                                 "x1, x2, sd1, sd2, n1, n2",# "lnCVR",
-                                "x1, x2, sd1, sd2, r, n1, n2",# "lnCVR_paired",
-                                "x1, x2, sd1, sd2, r, n1, n2",# "lnCVR_paired",
+                                "x1, x2, sd1, sd2, r, n",# "lnCVR_paired",
+                                "x1, x2, sd1, sd2, r, n",# "lnCVR_paired",
                                 # WISHART:
                                 "x1, x2, sd1, sd2, n1, n2",# "lnCVR",
                                 "x1, x2, sd1, sd2, n1, n2",# "lnCVR",
-                                "x1, x2, sd1, sd2, r, n1, n2",# "lnCVR_paired",
-                                "x1, x2, sd1, sd2, r, n1, n2",# "lnCVR_paired",
+                                "x1, x2, sd1, sd2, r, n",# "lnCVR_paired",
+                                "x1, x2, sd1, sd2, r, n",# "lnCVR_paired",
                                 #
                                 "n_AA, n_Aa, n_aa",# "lnHWE_A")
                                 "x1, x2, sd1, sd2, n1, n2", # lnM
@@ -378,11 +376,6 @@ effect_formulas[cloud_filtering_rules == "x1 > 0 & x2 > 0 & v1 > 0 & v2 > 0", ]$
 effect_formulas[cloud_filtering_rules == "x1 > 0 & x2 > 0 & v1 > 0 & v2 > 0", 
                 `:=` (lower_filter = "x1=0, x2=0, v1=0, v2=0",
                       upper_filter = "x1=Inf, x2=Inf, v1=Inf, v2=Inf")]
-
-# effect_formulas[cloud_filtering_rules %in% c("x1 > 0 & x2 > 0", 
-#                                              "v1 > 0 & v2 > 0",
-#                                              "x1 > 0 & x2 > 0 & v1 > 0 & v2 > 0"),
-#                 `:=` (lower_filter = 0, upper_filter = Inf)]
 
 effect_formulas[cloud_filtering_rules %in% c("p1 > 0 & p2 > 0 & p1 < 1 & p2 < 1"),
                 `:=` (lower_filter = "p1=0, p2=0", 
