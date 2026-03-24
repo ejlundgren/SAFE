@@ -5,6 +5,7 @@
 
 rm(list = ls())
 library("data.table")
+source('run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE.R')
 
 updateArray <- function(sh_path,
                         no_jobs){
@@ -56,6 +57,7 @@ updateJob <- function(job_path,
 # Load data ---------------------------------------------------------------
 #
 guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
+guide <- guide[!effect_type %in% c("lnOR", "lnRR")]
 
 files <- list.files("run_simulations/remote_mirrors/revision_paired_simulations/outputs/")
 files[grepl("lnCVR", files)]
@@ -65,17 +67,49 @@ files <- gsub(".Rds", "", files)
 length(files)
 
 guide <- guide[!batch_id %in% files, ]
-guide$effect_type
+unique(guide$effect_type)
 
 guide[, chunk := .GRP, by = .(batch_id)]
 max(guide$chunk)
+guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
+# Must be 0 rows
+
+# Why aren't these finished? 
+unique(guide$batch_id)
+
+sub <- guide[batch_id == "SMD_batch_4706"]
+eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2, 
+         sd1 = sub$true_sd1, sd2 = sub$true_sd2,
+         r = sub$r, n = sub$n,
+         effect_type = "SMD_paired")
+
+sub <- guide[batch_id == "lnCVR_batch_1647"]
+eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2, 
+         sd1 = sub$true_sd1, sd2 = sub$true_sd2,
+         r = sub$r, n = sub$n,
+         effect_type = "lnCVR_paired")
+
+sub <- guide[batch_id == "lnRoM_batch_4828"]
+eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2, 
+         sd1 = sub$true_sd1, sd2 = sub$true_sd2,
+         r = sub$r, n = sub$n,
+         effect_type = "lnRoM_paired")
+
+
+# sub <- guide[batch_id == "lnOR_batch_4909"]
+# eff_size(a = sub$true_mean1, b = sub$true_mean2, 
+#          c = sub$true_sd1, d = sub$true_sd2,
+#          effect_type = "lnRoM_paired")
+
+guide
+
 
 updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
             no_jobs = max(guide$chunk))
 
 updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
-          gb = "4gb",
-          time = "7:00:00")
+          gb = "5gb",
+          time = "5:00:00")
 
 #
 
