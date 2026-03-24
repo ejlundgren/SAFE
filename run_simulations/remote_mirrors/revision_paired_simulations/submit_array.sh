@@ -11,7 +11,7 @@
 #SBATCH --time 00:10:00
 #SBATCH --output=outfiles/meta_sim_boss_%j.out
 
-max_formulas=4703
+max_formulas=1622
 # number of chunks in this case
 
 for (( i=1; i<=${max_formulas}; i++ )); 

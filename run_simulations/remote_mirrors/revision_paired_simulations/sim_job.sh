@@ -6,9 +6,9 @@
 #SBATCH --job-name=revision_sim_job
 #SBATCH --mail-user=ejlundgr@fir.alliancecan.ca
 #SBATCH --mail-type=FAIL,END
-#SBATCH --mem-per-cpu=3gb
+#SBATCH --mem-per-cpu=4gb
 #SBATCH --cpus-per-task 1
-#SBATCH --time 6:00:00
+#SBATCH --time 7:00:00
 #SBATCH --output=outfiles/sim_job_%j.out
 
 module load gcc/13.3 r/4.5.0  

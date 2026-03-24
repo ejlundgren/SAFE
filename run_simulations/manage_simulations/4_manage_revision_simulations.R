@@ -58,11 +58,14 @@ updateJob <- function(job_path,
 guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
 files <- list.files("run_simulations/remote_mirrors/revision_paired_simulations/outputs/")
+files[grepl("lnCVR", files)]
+files[grepl("SMD", files)]
 
 files <- gsub(".Rds", "", files)
+length(files)
 
 guide <- guide[!batch_id %in% files, ]
-guide
+guide$effect_type
 
 guide[, chunk := .GRP, by = .(batch_id)]
 max(guide$chunk)
@@ -70,10 +73,9 @@ max(guide$chunk)
 updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
             no_jobs = max(guide$chunk))
 
-
 updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
-          gb = "3gb",
-          time = "6:00:00")
+          gb = "4gb",
+          time = "7:00:00")
 
 #
 
