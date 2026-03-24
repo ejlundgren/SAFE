@@ -78,7 +78,7 @@ final_guide
 expansion <- data.table(effect_type = unique(final_guide$effect_type))
 # expansion[, num := 1:.N]
 
-expanded.guide <- expansion[rep(seq(1, nrow(expansion)), 100)]
+expanded.guide <- expansion[rep(seq(1, nrow(expansion)), 1000)]
 expanded.guide
 expanded.guide[, batch_id := paste0(effect_type, "_batch_", 1:.N)]
 expanded.guide[, chunk := 1:.N]
@@ -96,9 +96,9 @@ expanded.guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
 # Must be 0 rows
 
 
-1e5 / 100
+1e5 / 1000
 length(unique(expanded.guide$batch_id))
-# So 500 cores and 1000 iterations per core.
+# So 5000 cores and 100 iterations per core.
 # That seems reasonable.
 
 expanded.guide[, checkpoint_path := paste0("checkpoints/", batch_id, ".Rds")]
