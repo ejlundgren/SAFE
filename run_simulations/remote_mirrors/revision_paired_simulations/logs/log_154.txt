@@ -1,0 +1,145 @@
+[1] "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v4/Compiler/gcccore/r/4.5.0/lib64/R/bin/exec/R"
+[2] "--no-echo"                                                                                                 
+[3] "--no-restore"                                                                                              
+[4] "--file=SAFE_revision_simulations.R"                                                                        
+[5] "--args"                                                                                                    
+[6] "154"                                                                                                       
+[1] "5 scenarios to run"
+Key: <effect_type>
+   effect_type       batch_id chunk  seed true_mean1 true_mean2 true_sd1
+        <char>         <char> <int> <int>      <num>      <num>    <num>
+1:        lnOR lnOR_batch_154   154   154         NA         NA       NA
+2:        lnOR lnOR_batch_154   154   154         NA         NA       NA
+3:        lnOR lnOR_batch_154   154   154         NA         NA       NA
+4:        lnOR lnOR_batch_154   154   154         NA         NA       NA
+5:        lnOR lnOR_batch_154   154   154         NA         NA       NA
+   true_sd2     r     n true_p_a true_p_c    n1    n2 true_a true_c true_b
+      <num> <num> <num>    <num>    <num> <num> <num>  <num>  <num>  <num>
+1:       NA    NA    NA      0.3      0.8    10    10      3      8      7
+2:       NA    NA    NA      0.3      0.8    50    50     15     40     35
+3:       NA    NA    NA      0.3      0.8   100   100     30     80     70
+4:       NA    NA    NA      0.3      0.8   500   500    150    400    350
+5:       NA    NA    NA      0.3      0.8    20    20      6     16     14
+   true_d      scenario_id                checkpoint_path
+    <num>           <char>                         <char>
+1:      2 scenario_lnOR_28 checkpoints/lnOR_batch_154.Rds
+2:     10 scenario_lnOR_29 checkpoints/lnOR_batch_154.Rds
+3:     20 scenario_lnOR_30 checkpoints/lnOR_batch_154.Rds
+4:    100 scenario_lnOR_31 checkpoints/lnOR_batch_154.Rds
+5:      4 scenario_lnOR_32 checkpoints/lnOR_batch_154.Rds
+                    file_path
+                       <char>
+1: outputs/lnOR_batch_154.Rds
+2: outputs/lnOR_batch_154.Rds
+3: outputs/lnOR_batch_154.Rds
+4: outputs/lnOR_batch_154.Rds
+5: outputs/lnOR_batch_154.Rds
+[1] "No checkpoint found. Starting with n=1"
+[1] "Beginning simulation for lnOR_batch_154"
+[1] "iteration 1 successful"
+[1] "iteration 2 successful"
+[1] "iteration 3 successful"
+[1] "iteration 4 successful"
+[1] "iteration 5 successful"
+[1] "iteration 6 successful"
+[1] "iteration 7 successful"
+[1] "iteration 8 successful"
+[1] "iteration 9 successful"
+[1] "iteration 10 successful"
+[1] "iteration 11 successful"
+[1] "iteration 12 successful"
+[1] "iteration 13 successful"
+[1] "iteration 14 successful"
+[1] "iteration 15 successful"
+[1] "iteration 16 successful"
+[1] "iteration 17 successful"
+[1] "iteration 18 successful"
+[1] "iteration 19 successful"
+[1] "iteration 20 successful"
+[1] "Saving checkpoint file"
+[1] "iteration 21 successful"
+[1] "iteration 22 successful"
+[1] "iteration 23 successful"
+[1] "iteration 24 successful"
+[1] "iteration 25 successful"
+[1] "iteration 26 successful"
+[1] "iteration 27 successful"
+[1] "iteration 28 successful"
+[1] "iteration 29 successful"
+[1] "iteration 30 successful"
+[1] "iteration 31 successful"
+[1] "iteration 32 successful"
+[1] "iteration 33 successful"
+[1] "iteration 34 successful"
+[1] "iteration 35 successful"
+[1] "iteration 36 successful"
+[1] "iteration 37 successful"
+[1] "iteration 38 successful"
+[1] "iteration 39 successful"
+[1] "iteration 40 successful"
+[1] "Saving checkpoint file"
+[1] "iteration 41 successful"
+[1] "iteration 42 successful"
+[1] "iteration 43 successful"
+[1] "iteration 44 successful"
+[1] "iteration 45 successful"
+[1] "iteration 46 successful"
+[1] "iteration 47 successful"
+[1] "iteration 48 successful"
+[1] "iteration 49 successful"
+[1] "iteration 50 successful"
+[1] "iteration 51 successful"
+[1] "iteration 52 successful"
+[1] "iteration 53 successful"
+[1] "iteration 54 successful"
+[1] "iteration 55 successful"
+[1] "iteration 56 successful"
+[1] "iteration 57 successful"
+[1] "iteration 58 successful"
+[1] "iteration 59 successful"
+[1] "iteration 60 successful"
+[1] "Saving checkpoint file"
+[1] "iteration 61 successful"
+[1] "iteration 62 successful"
+[1] "iteration 63 successful"
+[1] "iteration 64 successful"
+[1] "iteration 65 successful"
+[1] "iteration 66 successful"
+[1] "iteration 67 successful"
+[1] "iteration 68 successful"
+[1] "iteration 69 successful"
+[1] "iteration 70 successful"
+[1] "iteration 71 successful"
+[1] "iteration 72 successful"
+[1] "iteration 73 successful"
+[1] "iteration 74 successful"
+[1] "iteration 75 successful"
+[1] "iteration 76 successful"
+[1] "iteration 77 successful"
+[1] "iteration 78 successful"
+[1] "iteration 79 successful"
+[1] "iteration 80 successful"
+[1] "Saving checkpoint file"
+[1] "iteration 81 successful"
+[1] "iteration 82 successful"
+[1] "iteration 83 successful"
+[1] "iteration 84 successful"
+[1] "iteration 85 successful"
+[1] "iteration 86 successful"
+[1] "iteration 87 successful"
+[1] "iteration 88 successful"
+[1] "iteration 89 successful"
+[1] "iteration 90 successful"
+[1] "iteration 91 successful"
+[1] "iteration 92 successful"
+[1] "iteration 93 successful"
+[1] "iteration 94 successful"
+[1] "iteration 95 successful"
+[1] "iteration 96 successful"
+[1] "iteration 97 successful"
+[1] "iteration 98 successful"
+[1] "iteration 99 successful"
+[1] "iteration 100 successful"
+[1] "Saving checkpoint file"
+[1] 500
+[1] "Saved successfully"
