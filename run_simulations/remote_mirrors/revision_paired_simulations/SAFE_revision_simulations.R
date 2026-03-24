@@ -95,7 +95,8 @@ lnRoM <- function(scens){
            c("yi_first", "vi_first", 
              "yi_second", "vi_second"),
            c("sim_y_plugin_1st", "sim_v_plugin_1st",
-             "sim_y_plugin_2nd", "sim_v_plugin_2nd"))
+             "sim_y_plugin_2nd", "sim_v_plugin_2nd"),
+           skip_absent=TRUE)
   
   # Store results:
   results <- data.table(scens,
@@ -142,7 +143,8 @@ SMD_Wishart <- function(scens){
            c("yi_first", "vi_first", 
              "yi_second", "vi_second"),
            c("sim_y_plugin_1st", "sim_v_plugin_1st",
-             "sim_y_plugin_2nd", "sim_v_plugin_2nd"))
+             "sim_y_plugin_2nd", "sim_v_plugin_2nd"),
+           skip_absent=TRUE)
   
   # Store results:
   results <- data.table(scens,
@@ -282,7 +284,8 @@ lnCVR_Wishart <- function(scens){
            c("yi_first", "vi_first", 
              "yi_second", "vi_second"),
            c("sim_y_plugin_1st", "sim_v_plugin_1st",
-             "sim_y_plugin_2nd", "sim_v_plugin_2nd"))
+             "sim_y_plugin_2nd", "sim_v_plugin_2nd"),
+           skip_absent=TRUE)
   
   # Store results:
   results <- data.table(scens,
