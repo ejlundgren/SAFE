@@ -36,6 +36,7 @@ if(local){
   print(args)
   
   index <- as.numeric(args[6]) # get index value from bash script
+  
   source('remote_universal_SAFE.R')
   
   # Chunk should be same for an entire effect size / runID combination

@@ -35,7 +35,7 @@ guide <- CJ(true_mean1 = 13.4, true_mean2 = 16.1,
             true_sd1 = 4.6, true_sd2 = 3.9,
             r = c(0, 0.5, 0.8),
             n = c(5, 15, 100),
-            effect_type = c("SMD", "lnRoM", "lnCVR"))
+            effect_type = c("SMD", "lnRoM"))
 
 # For continuity correction.
 # Check the simulated data

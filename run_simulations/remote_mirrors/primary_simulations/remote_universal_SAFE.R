@@ -16,8 +16,42 @@ if(DEBUG){
   library("data.table")
   library("MASS")
   library("tmvtnorm")
-  source("remote_mirrors/final_simulations/remote_universal_SAFE.R")
+  source("run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE.R")
   # So that subfunctions are in environment
+  
+  sim_dat <- structure(list(sim_mean1 = c(16.6966169287131, 13.3944772531455, 
+                                          13.1317064287984, 12.4726758902812, 10.8947203153206, 13.2710710514953, 
+                                          11.882605128766, 12.1605940337062, 13.7033968117959), sim_mean2 = c(19.3407285732837, 
+                                                                                                              16.8453529226153, 16.0276722017751, 15.6436979948258, 14.9762636159497, 
+                                                                                                              15.1807182507386, 15.4042041457165, 15.2841937089102, 16.0265241707472
+                                          ), sim_sd1 = c(5.15657527720696, 4.49179596130783, 5.02144084286945, 
+                                                         6.72397548899408, 3.00529898800525, 4.31825223067962, 4.46279277873971, 
+                                                         5.02255708138392, 4.80911638971044), sim_sd2 = c(3.30020678362011, 
+                                                                                                          5.60919843657186, 4.3196872122018, 1.10920016798364, 4.11439596653131, 
+                                                                                                          3.99427850641121, 3.08565466690168, 4.25520877021784, 3.99860965050796
+                                                         )), row.names = c(NA, -9L), class = c("data.table", "data.frame"
+                                                         ))
+  eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
+           sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
+           n = c(5, 15, 100, 5, 15, 100, 5, 15, 100), 
+           r = c(0, 0, 0, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8),
+           effect_type = "lnCVR_paired",
+           SAFE_distribution = "4_multivariate_normal_wishart",
+           SAFE = TRUE,
+           parallelize = FALSE,
+           verbose = FALSE,
+           SAFE_boots = 1e6)
+  
+  input_vars <- list(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
+                     sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
+                     n = c(5, 15, 100, 5, 15, 100, 5, 15, 100), 
+                     r = c(0, 0, 0, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8))
+  effect_type = "lnCVR_paired"
+  SAFE_distribution = "4_multivariate_normal_wishart"
+  SAFE = TRUE
+  parallelize = FALSE
+  verbose = FALSE
+  SAFE_boots = 1e6
   
   
   eff_size(a = 5, b = 15, c = 10, d = 15,

@@ -1,3 +1,7 @@
+#
+#
+#
+#
 
 rm(list = ls())
 library("data.table")
@@ -48,9 +52,9 @@ updateJob <- function(job_path,
   
 }
 
+#
 # Load data ---------------------------------------------------------------
-
-
+#
 guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
 files <- list.files("run_simulations/remote_mirrors/revision_paired_simulations/outputs/")
