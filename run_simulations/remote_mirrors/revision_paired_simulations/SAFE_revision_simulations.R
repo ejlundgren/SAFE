@@ -342,6 +342,9 @@ if(file.exists(unique(guide$checkpoint_path))){
   set.seed(as.integer(guide$seed)) # if each chunk has the same seed, we'll be in trouble...
 }
 
+if(length(res) == end){
+  saveRDS(rbindlist(res, fill = T), unique(guide$file_path))
+}
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ --------------------------------------
 # >>> Loop --------------------------------------------------
 
