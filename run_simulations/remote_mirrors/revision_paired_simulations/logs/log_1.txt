@@ -1,0 +1,60 @@
+[1] "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v4/Compiler/gcccore/r/4.5.0/lib64/R/bin/exec/R"
+[2] "--no-echo"                                                                                                 
+[3] "--no-restore"                                                                                              
+[4] "--file=SAFE_revision_simulations.R"                                                                        
+[5] "--args"                                                                                                    
+[6] "1"                                                                                                         
+[1] "9 scenarios to run"
+Key: <effect_type>
+   effect_type       batch_id chunk  seed true_mean1 true_mean2 true_sd1
+        <char>         <char> <int> <int>      <num>      <num>    <num>
+1:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+2:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+3:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+4:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+5:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+6:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+7:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+8:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+9:         SMD SMD_batch_1806     1  1806       13.4       16.1      4.6
+   true_sd2     r     n true_p_a true_p_c    n1    n2 true_a true_c true_b
+      <num> <num> <num>    <num>    <num> <num> <num>  <num>  <num>  <num>
+1:      3.9   0.0     5       NA       NA    NA    NA     NA     NA     NA
+2:      3.9   0.0    15       NA       NA    NA    NA     NA     NA     NA
+3:      3.9   0.0   100       NA       NA    NA    NA     NA     NA     NA
+4:      3.9   0.5     5       NA       NA    NA    NA     NA     NA     NA
+5:      3.9   0.5    15       NA       NA    NA    NA     NA     NA     NA
+6:      3.9   0.5   100       NA       NA    NA    NA     NA     NA     NA
+7:      3.9   0.8     5       NA       NA    NA    NA     NA     NA     NA
+8:      3.9   0.8    15       NA       NA    NA    NA     NA     NA     NA
+9:      3.9   0.8   100       NA       NA    NA    NA     NA     NA     NA
+   true_d     scenario_id                checkpoint_path
+    <num>          <char>                         <char>
+1:     NA  scenario_SMD_1 checkpoints/SMD_batch_1806.Rds
+2:     NA  scenario_SMD_4 checkpoints/SMD_batch_1806.Rds
+3:     NA  scenario_SMD_7 checkpoints/SMD_batch_1806.Rds
+4:     NA scenario_SMD_10 checkpoints/SMD_batch_1806.Rds
+5:     NA scenario_SMD_13 checkpoints/SMD_batch_1806.Rds
+6:     NA scenario_SMD_16 checkpoints/SMD_batch_1806.Rds
+7:     NA scenario_SMD_19 checkpoints/SMD_batch_1806.Rds
+8:     NA scenario_SMD_22 checkpoints/SMD_batch_1806.Rds
+9:     NA scenario_SMD_25 checkpoints/SMD_batch_1806.Rds
+                    file_path
+                       <char>
+1: outputs/SMD_batch_1806.Rds
+2: outputs/SMD_batch_1806.Rds
+3: outputs/SMD_batch_1806.Rds
+4: outputs/SMD_batch_1806.Rds
+5: outputs/SMD_batch_1806.Rds
+6: outputs/SMD_batch_1806.Rds
+7: outputs/SMD_batch_1806.Rds
+8: outputs/SMD_batch_1806.Rds
+9: outputs/SMD_batch_1806.Rds
+[1] "CHECKPOINT FILE LOADED SUCCESSFULLY"
+[1] "Starting at iteration 101"
+[1] "Beginning simulation for SMD_batch_1806"
+[1] "iteration 101 successful"
+[1] "iteration 100 successful"
+[1] "Saving checkpoint file"
+[1] 909
+[1] "Saved successfully"
