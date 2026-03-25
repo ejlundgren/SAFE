@@ -56,8 +56,9 @@ updateJob <- function(job_path,
 #
 # Load data ---------------------------------------------------------------
 #
-guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
-guide <- guide[!effect_type %in% c("lnOR", "lnRR")]
+full_guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/scenarios.Rds")
+unique(full_guide$effect_type)
+full_guide <- full_guide[!effect_type %in% c("lnOR", "lnRR")]
 
 files <- list.files("run_simulations/remote_mirrors/revision_paired_simulations/outputs/")
 files[grepl("lnCVR", files)]
@@ -66,13 +67,9 @@ files[grepl("SMD", files)]
 files <- gsub(".Rds", "", files)
 length(files)
 
-guide <- guide[!batch_id %in% files, ]
+guide <- full_guide[!batch_id %in% files, ]
 unique(guide$effect_type)
 
-guide[, chunk := .GRP, by = .(batch_id)]
-max(guide$chunk)
-guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
-# Must be 0 rows
 
 # Why aren't these finished? 
 unique(guide$batch_id)
@@ -102,6 +99,14 @@ eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2,
 #          effect_type = "lnRoM_paired")
 
 guide
+
+guide <- full_guide[batch_id == "SMD_batch_1806", ]
+
+guide[, chunk := .GRP, by = .(batch_id)]
+max(guide$chunk)
+guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
+# Must be 0 rows
+
 saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
 updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
