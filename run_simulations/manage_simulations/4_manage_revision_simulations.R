@@ -77,7 +77,7 @@ guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
 # Why aren't these finished? 
 unique(guide$batch_id)
 
-sub <- guide[batch_id == "SMD_batch_4706"]
+sub <- guide[batch_id == "lnRoM_batch_1818"]
 eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2, 
          sd1 = sub$true_sd1, sd2 = sub$true_sd2,
          r = sub$r, n = sub$n,
@@ -102,14 +102,14 @@ eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2,
 #          effect_type = "lnRoM_paired")
 
 guide
-
+saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
 updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
             no_jobs = max(guide$chunk))
 
 updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
-          gb = "5gb",
-          time = "5:00:00")
+          gb = "6gb",
+          time = "4:00:00")
 
 #
 
