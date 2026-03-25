@@ -653,13 +653,6 @@ print(c("SAFE bias-corrected point estimate" = SAFE_yi, "SAFE sampling variance"
 
 ```
 
-### Continuity corrections
-lnOR and lnRR, the dominant binomial count-based effect sizes, fail when the number of counts equals 0. For that reason, to make these effect sizes calculable, we use continuity corrections. 
-
-The traditional continuity correction for lnOR is to add 0.5 to every cell (e.g., `a`, `b`, `c`, and `d`) for rows with a 0 in any cell. For lnRR (which only considers `a`, `c`, and `n1` and `n2`), the traditional correction is to add 0.5 to `a` or `c` and add 1 to `n1` or `n2`. 
-
-Below, we conduct Monte Carlo simulations (@sec-continuity-monte-carlo) to compare this continuity correction with adding 1 to cells instead of 0.5.
-
 # How good is SAFE? {#sec-compare-results}
 
 We simulated the bias of SAFE calculations versus normal plug-in calculations for a variety of common, and less common, effect sizes. We did this across a range of input variables, particularly sample size and the number of SAFE bootstraps.
@@ -1091,7 +1084,7 @@ p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ],
                      labels = labs)+
   facet_wrap(~estimand, 
              labeller = facet_labs)+
-  coord_cartesian(ylim = c(.85, 1))+
+  coord_cartesian(ylim = c(.93, 1))+
   ggtitle("Speed (1 / x)")+
   theme_SAFE+
   theme(legend.position = "bottom") 
@@ -1100,6 +1093,100 @@ p.coverage
 ```
 
 Coverage appears virtually identically for SAFE and the plugin at moderate sample sizes, but note that SAFE has better coverage at low sample sizes. That's pretty cool.
+
+
+### lnRoM
+
+Now let's look at the log-transformed ratio of means (lnRoM or lnRR). 
+
+```{r, SMD_mvnormal}
+#| label: lnRoM
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+sub_dat <- sim_results[effect_type == "lnRoM", ]
+
+setorder(sub_dat, sample_size1)
+
+p.point <- ggplot(data = sub_dat[calculation %in% c("bias") & sample_size_ratio == 1,],
+                  aes(x = sample_size1, y = value, color = estimator,
+                      group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(point_lab)+
+  xlab("Sample size")+
+  ggtitle("SMD", subtitle= "4-multivariate normal")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = as_labeller(c("plugin_1st" = "1st order plugin estimand",
+                                      "plugin_2nd" = "2nd order plugin estimand")))+
+  coord_cartesian(ylim = c(-0.01, 0.01))+
+  ggtitle("SMD")+
+  theme_SAFE+
+  theme(legend.position = "none") 
+
+#
+p.variance <- ggplot(data = sub_dat[calculation %in% c("relative_bias") & sample_size_ratio == 1, ], 
+                     aes(x = sample_size1, y = value, color = estimator,
+                         group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(var_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = c(plugin_1st = "1st order plugin", 
+                                plugin_2nd = "2nd order plugin", 
+                                safe = "SAFE"))+
+  coord_cartesian(ylim = c(-30, 30))+
+  facet_wrap(~estimand, 
+             ncol = 1,
+             labeller = as_labeller(c("plugin_1st" = "1st order plugin estimand",
+                                      "plugin_2nd" = "2nd order plugin estimand",
+                                      "safe" = "SAFE estimand")))+
+  theme_SAFE+
+  theme(legend.position = "bottom")
+
+p.point + xlab(NULL) + p.variance + plot_layout(ncol = 1, heights = c(1/4, 3/4)) + 
+  plot_annotation(tag_levels = "A")
+
+```
+
+And coverage:
+```{r}
+#| label: coverage_smd_normal
+#| echo: false
+#| eval: true
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ], 
+            aes(x = sample_size1, y = value, color = estimator,
+                group = estimator))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab("Coverage")+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  facet_wrap(~estimand, 
+             labeller = facet_labs,
+             ncol = 2)+
+  coord_cartesian(ylim = c(.95, .99))+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.coverage
+
+```
+Slightly better coverage than the plugin estimates! Neat 🙂
 
 ### SMD 4 multivariate normal
 
@@ -1191,7 +1278,7 @@ p.coverage <- ggplot(data = sub_dat[calculation %in% c("coverage"), ],
 p.coverage
 
 ```
-Slightly better coverage than the plugin estimates! Neat 🙂
+
 
 ### SMD 2 multivariate normal and 2-Wishart
 
@@ -2283,76 +2370,282 @@ ggplot(data = sub_dat,
 
 # Paired design Monte Carlo {#sec-paired-designs-monte-carlo}
 
-Now let's evaluate how different values of $r$ affect bias and relative bias of SAFE and plugin estimators. We'll include an $r$ of 0, as well as 0.5 and 0.8 and we'll run each scenario 1e5 times. Note that the SAFE bootstrapping itself is happening in the `eff_size()` function. The simulated data in the `foreach` loop below is the Monte Carlo simulation (and is a draw of the raw data, not plausible means).
+Now let's evaluate how different values of $r$ affect bias and relative bias of SAFE and plugin estimators. We included an $r$ of 0, 0.5, and 0.8 and we ran each scenario 1e5 times. We did this for lnRoM and SMD and lnCVR—the 3 main effect sizes with paired designs.
 
-We'll do this for lnRoM and SMD.
-
-```{r, monte_carlo}
-#| label: monte_carlo
-#| eval: false
-#| attr-source: "style='font-size: 0.8em;'"
-#| attr-output: "style='font-size: 0.7em'"
-  
-bias <- ggplot(data = point.bias.long,
-               aes(x = sample_n, y = bias, color = estimator))+
-  geom_hline(yintercept = 0)+
-  geom_path(linewidth = 1)+
-  geom_point(size = 2)+
-  xlab("Sample size")+
-  ylab("Point estimate bias")+
-  coord_cartesian(ylim = c(-0.001, 0.001))+
-  scale_color_manual("Estimator",
-                     labels = c("plugin_bias" = "Plug-in bias",
-                                "bias_corrected_safe_bias" = "SAFE\n(bias-corrected)",
-                                "uncorrected_safe_bias" = "mean SAFE\n(uncorrected)"),
-                     values = c("plugin_bias" = "#A8DADC",
-                                "bias_corrected_safe_bias" = "#E63946",
-                                "uncorrected_safe_bias" = "#1D3557"))+
-  theme_bw()+
-  theme(panel.border = element_blank(),
-        panel.grid = element_blank(),
-        legend.position = "bottom")
-
-# First, calculate variance in point estimates as our 'estimand' by scenario_id
-
-# Plot
-rel_bias <- ggplot(data = var.bias.long, 
-                   aes(x = sample_n, y = value, color = Estimator))+
-  geom_hline(yintercept = 0)+
-  geom_path(linewidth = 1)+
-  geom_point(size = 2)+
-  xlab("Sample size")+
-  ylab("Relative bias (%) in variance estimates")+
-  scale_color_manual("Estimator",
-                     labels = c("plugin_estimate" = "Plug-in\n(definition formula)",
-                                "SAFE_estimate" = "SAFE bootstrapping"),
-                     values = c("plugin_estimate" = "#A8DADC",
-                                "SAFE_estimate" = "#E63946"))+
-  facet_wrap(~Estimand,
-             ncol = 1,
-             labeller = as_labeller(c("plugin_estimand" = "Plug-in estimand\n(definition formula)",
-                                      "SAFE_estimand" = "SAFE estimand")))+
-  theme_bw()+
-  theme(panel.border = element_blank(),
-        panel.grid = element_blank(),
-        strip.background = element_blank(),
-        legend.position = "bottom")
-
-bias + rel_bias
-```
-
-Or just load the simulation here:
-
-```{r, monte_carlo_load}
-#| label: monte_carlo_load
+### SMD
+First, the bias of the point estimates:
+```{r}
+#| label: SMD_paired_point_bias
 #| eval: true
+#| echo: false
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
+paired_dat <- readRDS("builds/paired_scenarios_bias.Rds")
+paired_dat
+sub_dat <- paired_dat[effect_type == "SMD", ]
+
+unique(sub_dat$estimate)
+labs = c("first_estimate" = "Cohen's d",
+           "second_estimate" = "Hedges' g",
+           "safe_estimate" = "SAFE")
+
+pal = c("first_estimate" = "#A8DADC",
+           "second_estimate" = "#1D3557",
+           "safe_estimate" = "#E63946")
+pt_size <- 2
+
+unique(sub_dat$estimand)
+unique(sub_dat$r)
+
+facet_labs <- as_labeller(c("first_estimand" = "Cohen's d estimand",
+                            "second_estimand" = "Hedges' g estimand",
+                            "safe_estimand" = "SAFE estimand",
+                            "0" = "r = 0",
+                            "0.5" = "r = 0.5",
+                            "0.8" = "r = 0.8"))
+setorder(sub_dat, n)
+
+p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
+                                   estimand == "first_estimand",],
+                  aes(x = n, y = value, 
+                      color = estimate,
+                      group = estimate))+
+  facet_wrap(~r, labeller = facet_labs)+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(point_lab)+
+  xlab("Sample size")+
+  ggtitle("SMD")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs)+
+  coord_cartesian(ylim = c(-0.1, 0.1))+
+  ggtitle("SMD")+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.point
+
 ```
 
+And the relative bias of the variance estimates. Remember that these are in comparison to 3 potential estimands (Cohen's d, Hedges' g, and SAFE).
+```{r}
+#| label: SMD_paired_rel_bias
+#| eval: true
+#| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
 
-# Continuity correction MC {#sec-continuity-monte-carlo}
+sub_dat$estimand <- factor(sub_dat$estimand,
+                           levels = c("first_estimand", "second_estimand",
+                                      "safe_estimand"))
+p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ], 
+                     aes(x = n, y = value, color = estimate,
+                         group = estimate))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(var_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = c(plugin_1st = "Cohen's d", 
+                                plugin_2nd = "Hedges' g", 
+                                safe = "SAFE"))+
+  # coord_cartesian(ylim = c(-50, 50))+
+  facet_grid(estimand ~ r, 
+             labeller = facet_labs)+
+  theme_SAFE+
+  theme(legend.position = "bottom")
+
+p.variance
+```
+
+### lnRoM
+First, the bias of the point estimates:
+```{r}
+#| label: lnRoM_paired_point_bias
+#| eval: true
+#| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+sub_dat <- paired_dat[effect_type == "lnRoM" & !is.na(value), ]
+sub_dat <- droplevels(sub_dat)
+
+unique(sub_dat$variable)
+unique(sub_dat$estimate)
+
+labs = c("first_estimate" = "1st order plugin",
+           "second_estimate" = "2nd order plugin",
+           "safe_estimate" = "SAFE")
+
+pal = c("first_estimate" = "#A8DADC",
+           "second_estimate" = "#1D3557",
+           "safe_estimate" = "#E63946")
+pt_size <- 2
+
+unique(sub_dat$estimand)
+facet_labs <- as_labeller(c("first_estimand" = "1st order estimand",
+                            "second_estimand" = "2nd order plugin estimand",
+                            "safe_estimand" = "SAFE estimand",
+                            "0" = "r = 0",
+                            "0.5" = "r = 0.5",
+                            "0.8" = "r = 0.8"))
+pt_size <- 2
+
+unique(sub_dat$estimand)
+unique(sub_dat$r)
+
+setorder(sub_dat, n)
+
+p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
+                                   estimand == "first_estimand",],
+                  aes(x = n, y = value, 
+                      color = estimate,
+                      group = estimate))+
+  facet_wrap(~r, labeller = facet_labs)+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(point_lab)+
+  xlab("Sample size")+
+  ggtitle("SMD")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs,
+                     drop = TRUE)+
+  coord_cartesian(ylim = c(-0.01, 0.01))+
+  ggtitle("SMD")+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.point
+
+```
+
+And the relative bias of the variance estimates. 
+```{r}
+#| label: SMD_paired_rel_bias
+#| eval: true
+#| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+
+p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ], 
+                     aes(x = n, y = value, color = estimate,
+                         group = estimate))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(var_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = c(plugin_1st = "1st order plugin", 
+                                plugin_2nd = "2nd order plugin", 
+                                safe = "SAFE"))+
+  # coord_cartesian(ylim = c(-50, 50))+
+  facet_grid(r~estimand, 
+             labeller = facet_labs)+
+  theme_bw()+
+  # theme_SAFE+
+  theme(legend.position = "bottom")
+p.variance
+
+```
+
+### lnCVR
+First, the bias of the point estimates:
+```{r}
+#| label: SMD_paired_point_bias
+#| eval: true
+#| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+sub_dat <- paired_dat[effect_type == "lnCVR" & !is.na(value), ]
+sub_dat <- droplevels(sub_dat)
+
+unique(sub_dat$variable)
+unique(sub_dat$estimate)
+
+labs = c("first_estimate" = "1st order plugin",
+           "second_estimate" = "2nd order plugin",
+           "safe_estimate" = "SAFE")
+
+pal = c("first_estimate" = "#A8DADC",
+           "second_estimate" = "#1D3557",
+           "safe_estimate" = "#E63946")
+pt_size <- 2
+
+unique(sub_dat$estimand)
+facet_labs <- as_labeller(c("first_estimand" = "1st order estimand",
+                            "second_estimand" = "2nd order plugin estimand",
+                            "safe_estimand" = "SAFE estimand",
+                            "0" = "r = 0",
+                            "0.5" = "r = 0.5",
+                            "0.8" = "r = 0.8"))
+pt_size <- 2
+
+unique(sub_dat$estimand)
+unique(sub_dat$r)
+
+setorder(sub_dat, n)
+
+p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
+                                   estimand == "first_estimand",],
+                  aes(x = n, y = value, 
+                      color = estimate,
+                      group = estimate))+
+  facet_wrap(~r, labeller = facet_labs)+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(point_lab)+
+  xlab("Sample size")+
+  ggtitle("SMD")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = labs,
+                     drop = TRUE)+
+  coord_cartesian(ylim = c(-0.025, 0.025))+
+  ggtitle("SMD")+
+  theme_SAFE+
+  theme(legend.position = "bottom") 
+p.point
+
+```
+
+And the relative bias of the variance estimates. Remember that these are in comparison to 3 potential estimands (Cohen's d, Hedges' g, and SAFE).
+```{r}
+#| label: SMD_paired_rel_bias
+#| eval: true
+#| echo: false
+#| attr-source: "style='font-size: 0.8em;'"
+#| attr-output: "style='font-size: 0.7em'"
+
+p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ], 
+                     aes(x = n, y = value, color = estimate,
+                         group = estimate))+
+  geom_hline(yintercept = 0)+
+  geom_path(lwd = 1)+
+  geom_point(size = pt_size)+
+  ylab(var_lab)+
+  xlab("Sample size")+
+  scale_color_manual(name = "Estimator", 
+                     values = pal,
+                     labels = c("first_estimate" = "1st order plugin", 
+                                "second_estimate" = "2nd order plugin", 
+                                "safe_estimate" = "SAFE"))+
+  # coord_cartesian(ylim = c(-50, 50))+
+  facet_grid(r~estimand, 
+             labeller = facet_labs)+
+  theme_SAFE+
+  theme(legend.position = "bottom")
+
+```
 
 # Conclusion
 

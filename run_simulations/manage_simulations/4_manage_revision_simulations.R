@@ -53,6 +53,15 @@ updateJob <- function(job_path,
   
 }
 
+
+# testing -----------------------------------------------------------------
+
+formulas <- fread("run_simulations/remote_mirrors/revision_paired_simulations/data/effect_size_formulas.csv")
+formulas[name == "lnRoM", ]
+
+formulas[name == "lnRoM_paired", ]
+
+"(sd1^2 / (n * x1^2)) + (sd2^2 / (n * x2^2)) - ((2 * r * sd1 * sd2) / (x1 * x2 * sqrt(n^2)))"
 #
 # Load data ---------------------------------------------------------------
 #
@@ -101,7 +110,7 @@ eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2,
 guide
 
 guide <- full_guide[batch_id == "SMD_batch_1806", ]
-
+file.remove(unique(guide$file_path))
 guide[, chunk := .GRP, by = .(batch_id)]
 max(guide$chunk)
 guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
