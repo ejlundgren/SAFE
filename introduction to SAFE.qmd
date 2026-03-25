@@ -2415,7 +2415,7 @@ p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
   geom_point(size = pt_size)+
-  ylab(point_lab)+
+  ylab("Bias of point estimate")+
   xlab("Sample size")+
   ggtitle("SMD")+
   scale_color_manual(name = "Estimator", 
@@ -2446,7 +2446,7 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
   geom_point(size = pt_size)+
-  ylab(var_lab)+
+  ylab("Relative bias of variance estimates (%)")+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
@@ -2509,7 +2509,7 @@ p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
   geom_point(size = pt_size)+
-  ylab(point_lab)+
+  ylab("Bias of point estimates")+
   xlab("Sample size")+
   ggtitle("SMD")+
   scale_color_manual(name = "Estimator", 
@@ -2517,7 +2517,7 @@ p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
                      labels = labs,
                      drop = TRUE)+
   coord_cartesian(ylim = c(-0.01, 0.01))+
-  ggtitle("SMD")+
+  ggtitle("lnRoM")+
   theme_SAFE+
   theme(legend.position = "bottom") 
 p.point
@@ -2539,11 +2539,11 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
   geom_point(size = pt_size)+
-  ylab(var_lab)+
+  ylab("Relative bias of variance estimates")+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
-                     labels = c(plugin_1st = "1st order plugin", 
+                     labels = c(first_estimate = "1st order plugin", 
                                 plugin_2nd = "2nd order plugin", 
                                 safe = "SAFE"))+
   # coord_cartesian(ylim = c(-50, 50))+

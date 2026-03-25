@@ -142,6 +142,10 @@ eff_size <- function(...,
     rbindlist()
   
   out <- cbind(plugins, safe_out)
+  
+  if(!is.null(data)){
+    out <- cbind(data, out)
+  }
   return(out)
 }
 
@@ -385,7 +389,8 @@ parameter_cloud <- function(formulas,
     #
     wishart.out <-  stats::rWishart(SAFE_boots, 
                                     df = (max(c(input$n1, input$n2)) -1), 
-                                    Sigma = sigma_matrix) 
+                                    Sigma = sigma_matrix / min(c( input$n1, input$n2)) #' [The / n is new.]
+                                    ) 
     out[, sd1 := sqrt(wishart.out[1, 1, ] / (input$n1 - 1))]
     out[, sd2 := sqrt(wishart.out[2, 2, ] / (input$n2 - 1))]
     out

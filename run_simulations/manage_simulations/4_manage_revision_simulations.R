@@ -54,18 +54,6 @@ updateJob <- function(job_path,
 }
 
 
-# testing -----------------------------------------------------------------
-
-formulas <- fread("run_simulations/remote_mirrors/revision_paired_simulations/data/effect_size_formulas.csv")
-formulas[name == "lnRoM", ]
-
-formulas[name == "lnRoM_paired", ]
-
-"(sd1^2 / (n * x1^2)) + (sd2^2 / (n * x2^2)) - ((2 * r * sd1 * sd2) / (x1 * x2 * sqrt(n^2)))"
-#
-
-formulas[name == "SMD_paired" & sim_family == "4_multivariate_normal_wishart", ]
-
 # Load data ---------------------------------------------------------------
 #
 full_guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/scenarios.Rds")
