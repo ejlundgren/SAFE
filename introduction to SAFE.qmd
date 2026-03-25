@@ -2644,6 +2644,7 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
              labeller = facet_labs)+
   theme_SAFE+
   theme(legend.position = "bottom")
+p.variance
 
 ```
 
