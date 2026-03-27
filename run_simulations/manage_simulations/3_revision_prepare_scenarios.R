@@ -29,10 +29,11 @@ file.copy("scripts/SAFE_function.R",
 file.copy("data/effect_size_formulas.csv",
           "run_simulations/remote_mirrors/revision_paired_simulations/data/effect_size_formulas.csv",
           overwrite = T)
+formulas <- fread("data/effect_size_formulas.csv")
+formulas[name == "SMD_paired"]$formula
+
 #
 sim_results <- readRDS("builds/all_scenarios_summarized.Rds")
-
-rerun <- F
 
 monte_carlo_N <- 1e5
 #
@@ -51,6 +52,39 @@ final_guide <- copy(guide)
 final_guide
 
 final_guide[, scenario_id := paste("scenario", effect_type, 1:.N, sep = '_')]
+final_guide
+
+# Calculate true values --------------------------------------------------------------------
+temp <- guide[effect_type == "lnRoM", ]
+lnrom <- eff_size(effect_type = "lnRoM_paired",
+                  n = temp$n, r = temp$r,
+                  x1 = temp$true_mean1, x2 = temp$true_mean2,
+                  sd1 = temp$true_sd1, sd2 = temp$true_sd2,
+                  SAFE = FALSE)
+lnrom <- cbind(temp, lnrom)
+lnrom
+
+temp <- guide[effect_type == "SMD", ]
+smd <- eff_size(effect_type = "SMD_paired",
+                  n = temp$n, r = temp$r,
+                  x1 = temp$true_mean1, x2 = temp$true_mean2,
+                  sd1 = temp$true_sd1, sd2 = temp$true_sd2,
+                  SAFE = FALSE)
+smd <- cbind(temp, smd)
+smd
+
+temp <- guide[effect_type == "lnCVR", ]
+lncvr <- eff_size(effect_type = "lnCVR_paired",
+                n = temp$n, r = temp$r,
+                x1 = temp$true_mean1, x2 = temp$true_mean2,
+                sd1 = temp$true_sd1, sd2 = temp$true_sd2,
+                SAFE = FALSE)
+lncvr <- cbind(temp, lncvr)
+lncvr
+
+final_guide <- rbind(lnrom, smd, lncvr, fill = TRUE)
+setnames(final_guide, c("yi_first", "vi_first", "yi_second", "vi_second"),
+         c("yi_first_true", "vi_first_true", "yi_second_true", "vi_second_true"))
 final_guide
 
 # Expand guide for 1000 core per effect size --------------------------------------------

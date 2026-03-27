@@ -34,87 +34,87 @@ dat <- dat[iter <= 100, ]
 dat
 
 # Calculate truth now, which is silly but I'm getting strange errors  --------------
-
-scenarios <- unique(dat[, .(effect_type, scenario_id, 
-                            n, r, true_mean1, true_mean2, 
-                            true_sd1, true_sd2)])
-scenarios
-
-lncvr <- scenarios[effect_type == "lnCVR", ]
-out <-  eff_size(n = lncvr$n, 
-                 r = lncvr$r,
-                 x1 = lncvr$true_mean1, 
-                 x2 = lncvr$true_mean2,
-                 sd1 = lncvr$true_sd1,
-                 sd2 = lncvr$true_sd2,
-                 SAFE = FALSE,
-                 effect_type = "lnCVR_paired")
-lncvr <- cbind(lncvr,
-               out)
-lncvr
-lncvr <- lncvr[, names(lncvr)[!grepl("vi", names(lncvr))], with = F]
-lncvr
-setnames(lncvr, 
-         c("yi_first", "yi_second"), 
-         paste0(c("yi_first", "yi_second"), 
-                   "_estimand"))
-
-#
-#
-#
-lnrom <- scenarios[effect_type == "lnRoM", ]
-out <- eff_size(n = lnrom$n, 
-                  r = lnrom$r,
-                  x1 = lnrom$true_mean1, 
-                  x2 = lnrom$true_mean2,
-                  sd1 = lnrom$true_sd1,
-                  sd2 = lnrom$true_sd2,
-                  SAFE = FALSE,
-                  effect_type = "lnRoM_paired")
-lnrom <- cbind(lnrom,
-               out)
-lnrom
-escalc(measure = "ROMC",
-       m1i = true_mean1, m2i = true_mean2,
-       sd1i = true_sd1, sd2i = true_sd2,
-       ni = n, ri = r,
-       data = lnrom)
-lnrom <- lnrom[, names(lnrom)[!grepl("vi", names(lnrom))], with = F]
-setnames(lnrom, c("yi_first"), paste0("yi_first", "_estimand"))
-lnrom
-
-#
-smd <- scenarios[effect_type == "SMD", ]
-out <- eff_size(n = smd$n, 
-                r = smd$r,
-                x1 = smd$true_mean1, 
-                x2 = smd$true_mean2,
-                sd1 = smd$true_sd1,
-                sd2 = smd$true_sd2,
-                SAFE = FALSE,
-                effect_type = "SMD_paired")
-smd <- cbind(smd,
-               out)
-
-escalc(measure = "SMCRP",
-       m1i = true_mean1, m2i = true_mean2,
-       sd1i = true_sd1, sd2i = true_sd2,
-       ni = n, ri = r,
-       data = smd)
-
-smd <- smd[, names(smd)[!grepl("vi", names(smd))], with = F]
-setnames(smd, 
-         c("yi_first", "yi_second"), 
-         paste0(c("yi_first", "yi_second"), 
-                "_estimand"))
-
-truth <- rbind(lncvr, lnrom, smd, fill = TRUE)
-truth
-
-dat.mrg <- merge(dat,
-                 truth[, .(scenario_id, yi_first_estimand, yi_second_estimand)],
-                 by = "scenario_id")
-dat.mrg
+#' [Did this already just need to mind the new names]
+# scenarios <- unique(dat[, .(effect_type, scenario_id, 
+#                             n, r, true_mean1, true_mean2, 
+#                             true_sd1, true_sd2)])
+# scenarios
+# 
+# lncvr <- scenarios[effect_type == "lnCVR", ]
+# out <-  eff_size(n = lncvr$n, 
+#                  r = lncvr$r,
+#                  x1 = lncvr$true_mean1, 
+#                  x2 = lncvr$true_mean2,
+#                  sd1 = lncvr$true_sd1,
+#                  sd2 = lncvr$true_sd2,
+#                  SAFE = FALSE,
+#                  effect_type = "lnCVR_paired")
+# lncvr <- cbind(lncvr,
+#                out)
+# lncvr
+# lncvr <- lncvr[, names(lncvr)[!grepl("vi", names(lncvr))], with = F]
+# lncvr
+# setnames(lncvr, 
+#          c("yi_first", "yi_second"), 
+#          paste0(c("yi_first", "yi_second"), 
+#                    "_estimand"))
+# 
+# #
+# #
+# #
+# lnrom <- scenarios[effect_type == "lnRoM", ]
+# out <- eff_size(n = lnrom$n, 
+#                   r = lnrom$r,
+#                   x1 = lnrom$true_mean1, 
+#                   x2 = lnrom$true_mean2,
+#                   sd1 = lnrom$true_sd1,
+#                   sd2 = lnrom$true_sd2,
+#                   SAFE = FALSE,
+#                   effect_type = "lnRoM_paired")
+# lnrom <- cbind(lnrom,
+#                out)
+# lnrom
+# escalc(measure = "ROMC",
+#        m1i = true_mean1, m2i = true_mean2,
+#        sd1i = true_sd1, sd2i = true_sd2,
+#        ni = n, ri = r,
+#        data = lnrom)
+# lnrom <- lnrom[, names(lnrom)[!grepl("vi", names(lnrom))], with = F]
+# setnames(lnrom, c("yi_first"), paste0("yi_first", "_estimand"))
+# lnrom
+# 
+# #
+# smd <- scenarios[effect_type == "SMD", ]
+# out <- eff_size(n = smd$n, 
+#                 r = smd$r,
+#                 x1 = smd$true_mean1, 
+#                 x2 = smd$true_mean2,
+#                 sd1 = smd$true_sd1,
+#                 sd2 = smd$true_sd2,
+#                 SAFE = FALSE,
+#                 effect_type = "SMD_paired")
+# smd <- cbind(smd,
+#                out)
+# 
+# escalc(measure = "SMCRP",
+#        m1i = true_mean1, m2i = true_mean2,
+#        sd1i = true_sd1, sd2i = true_sd2,
+#        ni = n, ri = r,
+#        data = smd)
+# 
+# smd <- smd[, names(smd)[!grepl("vi", names(smd))], with = F]
+# setnames(smd, 
+#          c("yi_first", "yi_second"), 
+#          paste0(c("yi_first", "yi_second"), 
+#                 "_estimand"))
+# 
+# truth <- rbind(lncvr, lnrom, smd, fill = TRUE)
+# truth
+# 
+# dat.mrg <- merge(dat,
+#                  truth[, .(scenario_id, yi_first_estimand, yi_second_estimand)],
+#                  by = "scenario_id")
+# dat.mrg
 
 # Calculate mean and var --------------------------------------------------
 dat

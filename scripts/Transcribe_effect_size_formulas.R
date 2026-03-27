@@ -354,6 +354,7 @@ from <- "(1 - 3 / (4 * (2*n - 2) - 1) )"
 effect_formulas[derivative == "second" & name == "SMD_paired", formula := gsub(from, to, formula, fixed = TRUE)]
 effect_formulas[derivative == "second" & name == "SMD_paired", ]$formula
 
+
 # >>> Revise paired SMD formulas ------------------------------------------
 
 # The paired variance effect_formulas were incorrect:
@@ -380,6 +381,17 @@ effect_formulas
 
 
 effect_formulas[name == "SMD_paired" & calc_type == "sampling_variance",]$formula
+
+
+# Fix point estimate.
+effect_formulas[calc_type == "effect_size" & name == "SMD_paired", ]$formula
+from <- "sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )"
+effect_formulas[calc_type == "effect_size" & name == "SMD_paired" & grepl(from, formula, fixed = TRUE), ]
+to <- "sqrt((sd1^2 + sd2^2 - 2*r*sd1*sd2) / (2 * (1-r)))"
+effect_formulas[calc_type == "effect_size" & name == "SMD_paired", 
+                formula := gsub(from, to, formula, fixed = TRUE)]
+effect_formulas[calc_type == "effect_size" & name == "SMD_paired" & grepl(from, formula, fixed = TRUE), ]
+effect_formulas[calc_type == "effect_size" & name == "SMD_paired", ]$formula
 
 
 # >>> Add an execution string with explicit environment/object control ----------------
@@ -458,7 +470,6 @@ effect_formulas[sim_family == "4_multivariate_normal_wishart" & !grepl("paired",
 effect_formulas[sim_family == "2_multivariate_normal" & !grepl("paired", name),
                 sim_family := "2_multivariate_normal_indep"]
 
-
 effect_formulas[sim_family == "2_multivariate_normal" & grepl("paired", name),
                 sim_family := "2_multivariate_normal_paired"]
 
@@ -467,3 +478,4 @@ effect_formulas[sim_family == "2_multivariate_normal" & grepl("paired", name),
 
 fwrite(effect_formulas, "data/effect_size_formulas.csv", na = "NA")
 # fwrite(effect_formulas, "run_simulations/remote_mirrors/data/effect_size_formulas.csv", na = "NA")
+
