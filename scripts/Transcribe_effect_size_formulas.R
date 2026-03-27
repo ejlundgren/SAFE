@@ -382,17 +382,18 @@ effect_formulas
 
 effect_formulas[name == "SMD_paired" & calc_type == "sampling_variance",]$formula
 
-
-# Fix point estimate.
-effect_formulas[calc_type == "effect_size" & name == "SMD_paired", ]$formula
-from <- "sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )"
-effect_formulas[calc_type == "effect_size" & name == "SMD_paired" & grepl(from, formula, fixed = TRUE), ]
-to <- "sqrt((sd1^2 + sd2^2 - 2*r*sd1*sd2) / (2 * (1-r)))"
-effect_formulas[calc_type == "effect_size" & name == "SMD_paired", 
-                formula := gsub(from, to, formula, fixed = TRUE)]
-effect_formulas[calc_type == "effect_size" & name == "SMD_paired" & grepl(from, formula, fixed = TRUE), ]
-effect_formulas[calc_type == "effect_size" & name == "SMD_paired", ]$formula
-
+# >>> Does paired formula for point estimate have r? ----------------------
+# No it doesn't. Phew. 
+# # Fix point estimate.
+# effect_formulas[calc_type == "effect_size" & name == "SMD_paired", ]$formula
+# from <- "sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )"
+# effect_formulas[calc_type == "effect_size" & name == "SMD_paired" & grepl(from, formula, fixed = TRUE), ]
+# to <- "sqrt((sd1^2 + sd2^2 - 2*r*sd1*sd2) / (2 * (1-r)))"
+# effect_formulas[calc_type == "effect_size" & name == "SMD_paired", 
+#                 formula := gsub(from, to, formula, fixed = TRUE)]
+# effect_formulas[calc_type == "effect_size" & name == "SMD_paired" & grepl(from, formula, fixed = TRUE), ]
+# effect_formulas[calc_type == "effect_size" & name == "SMD_paired", ]$formula
+# 
 
 # >>> Add an execution string with explicit environment/object control ----------------
 i <- 1
