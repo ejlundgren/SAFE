@@ -218,13 +218,16 @@ parameter_cloud <- function(formulas,
                             SAFE_boots = NULL){
 
   if(verbose) cat("Running SAFE with", SAFE_boots, "bootstraps\n\n")
+  f
+  # TODO
+  # add 
   
-  # This is a bit of hacky fix..
-  if(grepl("paired", unique(formulas$name))){
-    input$n1 <- input$n
-    input$n2 <- input$n
-  }
-    
+  # # This is a bit of hacky fix..
+  # if(grepl("paired", unique(formulas$name))){
+  #   input$n1 <- input$n
+  #   input$n2 <- input$n
+  # }
+  #   
   # Construct sigma matrices ------------------------------------------------
   if(any(formulas$sim_family %in% "1_normal")){
     if(is.null(sigma_matrix)){
@@ -232,40 +235,76 @@ parameter_cloud <- function(formulas,
     }
     means <- c(x = input$x)
     
-  }else if(any(formulas$sim_family %in% "2_multivariate_normal")){
+  # }else if(any(formulas$sim_family %in% "2_multivariate_normal")){
+  #   if(is.null(sigma_matrix)){
+  #     
+      #sigma_matrix <- matrix(data = c((input$sd1^2 / input$n1),                    (input$r*input$sd1*input$sd2)/input$n1, #  / n1 add this to sd1^2
+      #                                (input$r*input$sd1*input$sd2)/input$n1,      (input$sd2^2 / input$n2)), #  / n2 add this to sd2^2
+      #                      nrow = 2, ncol = 2)
+      
+    #   # TODO -shinichi change 
+    #   sigma_matrix <- matrix(data = c((input$sd1^2 / input$n1), 
+    #                                   (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2),
+    #                                   (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2), 
+    #                                   (input$sd2^2 / input$n2)), 
+    #                          nrow = 2, ncol = 2)
+    #   
+    #   
+    # }
+    # means <- c(x1 = input$x1, x2 = input$x2)
+    # TODO -shinichi change 
+  }else if(any(formulas$sim_family == "2_multivariate_normal_indep")){
     if(is.null(sigma_matrix)){
-      
-      sigma_matrix <- matrix(data = c((input$sd1^2 / input$n1),                    (input$r*input$sd1*input$sd2)/input$n1, #  / n1 add this to sd1^2
-                                      (input$r*input$sd1*input$sd2)/input$n1,      (input$sd2^2 / input$n2)), #  / n2 add this to sd2^2
-                             nrow = 2, ncol = 2)
-      
+      sigma_matrix <- matrix(
+        c(input$sd1^2 / input$n1, 0,
+          0, input$sd2^2 / input$n2),
+        nrow = 2, ncol = 2, byrow = TRUE
+      )
     }
     means <- c(x1 = input$x1, x2 = input$x2)
     
-  }else if(any(formulas$sim_family == "4_multivariate_normal_wishart")){
+  }else if(any(formulas$sim_family == "2_multivariate_normal_paired")){
     if(is.null(sigma_matrix)){
-      
-      sigma_matrix <- matrix(c(input$sd1^2, input$r*input$sd1*input$sd2,
-                               input$r*input$sd1*input$sd2, input$sd2^2), 
-                             2, 2)
-      
+      sigma_matrix <- matrix(
+        c(input$sd1^2 / input$n,
+          input$r * input$sd1 * input$sd2 / input$n,
+          input$r * input$sd1 * input$sd2 / input$n,
+          input$sd2^2 / input$n),
+        nrow = 2, ncol = 2, byrow = TRUE
+      )
     }
+    means <- c(x1 = input$x1, x2 = input$x2)  
+    
+  }else if(any(formulas$sim_family == "4_multivariate_normal_chisq_indep")){
+    
     means <- c(x1 = input$x1, x2 = input$x2)
     
+    # no sigma_matrix needed here; SDs will be drawn from chi-square later  
+    
+  }else if(any(formulas$sim_family == "4_multivariate_normal_wishart_paired")){
+    if(is.null(sigma_matrix)){
+      sigma_matrix <- matrix(
+        c(input$sd1^2, input$r * input$sd1 * input$sd2,
+          input$r * input$sd1 * input$sd2, input$sd2^2),
+        nrow = 2, ncol = 2, byrow = TRUE
+      )
+    }
+    means <- c(x1 = input$x1, x2 = input$x2)
     # means <- c(x1 = input$x1, x2 = input$x2)
   }else if(any(formulas$sim_family == "4_multivariate_normal")){
     if(is.null(sigma_matrix)){
-      
-      sigma_matrix <- matrix(data = c(input$sd1^2/input$n1,                  (input$r*input$sd1*input$sd2)/input$n1,  0,                                                  0,
-                                      (input$r*input$sd1*input$sd2)/input$n1, (input$sd2^2)/input$n2,                   0,                                                  0,
-                                      0,                                      0,                                      (2*input$sd1^4)/(input$n1-1),                       ((2*input$r^2*input$sd1^2*input$sd2^2)/(input$n1-1)),
-                                      0,                                      0,                                      (2*input$r^2*input$sd1^2*input$sd2^2)/(input$n1-1), (2*input$sd2^4)/(input$n2-1)),
+      # TODO - shinichi - some changes
+      sigma_matrix <- matrix(data = c(input$sd1^2/input$n1,                    (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2),  0,                                                  0,
+                                      (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2), (input$sd2^2)/input$n2,                   0,                                                  0,
+                                      0,                                      0,                                      (2*input$sd1^4)/(input$n1-1),                       (2*input$r^2*input$sd1^2*input$sd2^2)/sqrt((input$n1 -1) * (input$n2-1)),
+                                      0,                                      0,                                      (2*input$r^2*input$sd1^2*input$sd2^2)/sqrt((input$n1 -1) * (input$n2-1)),           (2*input$sd2^4)/(input$n2-1)),
                              nrow = 4,
                              ncol = 4)
       
     }
     means <- c(x1 = input$x1, x2 = input$x2, 
                v1 = input$sd1^2, v2 = input$sd2^2)
+    
     
   }else if(any(formulas$sim_family %in% c("2_multinomial_as_normal"))){
 
@@ -335,10 +374,13 @@ parameter_cloud <- function(formulas,
                                 sd = sigma_matrix))
     return(out)
     
+  # }else if(unique(formulas$sim_family %in% c("4_multivariate_normal",
+  #                                            "2_multivariate_normal",
+  #                                            "2_multinomial_as_normal"))){
   }else if(unique(formulas$sim_family %in% c("4_multivariate_normal",
-                                             "2_multivariate_normal",
-                                             "2_multinomial_as_normal"))){
-    
+                                             "2_multivariate_normal_indep",
+                                             "2_multivariate_normal_paired",
+                                             "2_multinomial_as_normal"))){  
     out <- rtmvnorm(n = SAFE_boots,
                     mean = var_guide$mean,
                     sigma = sigma_matrix,
@@ -376,24 +418,48 @@ parameter_cloud <- function(formulas,
     }
 
     return(out)
-  }else if(unique(formulas$sim_family) %in% c("4_multivariate_normal_wishart")){
     
-    out <- rtmvnorm(n = SAFE_boots,
-                    mean = var_guide$mean,
-                    sigma = (sigma_matrix / c(input$n1, sqrt(input$n1*input$n2), sqrt(input$n1*input$n2), input$n2)),
-                    lower = var_guide$lower_bounds,
-                    upper = var_guide$upper_bounds) |>
+  }else if(unique(formulas$sim_family) == "4_multivariate_normal_chisq_indep"){
+    
+    x1_star <- rnorm(SAFE_boots, mean = input$x1, sd = input$sd1 / sqrt(input$n1))
+    x2_star <- rnorm(SAFE_boots, mean = input$x2, sd = input$sd2 / sqrt(input$n2))
+    
+    s1_sq_star <- input$sd1^2 * stats::rchisq(SAFE_boots, df = input$n1 - 1) / (input$n1 - 1)
+    s2_sq_star <- input$sd2^2 * stats::rchisq(SAFE_boots, df = input$n2 - 1) / (input$n2 - 1)
+    
+    out <- data.table(
+      x1 = x1_star,
+      x2 = x2_star,
+      sd1 = sqrt(s1_sq_star),
+      sd2 = sqrt(s2_sq_star)
+    )
+    
+    return(out) 
+    
+  }else if(unique(formulas$sim_family) == "4_multivariate_normal_wishart_paired"){
+    
+    mean_sigma <- sigma_matrix / input$n
+    
+    out <- rtmvnorm(
+      n = SAFE_boots,
+      mean = var_guide$mean,
+      sigma = mean_sigma,
+      lower = var_guide$lower_bounds,
+      upper = var_guide$upper_bounds
+    ) |>
       as.data.frame() |>
       setDT()
+    
     names(out) <- var_guide$variable
-    #
-    wishart.out <-  stats::rWishart(SAFE_boots, 
-                                    df = (max(c(input$n1, input$n2)) -1), 
-                                    Sigma = sigma_matrix / min(c( input$n1, input$n2)) #' [The / n is new.]
-                                    ) 
-    out[, sd1 := sqrt(wishart.out[1, 1, ] / (input$n1 - 1))]
-    out[, sd2 := sqrt(wishart.out[2, 2, ] / (input$n2 - 1))]
-    out
+    
+    wishart.out <- stats::rWishart(
+      SAFE_boots,
+      df = input$n - 1,
+      Sigma = sigma_matrix
+    )
+    
+    out[, sd1 := sqrt(wishart.out[1, 1, ] / (input$n - 1))]
+    out[, sd2 := sqrt(wishart.out[2, 2, ] / (input$n - 1))]
     
     return(out)
   }
@@ -497,13 +563,13 @@ if(debugging){
   input_vars <- list(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
                         sd1 = sim_dat$sim_sd1, sd2 = sim_dat$sim_sd2,
                         n = sim_dat$n, r = sim_dat$r)
-  
+  # TOOD - you need to add new familes
   x1 = sim_dat$sim_mean1; x2 = sim_dat$sim_mean2
   sd1 = sim_dat$sim_sd1; sd2 = sim_dat$sim_sd2
   n = sim_dat$n; r = sim_dat$r
   parallelize <- TRUE
   effect_type = "SMD_paired"
-  SAFE_distribution = "4_multivariate_normal_wishart"
+  SAFE_distribution = "4_multivariate_normal_wishart_paired"
   SAFE = TRUE
   verbose = FALSE
   SAFE_boots = 1e6
@@ -512,7 +578,7 @@ if(debugging){
            sd1 = sim_dat$sim_sd1, sd2 = sim_dat$sim_sd2,
            n = sim_dat$n, r = sim_dat$r,
            effect_type = "SMD_paired",
-           SAFE_distribution = "4_multivariate_normal_wishart",
+           SAFE_distribution = "4_multivariate_normal_wishart_paired",
            SAFE = TRUE,
            verbose = FALSE,
            SAFE_boots = 1e6)
