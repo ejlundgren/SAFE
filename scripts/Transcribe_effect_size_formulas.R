@@ -338,6 +338,50 @@ addendum[name %in% c("lnOR", "lnRR"), cloud_filtering_rules := "p1 > 0 & p2 > 0 
 effect_formulas <- rbind(effect_formulas,
                          addendum)
 
+# >>> Revise the J in SMD formulas ----------------------------------------------
+# Revise the J' correction in SMD formula:
+effect_formulas[derivative == "second" & name == "SMD", ]$formula
+from <- "(1 - 3 / (4 * (n1 + n2 - 2) - 1) )"
+to <- "(ifelse((n1 + n2 - 2) <= 1, NA_real_, exp(lgamma((n1 + n2 - 2)/2) - log(sqrt((n1 + n2 - 2)/2)) - lgamma(((n1 + n2 - 2) - 1)/2))))"
+effect_formulas[derivative == "second" & name == "SMD", formula := gsub(from, to, formula, fixed = TRUE)]
+effect_formulas[derivative == "second" & name == "SMD", ]$formula
+
+effect_formulas[derivative == "second" & name == "SMD_paired", ]$formula
+from <- "(1 - 3 / (4 * (2 * n - 2) - 1) )"
+to <- "(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) - lgamma(((2 * n - 2) - 1)/2))))"
+effect_formulas[derivative == "second" & name == "SMD_paired", formula := gsub(from, to, formula, fixed = TRUE)]
+from <- "(1 - 3 / (4 * (2*n - 2) - 1) )"
+effect_formulas[derivative == "second" & name == "SMD_paired", formula := gsub(from, to, formula, fixed = TRUE)]
+effect_formulas[derivative == "second" & name == "SMD_paired", ]$formula
+
+# >>> Revise paired SMD formulas ------------------------------------------
+
+# The paired variance effect_formulas were incorrect:
+effect_formulas[derivative == "first" & name == "SMD_paired" & calc_type == "sampling_variance",
+         formula := "2 * (1 - r) / n + d^2 / (2 * n )"]
+# This is Becker 1988 formula
+
+effect_formulas[derivative == "second" & name == "SMD_paired" & calc_type == "sampling_variance",
+         formula := "J^2 * (2 * (1 - r) / n + d^2 / (2 * n ))"]
+
+# Gsub out d and J
+d <- unique(effect_formulas[derivative == "first" & name == "SMD_paired" & calc_type == "effect_size"]$formula)
+d <- paste0("(", d, ")")
+d
+J <- "(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) - lgamma(((2 * n - 2) - 1)/2))))"
+J
+
+effect_formulas[name == "SMD_paired" & calc_type == "sampling_variance",
+         formula := gsub("d", d, formula)]
+
+effect_formulas[derivative == "second" & name == "SMD_paired" & calc_type == "sampling_variance",
+         formula := gsub("J", J, formula)]
+effect_formulas
+
+
+effect_formulas[name == "SMD_paired" & calc_type == "sampling_variance",]$formula
+
+
 # >>> Add an execution string with explicit environment/object control ----------------
 i <- 1
 k <- 1
@@ -399,7 +443,27 @@ effect_formulas
 effect_formulas[name == "lnCVR"]
 effect_formulas[name == "reciprocal"]
 
+# >>> Revise SAFE families ----------------------------------------------------------
+"2_multivariate_normal_indep"
+"2_multivariate_normal_paired"
+"4_multivariate_normal_chisq_indep"
+"4_multivariate_normal_wishart_paired"
+
+effect_formulas[sim_family == "4_multivariate_normal_wishart" & grepl("paired", name),
+                sim_family := "4_multivariate_normal_wishart_paired"]
+
+effect_formulas[sim_family == "4_multivariate_normal_wishart" & !grepl("paired", name),
+                sim_family := "4_multivariate_normal_chisq_indep"]
+
+effect_formulas[sim_family == "2_multivariate_normal" & !grepl("paired", name),
+                sim_family := "2_multivariate_normal_indep"]
+
+
+effect_formulas[sim_family == "2_multivariate_normal" & grepl("paired", name),
+                sim_family := "2_multivariate_normal_paired"]
+
+
 # >>> Save table ----------------------------------------------------------
 
 fwrite(effect_formulas, "data/effect_size_formulas.csv", na = "NA")
-fwrite(effect_formulas, "run_simulations/remote_mirrors/data/effect_size_formulas.csv", na = "NA")
+# fwrite(effect_formulas, "run_simulations/remote_mirrors/data/effect_size_formulas.csv", na = "NA")

@@ -58,7 +58,26 @@ updateJob <- function(job_path,
 #
 full_guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/scenarios.Rds")
 unique(full_guide$effect_type)
-full_guide <- full_guide[!effect_type %in% c("lnOR", "lnRR")]
+
+
+# >>> Round 1 -------------------------------------------------------------
+full_guide$chunk
+
+saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
+
+updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
+            no_jobs = max(full_guide$chunk))
+
+updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
+          gb = "6gb",
+          time = "4:00:00")
+
+#
+
+
+
+# >>> Round 2 -------------------------------------------------------------
+
 
 files <- list.files("run_simulations/remote_mirrors/revision_paired_simulations/outputs/")
 files[grepl("lnCVR", files)]
@@ -69,7 +88,6 @@ length(files)
 
 guide <- full_guide[!batch_id %in% files, ]
 unique(guide$effect_type)
-
 
 # Why aren't these finished? 
 unique(guide$batch_id)
@@ -91,32 +109,5 @@ eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2,
          sd1 = sub$true_sd1, sd2 = sub$true_sd2,
          r = sub$r, n = sub$n,
          effect_type = "lnRoM_paired")
-
-
-# sub <- guide[batch_id == "lnOR_batch_4909"]
-# eff_size(a = sub$true_mean1, b = sub$true_mean2, 
-#          c = sub$true_sd1, d = sub$true_sd2,
-#          effect_type = "lnRoM_paired")
-
-guide
-
-guide <- full_guide[batch_id == "SMD_batch_1806", ]
-file.remove(unique(guide$file_path))
-guide[, chunk := .GRP, by = .(batch_id)]
-max(guide$chunk)
-guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
-# Must be 0 rows
-
-saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
-
-updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
-            no_jobs = max(guide$chunk))
-
-updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
-          gb = "6gb",
-          time = "4:00:00")
-
-#
-
 
 

@@ -71,7 +71,8 @@ eff_size <- function(...,
   }
   
   # Print effect size specific warnings, e.g., 0 in lnOR and lnRR
-  if(!is.na(unique(effect_formulas.sub$special_warnings)) & verbose == TRUE){
+  if(!(is.na(unique(effect_formulas.sub$special_warnings)) | all(effect_formulas.sub$special_warnings == "")) & 
+            verbose == TRUE){
     cat(unique(effect_formulas.sub$special_warnings), 
         "Leaving it to user's discretion to check prior to execution. Negative values will be returned as NA.\n\n")
   }
@@ -143,9 +144,6 @@ eff_size <- function(...,
   
   out <- cbind(plugins, safe_out)
   
-  if(!is.null(data)){
-    out <- cbind(data, out)
-  }
   return(out)
 }
 
@@ -218,7 +216,6 @@ parameter_cloud <- function(formulas,
                             SAFE_boots = NULL){
 
   if(verbose) cat("Running SAFE with", SAFE_boots, "bootstraps\n\n")
-  f
   # TODO
   # add 
   
@@ -293,7 +290,6 @@ parameter_cloud <- function(formulas,
     # means <- c(x1 = input$x1, x2 = input$x2)
   }else if(any(formulas$sim_family == "4_multivariate_normal")){
     if(is.null(sigma_matrix)){
-      # TODO - shinichi - some changes
       sigma_matrix <- matrix(data = c(input$sd1^2/input$n1,                    (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2),  0,                                                  0,
                                       (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2), (input$sd2^2)/input$n2,                   0,                                                  0,
                                       0,                                      0,                                      (2*input$sd1^4)/(input$n1-1),                       (2*input$r^2*input$sd1^2*input$sd2^2)/sqrt((input$n1 -1) * (input$n2-1)),
@@ -338,7 +334,7 @@ parameter_cloud <- function(formulas,
   }
   
   # Parse upper and lower bounds for truncated normal ------------------------------------------------
-  if(!all(is.na(formulas$lower_filter))){
+  if(!(all(is.na(formulas$lower_filter)) | all(formulas$lower_filter == ""))){
     formulas$lower_filter
     
     lower <- data.table::tstrsplit(unique(formulas$lower_filter), ",") |> 
@@ -358,7 +354,7 @@ parameter_cloud <- function(formulas,
     var_guide <- var_guide[order(match(names(means), variable))]
   
   }else if(!unique(formulas$sim_family) %in% c("2_binomial", "4_binomial", "3_multinomial") &
-           all(is.na(formulas$lower_filter))){
+           (all(is.na(formulas$lower_filter)) | all(formulas$lower_filter == ""))){
     var_guide <- data.table(mean=means |> as.numeric(), 
                             variable = names(means),
                             lower_bounds = -Inf,
@@ -377,10 +373,10 @@ parameter_cloud <- function(formulas,
   # }else if(unique(formulas$sim_family %in% c("4_multivariate_normal",
   #                                            "2_multivariate_normal",
   #                                            "2_multinomial_as_normal"))){
-  }else if(unique(formulas$sim_family %in% c("4_multivariate_normal",
+  }else if(unique(formulas$sim_family) %in% c("4_multivariate_normal",
                                              "2_multivariate_normal_indep",
                                              "2_multivariate_normal_paired",
-                                             "2_multinomial_as_normal"))){  
+                                             "2_multinomial_as_normal")){  
     out <- rtmvnorm(n = SAFE_boots,
                     mean = var_guide$mean,
                     sigma = sigma_matrix,
@@ -390,19 +386,19 @@ parameter_cloud <- function(formulas,
       setDT()
     names(out) <- var_guide$variable
     
-    if(unique(formulas$sim_family == "4_multivariate_normal")){
+    if(unique(formulas$sim_family) == "4_multivariate_normal"){
       #' *Back convert the variance hyperparameters to SD*
       out[, `:=` (sd1 = sqrt(v1), sd2 = sqrt(v2))]
       out[, `:=` (v1 = NULL, v2 = NULL)]
     }
-    if(unique(formulas$sim_family == "2_multinomial_as_normal")){
+    if(unique(formulas$sim_family) == "2_multinomial_as_normal"){
       out[, `:=` (n1 = input$n1, n2 = input$n2)]
       out[, `:=` (a = round(p1 * n1),
                   c = round(p2 * n2))]
       out[, `:=` (b = n1 - a,
                   d = n2 - c)]
     }
-    #' [I really don't like this degree of specificity of effect_type manipulation inside the function]
+    
     if(unique(formulas$name) == "lnRR"){
       out[a == 0, `:=` (a = a + 0.5,
                         n1 = n1 + 1) ]
@@ -538,93 +534,8 @@ if(debugging){
   source("scripts/SAFE_function.R")
   # So that subfunctions are in environment
 
-  effect_formulas <- fread("data/effect_size_formulas.csv")
-  effect_formulas
-  
-  sim_dat <- structure(list(sim_mean1 = c(11.0914921082589, 10.5465827311586, 
-                                          10.3783220994874, 10.7887529570166, 10.2292914821718, 10.4460556331876, 
-                                          10.6900461494743, 10.4553605358433, 10.5058425958751), sim_sd1 = c(0.728951137245077, 
-                                                                                                             1.46694478235852, 1.1593549632935, 1.10942768590624, 1.01703391414187, 
-                                                                                                             1.16576704851109, 1.31792343825424, 1.19235848885537, 1.16505095314679
-                                          ), sim_mean2 = c(11.9181461051578, 13.1695475658651, 13.1294255775034, 
-                                                           12.7983193572001, 12.6360992779482, 12.9681300733558, 12.4934333946277, 
-                                                           13.2077875743616, 12.9786794956666), sim_sd2 = c(1.75985087717589, 
-                                                                                                            1.10596357436136, 1.26893519789774, 1.49787060550435, 1.4421418844819, 
-                                                                                                            1.56278855221608, 1.60665958099078, 1.58147854079977, 1.47169253442519
-                                                           ), true_mean1 = c(10.5, 10.5, 10.5, 10.5, 10.5, 10.5, 10.5, 10.5, 
-                                                                             10.5), true_mean2 = c(13, 13, 13, 13, 13, 13, 13, 13, 13), true_sd1 = c(1.2, 
-                                                                                                                                                     1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2), true_sd2 = c(1.5, 1.5, 
-                                                                                                                                                                                                           1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5), r = c(0, 0, 0, 0.5, 0.5, 
-                                                                                                                                                                                                                                                     0.5, 0.8, 0.8, 0.8), n = c(5, 15, 100, 5, 15, 100, 5, 15, 100
-                                                                                                                                                                                                                                                     ), scenario_id = c("scenario_1", "scenario_2", "scenario_3", 
-                                                                                                                                                                                                                                                                        "scenario_4", "scenario_5", "scenario_6", "scenario_7", "scenario_8", 
-                                                                                                                                                                                                                                                                        "scenario_9")), row.names = c(NA, -9L), class = c("data.table", 
-                                                                                                                                                                                                                                                                                                                          "data.frame"))
-  input_vars <- list(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
-                        sd1 = sim_dat$sim_sd1, sd2 = sim_dat$sim_sd2,
-                        n = sim_dat$n, r = sim_dat$r)
-  # TOOD - you need to add new familes
-  x1 = sim_dat$sim_mean1; x2 = sim_dat$sim_mean2
-  sd1 = sim_dat$sim_sd1; sd2 = sim_dat$sim_sd2
-  n = sim_dat$n; r = sim_dat$r
-  parallelize <- TRUE
-  effect_type = "SMD_paired"
-  SAFE_distribution = "4_multivariate_normal_wishart_paired"
-  SAFE = TRUE
-  verbose = FALSE
-  SAFE_boots = 1e6
-  effect_formulas[name == "SMD_paired"]
-  eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
-           sd1 = sim_dat$sim_sd1, sd2 = sim_dat$sim_sd2,
-           n = sim_dat$n, r = sim_dat$r,
-           effect_type = "SMD_paired",
-           SAFE_distribution = "4_multivariate_normal_wishart_paired",
-           SAFE = TRUE,
-           verbose = FALSE,
-           SAFE_boots = 1e6)
-  
-  
-  
-  effect_formulas[name == "lnRoM_paired"]
-  
-  eff_size(a = 5, b = 15, c = 10, d = 15,
-           effect_type = "lnOR",
-           SAFE_distribution = "2_multinomial_as_normal",
-           verbose = F,
-           SAFE_boots = 1e6)
-  
-  # The function works thanks to this table of effect size formulas.
-  # This contains the formuals, transformations, etc. (though the function needs a bit of development on the parameter_cloud side)
-  effect_formulas[name == "lnOR"]$sim_family
-  
-  eff_size(a = 5, b = 15, c = 10, d = 15,
-           effect_type = "lnOR",
-           SAFE_distribution = "2_multinomial_as_normal",
-           verbose = F,
-           SAFE_boots = 1e6)
-  eff_size(a = 5, b = 15, c = 10, d = 15,
-           effect_type = "lnOR",
-           SAFE_distribution = "4_binomial",
-           verbose = F,
-           SAFE_boots = 1e6)
-  
-  
-  eff_size(a = 5*10, b = 15*10, c = 10*10, d = 15*10,
-           effect_type = "lnOR",
-           SAFE_distribution = "2_multinomial_as_normal",
-           verbose = F,
-           SAFE_boots = 1e6)
-  eff_size(a = 5*10, b = 15*10, c = 10*10, d = 15*10,
-           effect_type = "lnOR",
-           SAFE_distribution = "4_binomial",
-           verbose = F,
-           SAFE_boots = 1e6)
-  
-  
-  
-  eff_size(x=15, sd=4.6, n=25, effect_type="reciprocal")
-  input_vars <- list(x=15, sd=4.6, n=25)
-  effect_type = "reciprocal"
+  effect_formulas <- fread("data/effect_size_formulas.csv", )
+  effect_formulas$lower_filter
   
   verbose = T
   SAFE_boots = 1e6
@@ -632,7 +543,37 @@ if(debugging){
   SAFE = TRUE
   SAFE_distribution = NULL
   parallelize = TRUE
-  verbose = T
+  
+  test <- structure(list(scenario_id = c("scenario_lnRoM_3", "scenario_lnRoM_6", 
+                                         "scenario_lnRoM_9", "scenario_lnRoM_12", "scenario_lnRoM_15", 
+                                         "scenario_lnRoM_18", "scenario_lnRoM_21", "scenario_lnRoM_24", 
+                                         "scenario_lnRoM_27"), r = c(0, 0, 0, 0.5, 0.5, 0.5, 0.8, 0.8, 
+                                          0.8), n = c(5, 15, 100, 5, 15, 100, 5, 15, 100), true_mean1 = c(13.4, 
+                                          13.4, 13.4, 13.4, 13.4, 13.4, 13.4, 13.4, 13.4), true_mean2 = c(16.1, 
+                                          16.1, 16.1, 16.1, 16.1, 16.1, 16.1, 16.1, 16.1), true_sd1 = c(4.6, 
+                                          4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6), true_sd2 = c(3.9, 3.9, 
+                                          3.9, 3.9, 3.9, 3.9, 3.9, 3.9, 3.9)), 
+                                          row.names = c(NA, -9L), 
+                                          class = c("data.table", "data.frame"))
+  test
+  
+  eff_size(x1 = test$true_mean1, x2 = test$true_mean2,
+           sd1 = test$true_sd1, sd2 = test$true_sd2,
+           n = test$n, r = test$r,
+           effect_type = "lnRoM_paired")
+  
+  input_vars <- list(x1 = test$true_mean1, x2 = test$true_mean2,
+                     sd1 = test$true_sd1, sd2 = test$true_sd2,
+                     n = test$n, r = test$r)
+  effect_type = "lnRoM_paired"
+  
+  
+  eff_size(x1 = test$true_mean1, x2 = test$true_mean2,
+           sd1 = test$true_sd1, sd2 = test$true_sd2,
+           n1 = test$n, n2 = test$n, #r = test$r,
+           effect_type = "lnRoM_paired")
+  
+  
 
 }
 

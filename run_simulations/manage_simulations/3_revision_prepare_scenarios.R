@@ -4,7 +4,11 @@
 # AIM: Simulate the influence of different choices of 'r' on bias and relative bias
 #
 #
-
+#
+#
+#
+#
+#
 rm(list = ls())
 
 # Now load packages:
@@ -15,6 +19,9 @@ p_load(data.table, MASS, crayon,
        ggplot2, patchwork, scico,
        stringr)
 
+# Prepare workspace -------------------------------------------------------
+
+# Copy functions to new remote mirror
 source("scripts/SAFE_function.R")
 file.copy("scripts/SAFE_function.R",
           "run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE.R",
@@ -35,44 +42,18 @@ guide <- CJ(true_mean1 = 13.4, true_mean2 = 16.1,
             true_sd1 = 4.6, true_sd2 = 3.9,
             r = c(0, 0.5, 0.8),
             n = c(5, 15, 100),
-            effect_type = c("SMD", "lnRoM"))
+            effect_type = c("SMD", "lnRoM", "lnCVR"))
 
 # For continuity correction.
 # Check the simulated data
-guide2 <- unique(sim_results[effect_type %in% c("lnOR", "lnRR"), .(scenario_id, effect_type, true_p_a, true_p_c, 
-                                                                   n1, n2, true_a, true_c,
-                                                                    true_b, true_d)])
 
-guide2
-
-guide2[is.na(true_b), true_b := n1 - true_a]
-guide2[is.na(true_d), true_d := n2 - true_c]
-nrow(guide2)
-nrow(unique(guide2[, .(true_p_a, true_p_c, n1, n2, true_a, true_c,
-                       true_b, true_d)]))
-guide2 <- unique(guide2[, .(effect_type, true_p_a, true_p_c, n1, n2, true_a, true_c,
-                     true_b, true_d)])
-
-final_guide <- rbind(guide, guide2,
-                     fill = TRUE)
+final_guide <- copy(guide)
 final_guide
 
 final_guide[, scenario_id := paste("scenario", effect_type, 1:.N, sep = '_')]
 final_guide
 
-# Expand guide for 1k per core --------------------------------------------
-
-# expanded.guide <- final_guide[rep(seq(1, nrow(final_guide)), 1000)]
-# expanded.guide
-
-# Add a batch ID:
-# expanded.guide[, batch_id := seq(1:), by = .()]
-# 
-# expansion <- rbind(data.table(type = c("normal"),
-#                               chunk = 1:100),
-#                    data.table(type = c("binomial"),
-#                               chunk = 101:200))
-# expansion
+# Expand guide for 1000 core per effect size --------------------------------------------
 
 # Not sure why I'm having such a hard time with this...
 expansion <- data.table(effect_type = unique(final_guide$effect_type))
