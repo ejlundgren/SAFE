@@ -2642,6 +2642,7 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
                      labels = c("first_estimate" = "1st order plugin", 
                                 "second_estimate" = "2nd order plugin", 
                                 "safe_estimate" = "SAFE"))+
+  ggtitle("lnCVR", subtitle = "Variance relative bias")+
   # coord_cartesian(ylim = c(-50, 50))+
   facet_grid(r~estimand, 
              labeller = facet_labs)+

@@ -55,7 +55,7 @@ guide
 #' *Each effect size is encapsulated given their unique data simulation details*
 # Each function takes a subset of the scenario guide as the object 'scens'
 
-data_generation <- function(scens){
+data_generation <- function(scens, lower_filter){
   lapply(1:nrow(scens), function(x){
     
     # Simulate data for scens
@@ -75,7 +75,7 @@ data_generation <- function(scens){
     out <- rtmvnorm(n = scens$n[x],
                     mean = means,
                     sigma = sig,
-                    lower = rep(0, length(means)),
+                    lower = rep(lower_filter, length(means)),
                     upper = rep(Inf, length(means)),
                     algorithm = "gibbs") |>
       as.data.frame() |>
@@ -93,7 +93,7 @@ data_generation <- function(scens){
 
 lnRoM <- function(scens){
   
-  sim_dat <- data_generation(scens)
+  sim_dat <- data_generation(scens, lower_filter = 0)
   
   # Calculate simulated effect sizes
   effs <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
@@ -123,7 +123,7 @@ lnRoM <- function(scens){
 SMD_Wishart <- function(scens){
   
   # Simulate data for scen
-  sim_dat <- data_generation(scens)
+  sim_dat <- data_generation(scens, lower_filter = -Inf)
   
   # Calculate simulated effect sizes
   effs <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
@@ -153,7 +153,7 @@ SMD_Wishart <- function(scens){
 lnCVR_Wishart <- function(scens){
   
   # Simulate data:
-  sim_dat <- data_generation(scens)
+  sim_dat <- data_generation(scens, lower_filter = 0)
   
   
   # calculate simulated effect sizes
