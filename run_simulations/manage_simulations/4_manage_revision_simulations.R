@@ -129,3 +129,13 @@ updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulation
 updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
           gb = "6gb",
           time = "4:00:00")
+# 30380955 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380956 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380957 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380958 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380959 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380960 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380961 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380962 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380963 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30380964 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1 

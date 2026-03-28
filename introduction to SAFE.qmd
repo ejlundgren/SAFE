@@ -2417,11 +2417,11 @@ p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
   geom_point(size = pt_size)+
   ylab("Bias of point estimate")+
   xlab("Sample size")+
-  ggtitle("SMD")+
+  ggtitle("SMD", subtitle = "Point estimate bias")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
                      labels = labs)+
-  coord_cartesian(ylim = c(-0.1, 0.1))+
+  # coord_cartesian(ylim = c(-0.1, 0.1))+
   ggtitle("SMD")+
   theme_SAFE+
   theme(legend.position = "bottom") 
@@ -2453,6 +2453,7 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
                      labels = c(plugin_1st = "Cohen's d", 
                                 plugin_2nd = "Hedges' g", 
                                 safe = "SAFE"))+
+  ggtitle("SMD", subtitle = "Variance relative bias")+
   # coord_cartesian(ylim = c(-50, 50))+
   facet_grid(estimand ~ r, 
              labeller = facet_labs)+
@@ -2511,12 +2512,12 @@ p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
   geom_point(size = pt_size)+
   ylab("Bias of point estimates")+
   xlab("Sample size")+
-  ggtitle("SMD")+
+  ggtitle("lnRoM", subtitle = "Point estimate bias")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
                      labels = labs,
                      drop = TRUE)+
-  coord_cartesian(ylim = c(-0.01, 0.01))+
+  # coord_cartesian(ylim = c(-0.01, 0.01))+
   ggtitle("lnRoM")+
   theme_SAFE+
   theme(legend.position = "bottom") 
@@ -2546,6 +2547,7 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
                      labels = c(first_estimate = "1st order plugin", 
                                 plugin_2nd = "2nd order plugin", 
                                 safe = "SAFE"))+
+  ggtitle("lnRoM", subtitle = "Variance relative bias")+
   # coord_cartesian(ylim = c(-50, 50))+
   facet_grid(r~estimand, 
              labeller = facet_labs)+
@@ -2610,7 +2612,8 @@ p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
                      values = pal,
                      labels = labs,
                      drop = TRUE)+
-  coord_cartesian(ylim = c(-0.025, 0.025))+
+  ggtitle("lnCVR", subtitle = "Point estimate bias")+
+  # coord_cartesian(ylim = c(-0.025, 0.025))+
   ggtitle("SMD")+
   theme_SAFE+
   theme(legend.position = "bottom") 
