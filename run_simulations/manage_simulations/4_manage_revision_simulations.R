@@ -119,7 +119,8 @@ unique(guide$effect_type)
 # Why aren't these finished? 
 unique(guide$batch_id)
 
-
+guide[, chunk := .GRP, by = .(batch_id)]
+guide
 saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
 updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
