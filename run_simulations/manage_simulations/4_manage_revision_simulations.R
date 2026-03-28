@@ -59,6 +59,7 @@ updateJob <- function(job_path,
 full_guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/scenarios.Rds")
 unique(full_guide$effect_type)
 
+guide <- copy(full_guide)
 
 # >>> Round 1 -------------------------------------------------------------
 full_guide$chunk
@@ -66,7 +67,7 @@ full_guide$chunk
 saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
 updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
-            no_jobs = max(full_guide$chunk))
+            no_jobs = max(guide$chunk))
 
 updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
           gb = "6gb",
@@ -74,7 +75,22 @@ updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations
 
 #
 
-
+# 30245377 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30563 (None) 
+# 30245380 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30564 (None) 
+# 30245383 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30564 (None) 
+# 30245386 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30567 (None) 
+# 30245389 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30604 (None) 
+# 30245416 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30606 (None) 
+# 30245419 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30609 (None) 
+# 30245422 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30613 (None) 
+# 30245425 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
+# 30245428 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
+# 30245431 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
+# 30245434 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
+# 30245437 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
+# 30245440 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
+# 30245443 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
+# 30245446 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1
 
 # >>> Round 2 -------------------------------------------------------------
 
