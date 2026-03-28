@@ -18,13 +18,14 @@ local <- FALSE
 if(local){
   setwd("run_simulations/remote_mirrors/revision_paired_simulations/")
   
-  index <- 2 # This is the chunk number
+  index <- 3 # This is the chunk number
   
   # setwd("/Users/ejlundgren/GenomeDK/meta_megafauna/meta_simulations/")
   source('remote_universal_SAFE.R')
   
   scenarios <- readRDS("data/scenarios.Rds")
-
+  # scenarios[which(effect_type == "lnCVR"), ]
+  
   guide <- scenarios[chunk == index, ]
   scens <- copy(guide)
 }else{

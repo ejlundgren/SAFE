@@ -531,11 +531,13 @@ if(debugging){
   library("data.table")
   library("MASS")
   library("tmvtnorm")
-  source("scripts/SAFE_function.R")
+  # source("scripts/SAFE_function.R")
+  source("run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE.R")
+  
   # So that subfunctions are in environment
 
-  effect_formulas <- fread("data/effect_size_formulas.csv", )
-  effect_formulas$lower_filter
+  effect_formulas <- fread("run_simulations/remote_mirrors/revision_paired_simulations/data/effect_size_formulas.csv", )
+  effect_formulas[name == 'lnCVR_paired', .(sim_family, lower_filter, upper_filter)]
   
   verbose = T
   SAFE_boots = 1e6
@@ -544,23 +546,27 @@ if(debugging){
   SAFE_distribution = NULL
   parallelize = TRUE
   
-  test <- structure(list(scenario_id = c("scenario_lnRoM_3", "scenario_lnRoM_6", 
-                                         "scenario_lnRoM_9", "scenario_lnRoM_12", "scenario_lnRoM_15", 
-                                         "scenario_lnRoM_18", "scenario_lnRoM_21", "scenario_lnRoM_24", 
-                                         "scenario_lnRoM_27"), r = c(0, 0, 0, 0.5, 0.5, 0.5, 0.8, 0.8, 
-                                          0.8), n = c(5, 15, 100, 5, 15, 100, 5, 15, 100), true_mean1 = c(13.4, 
-                                          13.4, 13.4, 13.4, 13.4, 13.4, 13.4, 13.4, 13.4), true_mean2 = c(16.1, 
-                                          16.1, 16.1, 16.1, 16.1, 16.1, 16.1, 16.1, 16.1), true_sd1 = c(4.6, 
-                                          4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6), true_sd2 = c(3.9, 3.9, 
-                                          3.9, 3.9, 3.9, 3.9, 3.9, 3.9, 3.9)), 
-                                          row.names = c(NA, -9L), 
-                                          class = c("data.table", "data.frame"))
+  test <- structure(list(sim_mean1 = c(12.3779610391397, 14.2583769514043, 
+                                       13.329383274105, 9.74354339260358, 14.669253617849, 13.4535756537553, 
+                                       8.21480474273108, 13.5945219946739, 14.6171578476033), sim_mean2 = c(15.0769171241879, 
+                                                                                                            16.2085509481021, 15.7135950404538, 14.4220579236131, 16.9086479977439, 
+                                                                                                            15.8900925689122, 11.2760271115986, 16.871109293977, 17.0798845170929
+                                       ), 
+                         n = c(5, 15, 100, 5, 15, 100, 5, 15, 100),
+                         r = c(0, 0, 0, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8),
+                         sim_sd1 = c(4.71508750633714, 4.54226384679711, 4.73334393567547, 
+                                                      6.2249224388095, 4.52407684460912, 4.75442468995487, 4.90467396539065, 
+                                                      5.57160083432024, 4.41125525234012), sim_sd2 = c(2.96125343063369, 
+                                                                                                       4.80791790302363, 4.10368278775713, 4.45070927198768, 2.98447571679791, 
+                                                                                                       4.09947919096842, 4.05101291166281, 3.73040712842924, 3.83794522487116
+                                                      )), row.names = c(NA, -9L), class = c("data.table", "data.frame"
+                                                      ))
   test
   
-  eff_size(x1 = test$true_mean1, x2 = test$true_mean2,
-           sd1 = test$true_sd1, sd2 = test$true_sd2,
-           n = test$n, r = test$r,
-           effect_type = "lnRoM_paired")
+  eff_size(x1 = test$sim_mean1, x2 = test$sim_mean2,
+           sd1 = test$sim_sd1, sd2 = test$sim_sd2,
+           n = c(5, 10, 100), r = test$r,
+           effect_type = "lnCVR_paired")
   
   input_vars <- list(x1 = test$true_mean1, x2 = test$true_mean2,
                      sd1 = test$true_sd1, sd2 = test$true_sd2,

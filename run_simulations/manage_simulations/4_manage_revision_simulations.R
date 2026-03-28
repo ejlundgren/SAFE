@@ -59,10 +59,8 @@ updateJob <- function(job_path,
 full_guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/scenarios.Rds")
 unique(full_guide$effect_type)
 
-guide <- copy(full_guide)
-
 # >>> Round 1 -------------------------------------------------------------
-full_guide$chunk
+guide <- copy(full_guide)
 
 saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
@@ -74,56 +72,59 @@ updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations
           time = "4:00:00")
 
 #
-
-# 30245377 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30563 (None) 
-# 30245380 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30564 (None) 
-# 30245383 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30564 (None) 
-# 30245386 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30567 (None) 
-# 30245389 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30604 (None) 
-# 30245416 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30606 (None) 
-# 30245419 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30609 (None) 
-# 30245422 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30613 (None) 
-# 30245425 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
-# 30245428 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
-# 30245431 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
-# 30245434 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
-# 30245437 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
-# 30245440 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
-# 30245443 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1        N/A      6G fc30614 (None) 
-# 30245446 ejlundgr def-snakagaw revision_sim_j   R    3:27:09     1    1
+# 30267094 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267095 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267096 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267097 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267098 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267099 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267100 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267101 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267102 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267103 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267104 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267105 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267106 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267107 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267108 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267109 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267110 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267111 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267112 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267113 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267114 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267115 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267116 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267117 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267118 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267119 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267120 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267121 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267122 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267123 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267124 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267168 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267169 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267170 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267171 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
+# 30267172 ejlundgr def-snakagaw revision_sim_j  PD    4:00:00     1    1        N/A      6G  (Priority) 
 
 # >>> Round 2 -------------------------------------------------------------
 
+#' [Error in lower bounds of lnCVR.]
 
-files <- list.files("run_simulations/remote_mirrors/revision_paired_simulations/outputs/")
-files[grepl("lnCVR", files)]
-files[grepl("SMD", files)]
-
-files <- gsub(".Rds", "", files)
-length(files)
-
-guide <- full_guide[!batch_id %in% files, ]
+guide <- full_guide[effect_type %in% "lnCVR", ]
 unique(guide$effect_type)
 
 # Why aren't these finished? 
 unique(guide$batch_id)
 
-sub <- guide[batch_id == "lnRoM_batch_1818"]
-eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2, 
-         sd1 = sub$true_sd1, sd2 = sub$true_sd2,
-         r = sub$r, n = sub$n,
-         effect_type = "SMD_paired")
 
-sub <- guide[batch_id == "lnCVR_batch_1647"]
-eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2, 
-         sd1 = sub$true_sd1, sd2 = sub$true_sd2,
-         r = sub$r, n = sub$n,
-         effect_type = "lnCVR_paired")
+saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
-sub <- guide[batch_id == "lnRoM_batch_4828"]
-eff_size(x1 = sub$true_mean1, x2 = sub$true_mean2, 
-         sd1 = sub$true_sd1, sd2 = sub$true_sd2,
-         r = sub$r, n = sub$n,
-         effect_type = "lnRoM_paired")
+updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
+            no_jobs = max(guide$chunk))
 
-
+updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
+          gb = "6gb",
+          time = "4:00:00")

@@ -29,8 +29,6 @@ file.copy("scripts/SAFE_function.R",
 file.copy("data/effect_size_formulas.csv",
           "run_simulations/remote_mirrors/revision_paired_simulations/data/effect_size_formulas.csv",
           overwrite = T)
-formulas <- fread("data/effect_size_formulas.csv")
-formulas[name == "SMD_paired"]$formula
 
 #
 sim_results <- readRDS("builds/all_scenarios_summarized.Rds")

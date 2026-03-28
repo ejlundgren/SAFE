@@ -475,6 +475,14 @@ effect_formulas[sim_family == "2_multivariate_normal" & grepl("paired", name),
                 sim_family := "2_multivariate_normal_paired"]
 
 
+
+# >>> lnCVR lower bounds -----------------------------------------------------
+effect_formulas[name %in% c('lnCVR', "lnCVR_paired"), .(sim_family, lower_filter, upper_filter)]
+effect_formulas[name %in% c('lnCVR', "lnCVR_paired") & grepl("wishart", sim_family), ]
+effect_formulas[name %in% c('lnCVR', "lnCVR_paired") & grepl("wishart", sim_family), 
+                `:=` (lower_filter = "x1=0, x2=0",
+                      upper_filter = "x1=Inf, x2=Inf")]
+
 # >>> Save table ----------------------------------------------------------
 
 fwrite(effect_formulas, "data/effect_size_formulas.csv", na = "NA")
