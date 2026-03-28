@@ -63,6 +63,9 @@ eff_size <- function(...,
     input_vars$r <- rep(0, max(lengths(input_vars))) # This is necessary for the shared sigma_matrices of some effect sizes
   }
   
+  #' [CHECKING]
+  cat(input_vars$r)
+  
   # Check for missing variables.
   vars <- strsplit(unique(effect_formulas.sub$vars_required), split = ", ") |> unlist()
   if(length(setdiff(vars, names(input_vars))) > 0){ 
