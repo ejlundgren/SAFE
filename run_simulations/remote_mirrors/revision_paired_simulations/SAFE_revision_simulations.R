@@ -99,7 +99,7 @@ formulas[name == "lnCVR_paired" & sim_family == "4_multivariate_normal_wishart_p
           2*r*sd1*sd2/(n * x1 * x2) + r^2 * sd1^2 * sd2^2 * (x1^4 + x2^4) / (2 * n^2 * x1^4 * x2^4) + 
           n/(n - 1)^2 - r^2/(n - 1) + r^4 * (sd1^8 + sd2^8) / (2 * (n - 1)^2 * sd1^4 * sd2^4)"
 
-#' [It is working, i was afriad that maybe I was setting 'r' to 0...]
+#' [It is working, i was afriad that maybe I was setting 'r' to 0 inside the function...]
 eff_size(x1 = 15, x2 = 11.5, sd1 = 1.5, sd2 = 1.3,
          n = 15, 
          r = 0.5,
