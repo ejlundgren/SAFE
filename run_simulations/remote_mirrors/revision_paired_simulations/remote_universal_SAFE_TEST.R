@@ -20,7 +20,7 @@
 #' *SAFE_calc* [->] *parameter_cloud* [->] *calc_effect*
 
 #' *MASTER FUNCTION*
-eff_size <- function(..., 
+eff_size2 <- function(..., 
                      effect_type = NULL,
                      SAFE = TRUE,
                      SAFE_boots = 1e6,
@@ -176,23 +176,34 @@ SAFE_calc <- function(formulas,
   # sigma_matrix = sigma_matrix_k #' if specified by user. Otherwise calculated based on sim_family
   # SAFE_boots = SAFE_boots
   # 
-  cloud <- parameter_cloud(formulas = formulas, 
-                           paired = ifelse(grepl("paired", formulas$name), 
-                                                 "yes", "no"),
+  
+  paired <- ifelse(grepl("paired", unique(formulas$name)), 
+                   "yes", "no")
+  
+  cloud <- parameter_cloud2(formulas = formulas, 
+                           paired = paired,
                            verbose = verbose,
                            input = input_k,
                            sigma_matrix = sigma_matrix_k, #' if specified by user. Otherwise calculated based on sim_family
                            SAFE_boots = SAFE_boots)
 
+  #' [This is the test. Calculate 'r' here from the actual data for paired designs]
+  if(paired == "yes"){
+    cor <- cor.test(cloud$x1, cloud$x2)
+    cloud$r <- cor$estimate   
+  }
+  
   # Add missing inputs (e.g., n)
   cloud <- data.table(cloud,
                       input_k[!names(input_k) %in% names(cloud)] |> unlist() |> t() |> data.table())
   
+ 
   # Convert cloud
   cloud_trans <- calc_effect(formulas = formulas[calc_type == "effect_size" &
                                                    derivative == "first", ],
                              input = cloud)$yi_first
   
+
   # bias corrected estimate of sampling variance and SE:
   safe_SE <- sd(cloud_trans)
   safe_vi <- safe_SE^2
@@ -203,12 +214,13 @@ SAFE_calc <- function(formulas,
   
   return(data.table(yi_safe = safe_yi,
                     vi_safe = safe_vi,
-                    SE_safe = safe_SE))
+                    SE_safe = safe_SE,
+                    test_safe_r = unique(cor$estimate)))
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -----------------------------------------
 #' *CLOUD MAKER*
-parameter_cloud <- function(formulas,
+parameter_cloud2 <- function(formulas,
                             paired = "no",
                             input,
                             verbose = TRUE,
@@ -534,7 +546,7 @@ if(debugging){
   library("MASS")
   library("tmvtnorm")
   # source("scripts/SAFE_function.R")
-  source("run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE.R")
+  source("run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE_TEST.R")
   
   # So that subfunctions are in environment
 
@@ -565,16 +577,15 @@ if(debugging){
                                                       ))
   test
   
-  eff_size(x1 = test$sim_mean1, x2 = test$sim_mean2,
+  eff_size2(x1 = test$sim_mean1, x2 = test$sim_mean2,
            sd1 = test$sim_sd1, sd2 = test$sim_sd2,
-           n = c(5, 10, 100), r = test$r,
+           n = test$n, r = test$r,
            effect_type = "lnCVR_paired")
   
-  input_vars <- list(x1 = test$true_mean1, x2 = test$true_mean2,
-                     sd1 = test$true_sd1, sd2 = test$true_sd2,
+  input_vars <- list(x1 = test$sim_mean1, x2 = test$sim_mean2,
+                     sd1 = test$sim_sd1, sd2 = test$sim_sd2,
                      n = test$n, r = test$r)
   effect_type = "lnRoM_paired"
-  
   
   eff_size(x1 = test$true_mean1, x2 = test$true_mean2,
            sd1 = test$true_sd1, sd2 = test$true_sd2,
