@@ -12,6 +12,9 @@ rm(list = ls())
 library("data.table")
 library("MASS")
 library("tmvtnorm")
+library("crayon")
+library("parallel")
+# library("pbapply")
 
 local <- FALSE
 
@@ -22,8 +25,7 @@ if(local){
   
   # setwd("/Users/ejlundgren/GenomeDK/meta_megafauna/meta_simulations/")
   source('remote_universal_SAFE.R')
-  source('remote_universal_SAFE_TEST.R')
-  
+
   scenarios <- readRDS("data/scenarios.Rds")
   # scenarios[which(effect_type == "lnCVR"), ]
   
@@ -41,8 +43,7 @@ if(local){
   index <- as.numeric(args[6]) # get index value from bash script
   
   source('remote_universal_SAFE.R')
-  source('remote_universal_SAFE_TEST.R')
-  
+
   if(!file.exists("outputs")) dir.create("outputs")
   if(!file.exists("checkpoints")) dir.create("checkpoints")
   
@@ -231,6 +232,7 @@ for(i in start:end){
                    parallelize = FALSE,
                    verbose = FALSE,
                    SAFE_boots = 1e6)
+  
   setnames(effs,
            c("yi_first", "vi_first", 
              "yi_second", "vi_second"),
@@ -238,26 +240,10 @@ for(i in start:end){
              "sim_y_plugin_2nd", "sim_v_plugin_2nd"),
            skip_absent=TRUE)
   
-  # Now calculate test alternative, where 'r' was calculated between safe point clouds:
-  test <- eff_size2(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
-                    sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
-                    n = guide$n, r = sim_dat$sim_r, 
-                    effect_type = type,
-                    SAFE = TRUE,
-                    parallelize = FALSE,
-                    verbose = FALSE,
-                    SAFE_boots = 1e6)
-  test <- test[, .(yi_safe, vi_safe, test_safe_r)]
-  setnames(test, 
-           c("yi_safe", "vi_safe"),
-           c("yi_safe_r_test", "vi_safe_r_test"),
-           skip_absent=TRUE)
-  
   # Store results:
   res[[i]] <- data.table(guide,
                         sim_dat,
-                        effs,
-                        test)
+                        effs)
   
   if(nrow(res[[i]][is.na(yi_safe) | is.na(vi_safe), ]) > 0){
     stop("NAs in SAFE results")

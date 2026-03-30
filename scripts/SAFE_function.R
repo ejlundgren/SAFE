@@ -126,7 +126,9 @@ eff_size <- function(...,
   # index <- seq(1:5)
   # Run SAFE function for each element of input_vars:
   
-  safe_out <- parallel::mclapply(index, function(k){
+  if(parallelize == TRUE){
+    
+    safe_out <- parallel::mclapply(index, function(k){
     if(verbose) cat("SAFE:", magenta(k, "/", max(index), "\r"))
     
     return(SAFE_calc(formulas = effect_formulas.sub,
@@ -135,12 +137,26 @@ eff_size <- function(...,
               sigma_matrix_k = sigma_matrix[[k]], # submit custom sigma_matrix if it exists.
               verbose = verbose,
               SAFE_boots = SAFE_boots)) 
-  },
-  mc.cores = ifelse(parallelize == TRUE,
-                    (parallel::detectCores()-1),
-                    1),
-  mc.allow.recursive = TRUE) |> 
+    },
+    mc.cores = (parallel::detectCores()-1),
+    mc.allow.recursive = TRUE) |> 
     rbindlist()
+  
+  }else{
+    
+    safe_out <- lapply(index, function(k){
+      if(verbose) cat("SAFE:", magenta(k, "/", max(index), "\r"))
+      
+      return(SAFE_calc(formulas = effect_formulas.sub,
+                       input_k = lapply(input_vars, "[[", k), # select the first element in each element...
+                       plugin_effect_k = plugin_effect_size[k],
+                       sigma_matrix_k = sigma_matrix[[k]], # submit custom sigma_matrix if it exists.
+                       verbose = verbose,
+                       SAFE_boots = SAFE_boots)) 
+    }) |> 
+      rbindlist()
+    
+  }
   
   out <- cbind(plugins, safe_out)
   
@@ -176,9 +192,13 @@ SAFE_calc <- function(formulas,
   # sigma_matrix = sigma_matrix_k #' if specified by user. Otherwise calculated based on sim_family
   # SAFE_boots = SAFE_boots
   # 
+  
+  paired <- ifelse(grepl("paired", unique(formulas$name)), 
+                   "yes", "no")
+  
+  
   cloud <- parameter_cloud(formulas = formulas, 
-                           paired = ifelse(grepl("paired", formulas$name), 
-                                                 "yes", "no"),
+                           paired = paired,
                            verbose = verbose,
                            input = input_k,
                            sigma_matrix = sigma_matrix_k, #' if specified by user. Otherwise calculated based on sim_family
@@ -201,9 +221,42 @@ SAFE_calc <- function(formulas,
   
   safe_yi <- plugin_effect_k - bias_SAFE
   
-  return(data.table(yi_safe = safe_yi,
-                    vi_safe = safe_vi,
-                    SE_safe = safe_SE))
+  # return(data.table(yi_safe = safe_yi,
+  #                   vi_safe = safe_vi,
+  #                   SE_safe = safe_SE))
+  # TESTING INFLUENCE OF 'r'. 
+  safe_out <- data.table(yi_safe = safe_yi,
+                         vi_safe = safe_vi,
+                         SE_safe = safe_SE)
+  
+  # Now let's do an alternative:
+  if(paired == "yes"){
+    cor <- cor.test(cloud$x1, cloud$x2)
+    cloud$r <- cor$estimate   
+    
+    # print(unique(cloud$r))
+    # print(head(cloud))
+    
+    cloud_trans <- calc_effect(formulas = formulas[calc_type == "effect_size" &
+                                                     derivative == "first", ],
+                               input = cloud)$yi_first
+    
+    # bias corrected estimate of sampling variance and SE:
+    safe_SE <- sd(cloud_trans)
+    safe_vi <- safe_SE^2
+    
+    bias_SAFE <- mean(cloud_trans) - plugin_effect_k
+    
+    safe_yi <- plugin_effect_k - bias_SAFE
+    
+    safe_out <- data.table(safe_out,
+                           yi_alternative_safe = safe_yi,
+                           vi_alternative_safe = safe_vi,
+                           safe_test_r = cor$estimate   )
+  }
+  
+  return(safe_out)
+  
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -----------------------------------------
@@ -531,8 +584,8 @@ if(debugging){
   library("data.table")
   library("MASS")
   library("tmvtnorm")
-  # source("scripts/SAFE_function.R")
-  source("run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE.R")
+  source("scripts/SAFE_function.R")
+  # source("run_simulations/remote_mirrors/revision_paired_simulations/remote_universal_SAFE.R")
   
   # So that subfunctions are in environment
 
@@ -565,8 +618,9 @@ if(debugging){
   
   eff_size(x1 = test$sim_mean1, x2 = test$sim_mean2,
            sd1 = test$sim_sd1, sd2 = test$sim_sd2,
-           n = c(5, 10, 100), r = test$r,
-           effect_type = "lnCVR_paired")
+           n = test$n, r = test$r,
+           parallelize = FALSE,
+           effect_type = "SMD_paired")
   
   input_vars <- list(x1 = test$true_mean1, x2 = test$true_mean2,
                      sd1 = test$true_sd1, sd2 = test$true_sd2,
