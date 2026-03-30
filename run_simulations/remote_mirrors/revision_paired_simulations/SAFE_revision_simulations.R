@@ -28,7 +28,7 @@ if(local){
   # scenarios[which(effect_type == "lnCVR"), ]
   
   guide <- scenarios[chunk == index, ]
-  scens <- copy(guide)
+  # scens <- copy(guide)
   
   }else{
   
@@ -218,13 +218,13 @@ for(i in start:end){
     stop("More than one effect type in loop")
   }
   
-  sim_dat <- data_generation(scens, 
+  sim_dat <- data_generation(guide, 
                              lower_filter = unique(guide$lower_filter))
   
   # Calculate simulated effect sizes
   effs <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
                    sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
-                   n = scens$n, r = sim_dat$sim_r, 
+                   n = guide$n, r = sim_dat$sim_r, 
                    effect_type = type,
                    SAFE = TRUE,
                    parallelize = FALSE,
@@ -240,7 +240,7 @@ for(i in start:end){
   # Now calculate test alternative, where 'r' was calculated between safe point clouds:
   test <- eff_size2(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
                     sd1 = sim_dat$sim_sd1,  sd2 = sim_dat$sim_sd2,
-                    n = scens$n, r = sim_dat$sim_r, 
+                    n = guide$n, r = sim_dat$sim_r, 
                     effect_type = type,
                     SAFE = TRUE,
                     parallelize = FALSE,
@@ -252,7 +252,7 @@ for(i in start:end){
            c("yi_safe_r_test", "vi_safe_r_test"))
   
   # Store results:
-  res[[i]] <- data.table(scens,
+  res[[i]] <- data.table(guide,
                         sim_dat,
                         effs,
                         test)

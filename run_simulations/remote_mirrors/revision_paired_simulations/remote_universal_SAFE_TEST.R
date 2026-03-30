@@ -129,7 +129,7 @@ eff_size2 <- function(...,
   safe_out <- parallel::mclapply(index, function(k){
     if(verbose) cat("SAFE:", magenta(k, "/", max(index), "\r"))
     
-    return(SAFE_calc(formulas = effect_formulas.sub,
+    return(SAFE_calc2(formulas = effect_formulas.sub,
               input_k = lapply(input_vars, "[[", k), # select the first element in each element...
               plugin_effect_k = plugin_effect_size[k],
               sigma_matrix_k = sigma_matrix[[k]], # submit custom sigma_matrix if it exists.
@@ -165,7 +165,7 @@ calc_effect <- function(formulas,
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -----------------------------------------
 #' *This calls parameter cloud and does calculations:*
 
-SAFE_calc <- function(formulas,
+SAFE_calc2 <- function(formulas,
                       input_k,
                       plugin_effect_k,
                       sigma_matrix_k,
