@@ -41,6 +41,7 @@ if(local){
   index <- as.numeric(args[6]) # get index value from bash script
   
   source('remote_universal_SAFE.R')
+  source('remote_universal_SAFE_TEST.R')
   
   if(!file.exists("outputs")) dir.create("outputs")
   if(!file.exists("checkpoints")) dir.create("checkpoints")
@@ -249,7 +250,8 @@ for(i in start:end){
   test <- test[, .(yi_safe, vi_safe, test_safe_r)]
   setnames(test, 
            c("yi_safe", "vi_safe"),
-           c("yi_safe_r_test", "vi_safe_r_test"))
+           c("yi_safe_r_test", "vi_safe_r_test"),
+           skip_absent=TRUE)
   
   # Store results:
   res[[i]] <- data.table(guide,
