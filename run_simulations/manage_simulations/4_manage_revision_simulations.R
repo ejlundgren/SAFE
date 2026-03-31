@@ -59,8 +59,23 @@ updateJob <- function(job_path,
 full_guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/scenarios.Rds")
 unique(full_guide$effect_type)
 
-# >>> Round 1 -------------------------------------------------------------
 guide <- copy(full_guide)
+
+saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
+
+# >>> Test required allocation --------------------------------------------
+
+updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulations/submit_array.sh",
+            no_jobs = 3)
+
+updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
+          gb = "6gb",
+          time = "6:00:00")
+
+
+
+
+# >>> Round 1 -------------------------------------------------------------
 
 saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
@@ -71,7 +86,44 @@ updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations
           gb = "6gb",
           time = "6:00:00")
 
-
+# 30585449 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585450 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585451 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585452 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585453 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585454 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585455 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585456 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585457 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585458 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585459 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585460 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585461 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585462 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585463 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585464 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585465 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585466 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585467 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585468 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585469 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585470 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585471 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585472 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585473 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585474 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585475 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585476 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585477 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585478 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585479 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585480 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585481 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585482 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585483 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585484 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585485 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
+# 30585486 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
 # >>> Round 2 -------------------------------------------------------------
 
 #' [Error in lower bounds of lnCVR.]
