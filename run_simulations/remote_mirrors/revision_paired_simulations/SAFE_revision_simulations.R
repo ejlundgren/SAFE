@@ -170,7 +170,7 @@ res <- list()
 i <- 1
 start <- 1
 
-end <- 100
+end <- 1000
 
 # Save a checkpoint file every N iterations:
 checkpoint_length <- 20

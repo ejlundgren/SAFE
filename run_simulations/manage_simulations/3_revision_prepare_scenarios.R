@@ -85,13 +85,13 @@ setnames(final_guide, c("yi_first", "vi_first", "yi_second", "vi_second"),
          c("yi_first_true", "vi_first_true", "yi_second_true", "vi_second_true"))
 final_guide
 
-# Expand guide for 1000 core per effect size --------------------------------------------
+# Expand guide for 100 core per effect size --------------------------------------------
 
 # Not sure why I'm having such a hard time with this...
 expansion <- data.table(effect_type = unique(final_guide$effect_type))
 # expansion[, num := 1:.N]
 
-expanded.guide <- expansion[rep(seq(1, nrow(expansion)), 1000)]
+expanded.guide <- expansion[rep(seq(1, nrow(expansion)), 100)]
 expanded.guide
 expanded.guide[, batch_id := paste0(effect_type, "_batch_", 1:.N)]
 expanded.guide[, chunk := 1:.N]
@@ -109,7 +109,7 @@ expanded.guide[, .(n = uniqueN(effect_type)), by = .(chunk)][n > 1]
 # Must be 0 rows
 
 
-1e5 / 1000
+1e5 / 100
 length(unique(expanded.guide$batch_id))
 # So 5000 cores and 100 iterations per core.
 # That seems reasonable.
