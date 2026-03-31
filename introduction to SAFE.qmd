@@ -2383,7 +2383,7 @@ First, the bias of the point estimates:
 
 paired_dat <- readRDS("builds/paired_scenarios_bias.Rds")
 paired_dat
-sub_dat <- paired_dat[effect_type == "SMD", ]
+sub_dat <- paired_dat[effect_type == "SMD_paired", ]
 
 unique(sub_dat$estimate)
 labs = c("first_estimate" = "Cohen's d",
@@ -2472,7 +2472,7 @@ First, the bias of the point estimates:
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-sub_dat <- paired_dat[effect_type == "lnRoM" & !is.na(value), ]
+sub_dat <- paired_dat[effect_type == "lnRoM_paired" & !is.na(value), ]
 sub_dat <- droplevels(sub_dat)
 
 unique(sub_dat$variable)
@@ -2552,7 +2552,7 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
   facet_grid(r~estimand, 
              labeller = facet_labs)+
   theme_bw()+
-  # theme_SAFE+
+  theme_SAFE+
   theme(legend.position = "bottom")
 p.variance
 
@@ -2567,7 +2567,7 @@ First, the bias of the point estimates:
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-sub_dat <- paired_dat[effect_type == "lnCVR" & !is.na(value), ]
+sub_dat <- paired_dat[effect_type == "lnCVR_paired" & !is.na(value), ]
 sub_dat <- droplevels(sub_dat)
 
 unique(sub_dat$variable)
@@ -2605,16 +2605,14 @@ p.point <- ggplot(data = sub_dat[measure %in% c("bias") &
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
   geom_point(size = pt_size)+
-  ylab(point_lab)+
+  ylab("Bias of point estimate")+
   xlab("Sample size")+
-  ggtitle("SMD")+
   scale_color_manual(name = "Estimator", 
                      values = pal,
                      labels = labs,
                      drop = TRUE)+
   ggtitle("lnCVR", subtitle = "Point estimate bias")+
   # coord_cartesian(ylim = c(-0.025, 0.025))+
-  ggtitle("SMD")+
   theme_SAFE+
   theme(legend.position = "bottom") 
 p.point
@@ -2635,7 +2633,7 @@ p.variance <- ggplot(data = sub_dat[measure %in% c("rel_bias"), ],
   geom_hline(yintercept = 0)+
   geom_path(lwd = 1)+
   geom_point(size = pt_size)+
-  ylab(var_lab)+
+  ylab("Relative bias of variance estimate")+
   xlab("Sample size")+
   scale_color_manual(name = "Estimator", 
                      values = pal,

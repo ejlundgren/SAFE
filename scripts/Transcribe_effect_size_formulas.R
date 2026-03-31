@@ -475,6 +475,13 @@ effect_formulas[sim_family == "2_multivariate_normal" & grepl("paired", name),
                 sim_family := "2_multivariate_normal_paired"]
 
 
+# >>> default SAFE families -----------------------------------------------
+x <- effect_formulas[is.na(default_safe_family), .(name, sim_family)]
+
+x[, .(n_families = uniqueN(sim_family)), by = .(name)]
+
+unique(effect_formulas$default_safe_family)
+effect_formulas[is.na(default_safe_family), default_safe_family := "yes"]
 
 # >>> lnCVR lower bounds -----------------------------------------------------
 effect_formulas[name %in% c('lnCVR', "lnCVR_paired"), .(sim_family, lower_filter, upper_filter)]

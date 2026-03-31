@@ -25,7 +25,6 @@ eff_size <- function(...,
                      SAFE = TRUE,
                      SAFE_boots = 1e6,
                      SAFE_distribution = NULL,
-                     sigma_matrix = NULL, 
                      parallelize = FALSE,
                      verbose = T){
   
@@ -52,14 +51,17 @@ eff_size <- function(...,
     effect_formulas.sub <- effect_formulas[name == effect_type, ]
   }
 
+  # Check that vectors are the same length:
   if(length(unique(lengths(input_vars))) > 1){ return(cat("Input vectors", "(", red(paste(names(input_vars), collapse = ", ")), ")",  "are different lengths. Please double check inputs.")) }
   
   # Deal with missing 'r' 
   if(grepl("paired", effect_type) & !"r" %in% names(input_vars)){ 
     cat("Paired design selected", red("but 'r' not specified."), "Setting 'r' to 0.5")
+    
     input_vars$r <- rep(0.5, max(lengths(input_vars)))
+    
   }else if(!grepl("paired", effect_type) & !"r" %in% names(input_vars) ){
-    #' [Set to 0 for non-paired effects. ]
+    # Set to 0 for unpaired effects
     input_vars$r <- rep(0, max(lengths(input_vars))) # This is necessary for the shared sigma_matrices of some effect sizes
   }
   
@@ -121,7 +123,6 @@ eff_size <- function(...,
   # k <- 1
   # input_k = lapply(input_vars, "[[", k) # select the first element in each element...
   # plugin_effect_k = plugin_effect_size[k]
-  # sigma_matrix_k = sigma_matrix[[k]] # submit custom sigma_matrix if it exists.
   # SAFE_boots = 1e6
   # index <- seq(1:5)
   # Run SAFE function for each element of input_vars:
@@ -134,7 +135,6 @@ eff_size <- function(...,
     return(SAFE_calc(formulas = effect_formulas.sub,
               input_k = lapply(input_vars, "[[", k), # select the first element in each element...
               plugin_effect_k = plugin_effect_size[k],
-              sigma_matrix_k = sigma_matrix[[k]], # submit custom sigma_matrix if it exists.
               verbose = verbose,
               SAFE_boots = SAFE_boots)) 
     },
@@ -150,7 +150,6 @@ eff_size <- function(...,
       return(SAFE_calc(formulas = effect_formulas.sub,
                        input_k = lapply(input_vars, "[[", k), # select the first element in each element...
                        plugin_effect_k = plugin_effect_size[k],
-                       sigma_matrix_k = sigma_matrix[[k]], # submit custom sigma_matrix if it exists.
                        verbose = verbose,
                        SAFE_boots = SAFE_boots)) 
     }) |> 
@@ -184,7 +183,6 @@ calc_effect <- function(formulas,
 SAFE_calc <- function(formulas,
                       input_k,
                       plugin_effect_k,
-                      sigma_matrix_k,
                       verbose = TRUE,
                       SAFE_boots = NULL){
   #' *For debugging:*
@@ -201,7 +199,6 @@ SAFE_calc <- function(formulas,
                            paired = paired,
                            verbose = verbose,
                            input = input_k,
-                           sigma_matrix = sigma_matrix_k, #' if specified by user. Otherwise calculated based on sim_family
                            SAFE_boots = SAFE_boots)
 
   # Add missing inputs (e.g., n)
@@ -265,19 +262,11 @@ parameter_cloud <- function(formulas,
                             paired = "no",
                             input,
                             verbose = TRUE,
-                            sigma_matrix = NULL,
                             SAFE_boots = NULL){
 
   if(verbose) cat("Running SAFE with", SAFE_boots, "bootstraps\n\n")
-  # TODO
-  # add 
-  
-  # # This is a bit of hacky fix..
-  # if(grepl("paired", unique(formulas$name))){
-  #   input$n1 <- input$n
-  #   input$n2 <- input$n
-  # }
-  #   
+ 
+  sigma_matrix <- NULL
   # Construct sigma matrices ------------------------------------------------
   if(any(formulas$sim_family %in% "1_normal")){
     if(is.null(sigma_matrix)){
