@@ -56,70 +56,74 @@ print(paste(nrow(guide), "scenarios to run"))
 guide
 
 
-# stopifnot(nrow(guide) == 1)
-#' @Shinichi- here are all the formulas:
-formulas <- fread("data/effect_size_formulas.csv")
-#' [SMD point estimates:]
-unique(formulas[name == "SMD_paired" ]$sim_family)
-formulas[name == "SMD_paired" & sim_family == "4_multivariate_normal_wishart_paired"]$formula
-
-formulas[name %in% c("SMD_paired", "lnRoM_paired", "lnCVR_paired"), .(name, sim_family, default_safe_family)]
-
-# First:
-"(x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )"
-# Second:
-"(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) - lgamma(((2 * n - 2) - 1)/2)))) *
+testing <- FALSE
+if(testing){
+  # stopifnot(nrow(guide) == 1)
+  #' @Shinichi- here are all the formulas:
+  formulas <- fread("data/effect_size_formulas.csv")
+  #' [SMD point estimates:]
+  unique(formulas[name == "SMD_paired" ]$sim_family)
+  formulas[name == "SMD_paired" & sim_family == "4_multivariate_normal_wishart_paired"]$formula
+  
+  formulas[name %in% c("SMD_paired", "lnRoM_paired", "lnCVR_paired"), .(name, sim_family, default_safe_family)]
+  
+  # First:
+  "(x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )"
+  # Second:
+  "(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) - lgamma(((2 * n - 2) - 1)/2)))) *
                   ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) ) )"
-
-#' [SMD variance:]
-# First:
-"2 * (1 - r) / n + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) ))^2 / (2 * n )"
-
-# Second:
-"(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) -
+  
+  #' [SMD variance:]
+  # First:
+  "2 * (1 - r) / n + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) ))^2 / (2 * n )"
+  
+  # Second:
+  "(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) -
             lgamma(((2 * n - 2) - 1)/2))))^2 *
             (2 * (1 - r) / n + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) /
             (2 * n - 2) ))^2 / (2 * n ))"
-
-#' [lnRoM point estimates:]
-formulas[name == "lnRoM_paired", ]$formula
-# First:
-"log(x1 / x2)"
-
-#' [lnRoM variance:]
-# First:
-"vi_first <- (sd1^2 / (n1 * x1^2)) + (sd2^2 / (n2 * x2^2)) - ((2 * r * sd1 * sd2) / (x1 * x2 * sqrt(n1 * n2)))"
-
-
-#' [lnCVR point estimate:]
-formulas[name == "lnCVR_paired" & sim_family == "4_multivariate_normal_wishart_paired", ]$formula
-# First:
-"log(sd1 / x1) - log(sd2 / x2)"
-
-# Second:
-"log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n - 1) - 1 / (n - 1)) + 1/2 * ((sd2^2/(n * x2^2)) - (sd1^2 / (n * x1^2)))"
-
-#' [lnCVR variance:]
-# First:
-"sd1^2/(n * x1^2) + sd2^2/(n * x2^2) - 2*r*sd1*sd2/(n * x1 * x2) + 1/(n - 1) - r^2/(n - 1)"
-
-# Second:
-"sd1^2/(n * x1^2) + sd1^4/(2 * n^2 * x1^4) + sd2^2/(n * x2^2) + sd2^4/(2 * n^2 * x2^4) -
+  
+  #' [lnRoM point estimates:]
+  formulas[name == "lnRoM_paired", ]$formula
+  # First:
+  "log(x1 / x2)"
+  
+  #' [lnRoM variance:]
+  # First:
+  "vi_first <- (sd1^2 / (n1 * x1^2)) + (sd2^2 / (n2 * x2^2)) - ((2 * r * sd1 * sd2) / (x1 * x2 * sqrt(n1 * n2)))"
+  
+  
+  #' [lnCVR point estimate:]
+  formulas[name == "lnCVR_paired" & sim_family == "4_multivariate_normal_wishart_paired", ]$formula
+  # First:
+  "log(sd1 / x1) - log(sd2 / x2)"
+  
+  # Second:
+  "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n - 1) - 1 / (n - 1)) + 1/2 * ((sd2^2/(n * x2^2)) - (sd1^2 / (n * x1^2)))"
+  
+  #' [lnCVR variance:]
+  # First:
+  "sd1^2/(n * x1^2) + sd2^2/(n * x2^2) - 2*r*sd1*sd2/(n * x1 * x2) + 1/(n - 1) - r^2/(n - 1)"
+  
+  # Second:
+  "sd1^2/(n * x1^2) + sd1^4/(2 * n^2 * x1^4) + sd2^2/(n * x2^2) + sd2^4/(2 * n^2 * x2^4) -
           2*r*sd1*sd2/(n * x1 * x2) + r^2 * sd1^2 * sd2^2 * (x1^4 + x2^4) / (2 * n^2 * x1^4 * x2^4) +
           n/(n - 1)^2 - r^2/(n - 1) + r^4 * (sd1^8 + sd2^8) / (2 * (n - 1)^2 * sd1^4 * sd2^4)"
+  
+  #' [It is working, i was afriad that maybe I was setting 'r' to 0 inside the function...]
+  eff_size(x1 = 15, x2 = 11.5, sd1 = 1.5, sd2 = 1.3,
+           n = 15,
+           r = 0.5,
+           verbose = F,
+           effect_type = "SMD_paired")
+  
+  eff_size(x1 = 15, x2 = 11.5, sd1 = 1.5, sd2 = 1.3,
+           n = 15,
+           r = 0.8,
+           verbose = F,
+           effect_type = "SMD_paired")
+}
 
-#' [It is working, i was afriad that maybe I was setting 'r' to 0 inside the function...]
-eff_size(x1 = 15, x2 = 11.5, sd1 = 1.5, sd2 = 1.3,
-         n = 15,
-         r = 0.5,
-         verbose = F,
-         effect_type = "SMD_paired")
-
-eff_size(x1 = 15, x2 = 11.5, sd1 = 1.5, sd2 = 1.3,
-         n = 15,
-         r = 0.8,
-         verbose = F,
-         effect_type = "SMD_paired")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ------------------------------------------
 # Add some constants to guide
