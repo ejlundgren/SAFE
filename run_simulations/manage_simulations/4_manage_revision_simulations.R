@@ -72,9 +72,6 @@ updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations
           gb = "6gb",
           time = "6:00:00")
 
-
-
-
 # >>> Round 1 -------------------------------------------------------------
 
 saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
