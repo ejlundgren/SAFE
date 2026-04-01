@@ -5,10 +5,6 @@
 #
 #
 #
-#
-#
-#
-#
 rm(list = ls())
 
 # Now load packages:
