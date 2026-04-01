@@ -28,6 +28,13 @@ dat[, scenario_id := paste0("scenario_", effect_type, "_", .GRP),
     by = .(effect_type, true_mean1, true_mean2, true_sd1, true_sd2, r, n)]
 dat
 
+#
+rs <- dat[, .(min_sim_r = min(sim_r), 
+              max_sim_r  = max(sim_r), 
+              mean_sim_r = mean(sim_r),
+              sd_sim_r = sd(sim_r)),
+          by = .(r, n, effect_type)]
+rs[, mean_sim_r := round(mean_sim_r, 3)]
 
 # Calculate mean and var --------------------------------------------------
 dat

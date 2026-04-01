@@ -79,7 +79,7 @@ updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations
 
 # >>> Round 1 -------------------------------------------------------------
 
-guide <- guide[chunk > 3, ]
+guide <- guide[chunk > 3, ] #' [Shouldn't have omitted all of these]
 guide[, chunk := .GRP, by = .(batch_id)]
 unique(guide$chunk)
 

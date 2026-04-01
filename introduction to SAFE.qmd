@@ -2381,7 +2381,7 @@ First, the bias of the point estimates:
 #| attr-source: "style='font-size: 0.8em;'"
 #| attr-output: "style='font-size: 0.7em'"
 
-paired_dat <- readRDS("builds/paired_scenarios_bias.Rds")
+paired_dat <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/summaries/paired_scenarios_bias.Rds")
 paired_dat
 sub_dat <- paired_dat[effect_type == "SMD_paired", ]
 
