@@ -53,7 +53,6 @@ updateJob <- function(job_path,
   
 }
 
-
 # Load data ---------------------------------------------------------------
 #
 full_guide <- readRDS("run_simulations/remote_mirrors/revision_paired_simulations/data/scenarios.Rds")
@@ -72,7 +71,17 @@ updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations
           gb = "6gb",
           time = "6:00:00")
 
+# 30824314 ejlundgr def-snakagaw revision_sim_j   R    5:52:57     1    1        N/A      6G fc30560 (None) 
+# 30824315 ejlundgr def-snakagaw revision_sim_j   R    5:52:57     1    1        N/A      6G fc30560 (None) 
+# 30824316 ejlundgr def-snakagaw revision_sim_j   R    5:52:57     1    1        N/A      6G fc30560 (None) 
+# This is for i in 1:1000
+# Looks like only needs 8% of 6gb and about 3 hours
+
 # >>> Round 1 -------------------------------------------------------------
+
+guide <- guide[chunk > 3, ]
+guide[, chunk := .GRP, by = .(batch_id)]
+unique(guide$chunk)
 
 saveRDS(guide, "run_simulations/remote_mirrors/revision_paired_simulations/data/working_scenarios.Rds")
 
@@ -80,8 +89,8 @@ updateArray(sh_path = "run_simulations/remote_mirrors/revision_paired_simulation
             no_jobs = max(guide$chunk))
 
 updateJob(job_path = "run_simulations/remote_mirrors/revision_paired_simulations/sim_job.sh",
-          gb = "6gb",
-          time = "6:00:00")
+          gb = "800M",
+          time = "12:00:00")
 
 # 30585449 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 
 # 30585450 ejlundgr def-snakagaw revision_sim_j  PD    6:00:00     1    1        N/A      6G  (None) 

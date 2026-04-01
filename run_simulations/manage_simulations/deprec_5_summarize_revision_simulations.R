@@ -1,7 +1,7 @@
 # Summarize the revision simulations
 #
 #
-#
+#' [This has migrated to the cluster itself]
 #
 #
 rm(list = ls())
