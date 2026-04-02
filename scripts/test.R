@@ -56,13 +56,27 @@ for(rho in cor_levels){
     yi_plugin <- calc_SMD(m1_hat, m2_hat, sd1_hat, sd2_hat, N)
     
     # --- MINI SAFE PROCEDURE ---
-    cloud_m1 <- rnorm(1000, m1_hat, sd1_hat/sqrt(N)) 
-    cloud_m2 <- rnorm(1000, m2_hat, sd2_hat/sqrt(N))
+    r_cloud <- suppressWarnings(cor(dat[,1], dat[,2]))
     
-    # We pass individual sample SDs to the plugin within the cloud
-    cloud_yi <- calc_SMD(cloud_m1, cloud_m2, sd1_hat, sd2_hat, N)
+    Sigma_cloud <- matrix(
+      c(sd1_hat^2 / N,
+        r_cloud * sd1_hat * sd2_hat / N,
+        r_cloud * sd1_hat * sd2_hat / N,
+        sd2_hat^2 / N),
+      nrow = 2, byrow = TRUE
+    )
     
-    bias_safe <- mean(cloud_yi, na.rm=T) - yi_plugin
+    cloud <- tmvtnorm::rtmvnorm(
+      n = 1000,
+      mean = c(m1_hat, m2_hat),
+      sigma = Sigma_cloud,
+      lower = c(-Inf, -Inf),
+      upper = c( Inf,  Inf)
+    )
+    
+    cloud_yi <- calc_SMD(cloud[,1], cloud[,2], sd1_hat, sd2_hat, N)
+    
+    bias_safe <- mean(cloud_yi, na.rm = TRUE) - yi_plugin
     yi_safe <- yi_plugin - bias_safe
     
     yi_hedges <- calc_Hedges_g(yi_plugin, N)
@@ -140,12 +154,26 @@ for(rho in cor_levels){
     yi_plugin <- calc_lnRoM(m1_hat, m2_hat)
     
     # --- MINI SAFE PROCEDURE ---
-    # Cloud generation using individual sample SDs
-    cloud_m1 <- rnorm(1000, m1_hat, sd1_hat/sqrt(N)) 
-    cloud_m2 <- rnorm(1000, m2_hat, sd2_hat/sqrt(N))
+    r_cloud <- suppressWarnings(cor(dat[,1], dat[,2]))
     
-    cloud_yi <- calc_lnRoM(cloud_m1, cloud_m2)
-    bias_safe <- mean(cloud_yi) - yi_plugin
+    Sigma_cloud <- matrix(
+      c(sd1_hat^2 / N,
+        r_cloud * sd1_hat * sd2_hat / N,
+        r_cloud * sd1_hat * sd2_hat / N,
+        sd2_hat^2 / N),
+      nrow = 2, byrow = TRUE
+    )
+    
+    cloud <- tmvtnorm::rtmvnorm(
+      n = 1000,
+      mean = c(m1_hat, m2_hat),
+      sigma = Sigma_cloud,
+      lower = c(0, 0),
+      upper = c(Inf, Inf)
+    )
+    
+    cloud_yi <- calc_lnRoM(cloud[,1], cloud[,2])
+    bias_safe <- mean(cloud_yi, na.rm = TRUE) - yi_plugin
     yi_safe <- yi_plugin - bias_safe
     
     return(c(yi_plugin = yi_plugin, yi_safe = yi_safe))

@@ -170,7 +170,8 @@ calc_effect <- function(formulas,
   exec <- paste(paste(formulas$label, "<-", formulas$exec_formula), collapse = "; ")
   
   # This adds the effects/variances to the local env but with name assignation:
-  eval(parse(text = exec))
+  # used to be "eval(parse(text = exec)" 
+  eval(parse(text = exec), envir = as.environment(input))
   
   # Gather variables from local function environment and return as data.table
   return(eval(parse(text = paste0("data.table(", paste(unique(formulas$label), collapse = ", "), ")"))))
