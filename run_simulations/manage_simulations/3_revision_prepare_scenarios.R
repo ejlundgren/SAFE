@@ -81,6 +81,9 @@ setnames(final_guide, c("yi_first", "vi_first", "yi_second", "vi_second"),
          c("yi_first_true", "vi_first_true", "yi_second_true", "vi_second_true"))
 final_guide
 
+# Drop the estimates we don't need bc theyre not truth
+final_guide <- final_guide[, !c("yi_second_true", "vi_first_true", "vi_second_true")]
+
 # Expand guide for 100 core per effect size --------------------------------------------
 
 # Not sure why I'm having such a hard time with this...

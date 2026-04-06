@@ -55,7 +55,10 @@ dat.estimates <- dat[, .(yi_first_estimate = mean(sim_y_plugin_1st),
                             scenario_id, yi_first_true, yi_second_true)]
 dat.estimates
 
-setnames(dat.estimates, c("yi_first_true", "yi_second_true"), c("yi_first_estimand", "yi_second_estimand"))
+# drop 2nd point estimand. It's not real. 
+setnames(dat.estimates, 
+         c("yi_first_true", "yi_second_true"), 
+          c("yi_first_estimand", "yi_second_estimand"))
 
 # Calculate bias and relative bias ----------------------------------------
 # Point estimate bias:

@@ -25,7 +25,6 @@ eff_size <- function(...,
                      SAFE = TRUE,
                      SAFE_boots = 1e6,
                      SAFE_distribution = NULL,
-                     SAFE_duration_seconds = 120,
                      parallelize = FALSE,
                      verbose = T){
   
@@ -35,7 +34,7 @@ eff_size <- function(...,
   require("data.table")
   require("crayon")
   require("MASS")
-  # require("tmvtnorm")
+  require("tmvtnorm")
   require("parallel")
   
   effect_formulas <- fread("data/effect_size_formulas.csv")
@@ -119,14 +118,14 @@ eff_size <- function(...,
   
   if(length(plugin_effect_size) != max(index)){ return(cat("Error 1")) }
   
-  ##' *For debugging:*
+  #' *For debugging:*
   # formulas = effect_formulas.sub
   # k <- 1
   # input_k = lapply(input_vars, "[[", k) # select the first element in each element...
   # plugin_effect_k = plugin_effect_size[k]
   # SAFE_boots = 1e6
   # index <- seq(1:5)
-  ## Run SAFE function for each element of input_vars:
+  # Run SAFE function for each element of input_vars:
   
   if(parallelize == TRUE){
     
@@ -151,7 +150,6 @@ eff_size <- function(...,
       return(SAFE_calc(formulas = effect_formulas.sub,
                        input_k = lapply(input_vars, "[[", k), # select the first element in each element...
                        plugin_effect_k = plugin_effect_size[k],
-                       SAFE_duration_seconds = SAFE_duration_seconds,
                        verbose = verbose,
                        SAFE_boots = SAFE_boots)) 
     }) |> 
@@ -192,44 +190,23 @@ SAFE_calc <- function(formulas,
                       input_k,
                       plugin_effect_k,
                       verbose = TRUE,
-                      log_out_of_bound_values = FALSE,
-                      SAFE_duration_seconds = 120,
                       SAFE_boots = NULL){
   #' *For debugging:*
   # input = input_k
+  # sigma_matrix = sigma_matrix_k #' if specified by user. Otherwise calculated based on sim_family
   # SAFE_boots = SAFE_boots
   # 
   
   paired <- ifelse(grepl("paired", unique(formulas$name)), 
                    "yes", "no")
   
-  cloud <- list()
-  cloud_rows <- 0
-  duration <- 0
-  index <- 1
-  start <- Sys.time()
-  number_excluded <- c()
-  while(cloud_rows < SAFE_boots &
-        duration < SAFE_duration_seconds){
-    
-    cloud[[index]] <- parameter_cloud(formulas = formulas, 
-                                         paired = paired,
-                                         verbose = verbose,
-                                         input = input_k,
-                                         SAFE_boots = SAFE_boots)
-    cloud_rows <- sapply(cloud, nrow) |> sum()
-    index <- index+1
-    duration <- as.numeric(Sys.time() - start)
-  }
-  
-  number_excluded <- SAFE_boots - sapply(cloud, nrow)
-  
-  if(duration >= 60){
-    cat(red("Duration exceeded", SAFE_duration_seconds, "seconds due to filtering of values outside of threshold"))
-  }
-  cloud <- rbindlist(cloud)
-  cloud <- cloud[1:SAFE_boots, ]
-  
+
+  cloud <- parameter_cloud(formulas = formulas, 
+                           paired = paired,
+                           verbose = verbose,
+                           input = input_k,
+                           SAFE_boots = SAFE_boots)
+
   # Add missing inputs (e.g., n)
   cloud <- data.table(cloud,
                       input_k[!names(input_k) %in% names(cloud)] |> unlist() |> t() |> data.table())
@@ -253,8 +230,34 @@ SAFE_calc <- function(formulas,
   # TESTING INFLUENCE OF 'r'. 
   safe_out <- data.table(yi_safe = safe_yi,
                          vi_safe = safe_vi,
-                         SE_safe = safe_SE,
-                         SAFE_number_excluded = paste(number_excluded, collapse = "; "))
+                         SE_safe = safe_SE)
+  
+  # Now let's do an alternative:
+  if(paired == "yes"){
+    cor <- cor.test(cloud$x1, cloud$x2)
+    cloud$r <- cor$estimate   
+    
+    # print(unique(cloud$r))
+    # print(head(cloud))
+    
+    cloud_trans <- calc_effect(formulas = formulas[calc_type == "effect_size" &
+                                                     derivative == "first", ],
+                               input = cloud)$yi_first
+    
+    # bias corrected estimate of sampling variance and SE:
+    safe_SE <- sd(cloud_trans)
+    safe_vi <- safe_SE^2
+    
+    bias_SAFE <- mean(cloud_trans) - plugin_effect_k
+    
+    safe_yi <- plugin_effect_k - bias_SAFE
+    
+    safe_out <- data.table(safe_out,
+                           yi_alternative_safe = safe_yi,
+                           vi_alternative_safe = safe_vi,
+                           safe_test_r = cor$estimate   )
+  }
+  
   return(safe_out)
   
 }
@@ -270,7 +273,6 @@ parameter_cloud <- function(formulas,
   if(verbose) cat("Running SAFE with", SAFE_boots, "bootstraps\n\n")
  
   sigma_matrix <- NULL
-  
   # Construct sigma matrices ------------------------------------------------
   if(any(formulas$sim_family %in% "1_normal")){
     if(is.null(sigma_matrix)){
@@ -278,6 +280,24 @@ parameter_cloud <- function(formulas,
     }
     means <- c(x = input$x)
     
+  # }else if(any(formulas$sim_family %in% "2_multivariate_normal")){
+  #   if(is.null(sigma_matrix)){
+  #     
+      #sigma_matrix <- matrix(data = c((input$sd1^2 / input$n1),                    (input$r*input$sd1*input$sd2)/input$n1, #  / n1 add this to sd1^2
+      #                                (input$r*input$sd1*input$sd2)/input$n1,      (input$sd2^2 / input$n2)), #  / n2 add this to sd2^2
+      #                      nrow = 2, ncol = 2)
+      
+    #   # TODO -shinichi change 
+    #   sigma_matrix <- matrix(data = c((input$sd1^2 / input$n1), 
+    #                                   (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2),
+    #                                   (input$r * input$sd1 * input$sd2) / sqrt(input$n1 * input$n2), 
+    #                                   (input$sd2^2 / input$n2)), 
+    #                          nrow = 2, ncol = 2)
+    #   
+    #   
+    # }
+    # means <- c(x1 = input$x1, x2 = input$x2)
+    # TODO -shinichi change 
   }else if(any(formulas$sim_family == "2_multivariate_normal_indep")){
     if(is.null(sigma_matrix)){
       sigma_matrix <- matrix(
@@ -361,7 +381,7 @@ parameter_cloud <- function(formulas,
     means <- c(p1 = input$p1, p2 = input$p2)
   }
   
-  # Parse upper and lower bounds for filtering ------------------------------------------------
+  # Parse upper and lower bounds for truncated normal ------------------------------------------------
   if(!(all(is.na(formulas$lower_filter)) | all(formulas$lower_filter == ""))){
     formulas$lower_filter
     
@@ -388,6 +408,7 @@ parameter_cloud <- function(formulas,
                             lower_bounds = -Inf,
                             upper_bounds = Inf)
   }
+  
 
   # Create Gaussian clouds ------------------------------------------------------------
   if(unique(formulas$sim_family == "1_normal")){
@@ -395,7 +416,8 @@ parameter_cloud <- function(formulas,
     out <- data.table(x = rnorm(n=SAFE_boots,
                                 mean = var_guide$mean, 
                                 sd = sigma_matrix))
-
+    return(out)
+    
   # }else if(unique(formulas$sim_family %in% c("4_multivariate_normal",
   #                                            "2_multivariate_normal",
   #                                            "2_multinomial_as_normal"))){
@@ -403,9 +425,11 @@ parameter_cloud <- function(formulas,
                                              "2_multivariate_normal_indep",
                                              "2_multivariate_normal_paired",
                                              "2_multinomial_as_normal")){  
-    out <- MASS::mvrnorm(n = SAFE_boots,
-                    mu = var_guide$mean,
-                    Sigma = sigma_matrix) |>
+    out <- rtmvnorm(n = SAFE_boots,
+                    mean = var_guide$mean,
+                    sigma = sigma_matrix,
+                    lower = var_guide$lower_bounds,
+                    upper = var_guide$upper_bounds) |>
       as.data.frame() |>
       setDT()
     names(out) <- var_guide$variable
@@ -437,7 +461,8 @@ parameter_cloud <- function(formulas,
             d = d + 0.5)]
     }
 
-
+    return(out)
+    
   }else if(unique(formulas$sim_family) == "4_multivariate_normal_chisq_indep"){
     
     x1_star <- rnorm(SAFE_boots, mean = input$x1, sd = input$sd1 / sqrt(input$n1))
@@ -453,14 +478,18 @@ parameter_cloud <- function(formulas,
       sd2 = sqrt(s2_sq_star)
     )
     
+    return(out) 
+    
   }else if(unique(formulas$sim_family) == "4_multivariate_normal_wishart_paired"){
     
     mean_sigma <- sigma_matrix / input$n
     
-    out <- MASS::mvrnorm(
+    out <- rtmvnorm(
       n = SAFE_boots,
-      mu = var_guide$mean,
-      Sigma = mean_sigma
+      mean = var_guide$mean,
+      sigma = mean_sigma,
+      lower = var_guide$lower_bounds,
+      upper = var_guide$upper_bounds
     ) |>
       as.data.frame() |>
       setDT()
@@ -475,6 +504,8 @@ parameter_cloud <- function(formulas,
     
     out[, sd1 := sqrt(wishart.out[1, 1, ] / (input$n - 1))]
     out[, sd2 := sqrt(wishart.out[2, 2, ] / (input$n - 1))]
+    
+    return(out)
   }
   
   # Count data clouds --------------------------------------------------------------
@@ -489,6 +520,8 @@ parameter_cloud <- function(formulas,
                       n1 = n1 + 1) ]
     out[c == 0, `:=` (c = c + 0.5,
                       n2 = n2 + 1) ]
+    return(out)
+    
   }else if(any(formulas$sim_family == "4_binomial")){ # this is lnOR
     if(!all(c("n1", "n2") %in% names(input))){
       input$n1 <- input$a + input$b
@@ -508,6 +541,8 @@ parameter_cloud <- function(formulas,
         c = c + 0.5,
         d = d + 0.5)]
 
+    return(out)
+    
   }else if(any(formulas$sim_family == "3_multinomial")){
     N <- (input$n_AA + input$n_Aa + input$n_aa)
     out <- stats::rmultinom(n = SAFE_boots,
@@ -527,14 +562,10 @@ parameter_cloud <- function(formulas,
         `:=` (n_AA = n_AA + 0.5,
               n_Aa = n_Aa + 0.5,
               n_aa = n_aa + 0.5)]
+    
+    return(out)
   }
-
-  # Filter out not allowable values:
-  var_guide[, conditional := paste(variable, ">", lower_bounds, "&", variable, "<", upper_bounds)]
-  conditional <- paste(var_guide$conditional, collapse = " & ")
-  
-  return(out[eval(parse(text = conditional)), ])
-  
+  return(cat("unexpected error 1: sim_family did not match"))
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -------------------------------------

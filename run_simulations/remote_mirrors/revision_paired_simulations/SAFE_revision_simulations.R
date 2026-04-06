@@ -21,7 +21,7 @@ local <- FALSE
 if(local){
   setwd("run_simulations/remote_mirrors/revision_paired_simulations/")
   
-  index <- 3 # This is the chunk number
+  index <- 298 # This is the chunk number
   
   # setwd("/Users/ejlundgren/GenomeDK/meta_megafauna/meta_simulations/")
   source('remote_universal_SAFE.R')
@@ -55,76 +55,6 @@ print(paste(nrow(guide), "scenarios to run"))
 
 guide
 
-
-testing <- FALSE
-if(testing){
-  # stopifnot(nrow(guide) == 1)
-  #' @Shinichi- here are all the formulas:
-  formulas <- fread("data/effect_size_formulas.csv")
-  #' [SMD point estimates:]
-  unique(formulas[name == "SMD_paired" ]$sim_family)
-  formulas[name == "SMD_paired" & sim_family == "4_multivariate_normal_wishart_paired"]$formula
-  
-  formulas[name %in% c("SMD_paired", "lnRoM_paired", "lnCVR_paired"), .(name, sim_family, default_safe_family)]
-  
-  # First:
-  "(x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) )"
-  # Second:
-  "(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) - lgamma(((2 * n - 2) - 1)/2)))) *
-                  ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) ) )"
-  
-  #' [SMD variance:]
-  # First:
-  "2 * (1 - r) / n + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) / (2 * n - 2) ))^2 / (2 * n )"
-  
-  # Second:
-  "(ifelse((2 * n - 2) <= 1, NA_real_, exp(lgamma((2 * n - 2)/2) - log(sqrt((2 * n - 2)/2)) -
-            lgamma(((2 * n - 2) - 1)/2))))^2 *
-            (2 * (1 - r) / n + ((x1 - x2) / sqrt( ((n - 1) * sd1^2 + (n - 1) * sd2^2) /
-            (2 * n - 2) ))^2 / (2 * n ))"
-  
-  #' [lnRoM point estimates:]
-  formulas[name == "lnRoM_paired", ]$formula
-  # First:
-  "log(x1 / x2)"
-  
-  #' [lnRoM variance:]
-  # First:
-  "vi_first <- (sd1^2 / (n1 * x1^2)) + (sd2^2 / (n2 * x2^2)) - ((2 * r * sd1 * sd2) / (x1 * x2 * sqrt(n1 * n2)))"
-  
-  
-  #' [lnCVR point estimate:]
-  formulas[name == "lnCVR_paired" & sim_family == "4_multivariate_normal_wishart_paired", ]$formula
-  # First:
-  "log(sd1 / x1) - log(sd2 / x2)"
-  
-  # Second:
-  "log((sd1 / x1) / (sd2 / x2)) + 1/2 * (1 / (n - 1) - 1 / (n - 1)) + 1/2 * ((sd2^2/(n * x2^2)) - (sd1^2 / (n * x1^2)))"
-  
-  #' [lnCVR variance:]
-  # First:
-  "sd1^2/(n * x1^2) + sd2^2/(n * x2^2) - 2*r*sd1*sd2/(n * x1 * x2) + 1/(n - 1) - r^2/(n - 1)"
-  
-  # Second:
-  "sd1^2/(n * x1^2) + sd1^4/(2 * n^2 * x1^4) + sd2^2/(n * x2^2) + sd2^4/(2 * n^2 * x2^4) -
-          2*r*sd1*sd2/(n * x1 * x2) + r^2 * sd1^2 * sd2^2 * (x1^4 + x2^4) / (2 * n^2 * x1^4 * x2^4) +
-          n/(n - 1)^2 - r^2/(n - 1) + r^4 * (sd1^8 + sd2^8) / (2 * (n - 1)^2 * sd1^4 * sd2^4)"
-  
-  #' [It is working, i was afriad that maybe I was setting 'r' to 0 inside the function...]
-  eff_size(x1 = 15, x2 = 11.5, sd1 = 1.5, sd2 = 1.3,
-           n = 15,
-           r = 0.5,
-           verbose = F,
-           effect_type = "SMD_paired")
-  
-  eff_size(x1 = 15, x2 = 11.5, sd1 = 1.5, sd2 = 1.3,
-           n = 15,
-           r = 0.8,
-           verbose = F,
-           effect_type = "SMD_paired")
-}
-
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ------------------------------------------
 # Add some constants to guide
 guide[, lower_filter := ifelse(effect_type == "SMD", -Inf, 0)]
@@ -135,6 +65,9 @@ guide
 # >>> Encapsulate data generation ----------------------------------------------------
 
 data_generation <- function(scens, lower_filter){
+  
+  conditional <- paste("group1 >", lower_filter, "& group2 >", lower_filter)
+  
   lapply(1:nrow(scens), function(x){
     
     sig <- matrix(
@@ -148,23 +81,37 @@ data_generation <- function(scens, lower_filter){
     means <- c(m1 = scens$true_mean1[x],
                m2 = scens$true_mean2[x])
     
-    out <- rtmvnorm(n = scens$n[x],
-                    mean = means,
-                    sigma = sig,
-                    lower = rep(lower_filter, length(means)),
-                    upper = rep(Inf, length(means)),
-                    algorithm = "gibbs") |>
-      as.data.frame() |>
-      setDT()
-    names(out) <- c("m1", "m2")
+    # Need to do in a while loop.
+    sim_length <- 0
+    out <- list()
+    index <- 1
     
-    cor <- cor.test(out$m1, out$m2)
+    while(sim_length < scens$n[x]){
+      out[[index]] <- MASS::mvrnorm(n = scens$n[x],
+                           mu = means,
+                           Sigma = sig) |>
+        as.data.frame() |>
+        setDT()
+      setnames(out[[index]], 
+               c("m1", "m2"),
+               c("group1", "group2"))
+      
+      out[[index]] <- out[[index]][eval(parse(text = conditional)), ]
+      sim_length <- sapply(out, nrow) |> sum()
+      index <- index + 1
+    }
+    out <- rbindlist(out)
+    out <- out[1:scens$n[x], ]
     
-    out <- data.table(sim_mean1 = mean(out$m1),
-                      sim_mean2 = mean(out$m2),
-                      sim_sd1 = sd(out$m1),
-                      sim_sd2 = sd(out$m2),
-                      sim_r = cor$estimate)
+    #
+    cor <- cor.test(out$group1, out$group2)
+    
+    out <- data.table(sim_mean1 = mean(out$group1),
+                      sim_mean2 = mean(out$group2),
+                      sim_sd1 = sd(out$group1),
+                      sim_sd2 = sd(out$group2),
+                      sim_r = cor$estimate,
+                      sim_n = nrow(out))
     return(out)
   }) |> rbindlist()
 }
@@ -228,6 +175,7 @@ for(i in start:end){
   
   sim_dat <- data_generation(guide, 
                              lower_filter = unique(guide$lower_filter))
+  
   
   # Calculate simulated effect sizes
   effs <- eff_size(x1 = sim_dat$sim_mean1, x2 = sim_dat$sim_mean2,
