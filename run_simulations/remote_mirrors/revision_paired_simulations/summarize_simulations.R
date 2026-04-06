@@ -15,7 +15,8 @@ if(local){
 files <- data.table(checkpoint = list.files("checkpoints/",
                     full.names = T))
 
-#' [Somehow some of the files are corrupted. But I don't think the checkpoints are.]
+length(list.files("outputs"))
+# good. 300
 
 # readRDS(files[i, ]$checkpoint)
 dat <- lapply(files$checkpoint, function(x) y <- readRDS(x) |> rbindlist() )
@@ -97,3 +98,43 @@ dat.mlt
 if(!file.exists("summaries")) dir.create("summaries")
 saveRDS(dat.mlt, "summaries/paired_scenarios_bias.Rds")
 
+
+# Summarize prevalence of 0s ----------------------------------------------
+library("stringr")
+library("tidyr")
+library("dplyr")
+
+dat
+dat[sim_n != n]
+
+zeroes <- dat[, .(scenario_id, batch_id, effect_type, true_mean1, true_mean2,
+                  true_sd1, true_sd2, r, n, SAFE_number_excluded, iter)]
+
+
+# Drop the ultimate one per group (group = iter x scenario_id) right? Or just summarize all of them?
+# zeroes[, SAFE_number_excluded_truncated]
+# Maybe we just do all of them
+
+str_count(";l;l;", ";")
+zeroes.long <- zeroes %>%
+  separate_longer_delim(cols = "SAFE_number_excluded", delim = ";") |> setDT()
+
+head(zeroes.long)
+
+zeroes.long[, SAFE_number_excluded := trimws(SAFE_number_excluded)]
+zeroes.long[, SAFE_number_excluded := as.numeric(SAFE_number_excluded)]
+zeroes.long
+
+zeroes.long[, number_of_SAFE_rounds := .N,
+            by = .(scenario_id,batch_id, iter)]
+range(zeroes.long$number_of_SAFE_rounds)
+range(zeroes.long$SAFE_number_excluded)
+# hist(zeroes.long$SAFE_number_excluded)
+
+zeroes.long.sum <- zeroes.long[, .(mean_excluded = mean(SAFE_number_excluded),
+                                   mean_rounds = mean(number_of_SAFE_rounds)),
+                               by = .(scenario_id, n, r, effect_type)]
+
+zeroes.long.sum 
+
+saveRDS(zeroes.long.sum, "summaries/exclusion_summaries.Rds")
