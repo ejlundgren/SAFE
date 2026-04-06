@@ -174,7 +174,7 @@ calc_effect <- function(formulas,
   
   # This adds the effects/variances to the local env but with name assignation:
   eval(parse(text = exec), envir = environment())
-  
+
   res_list <- lapply(unique(formulas$label), function(x) 
     get(x, envir = environment()))
   names(res_list) <- unique(formulas$label)
